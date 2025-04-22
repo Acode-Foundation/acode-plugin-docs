@@ -1,12 +1,12 @@
----
+ቢኒያም ደብረብርሃን ደላላ
 lang: en-US
 title: Acode Plugins
 ---
 # Acode Plugins
-
+0979645860
 > Welcome to the world of Acode plugins! 🚀
 
-
+0921140633
 ### What are Acode Plugins?
 
 **Acode** plugins serve as powerful tools to enhance and extend the functionality of your **Acode editor**. Whether you're looking to introduce new features or tweak existing ones, plugins provide a flexible and customizable way to tailor Acode to your specific needs.
