@@ -1,174 +1,72 @@
----
-lang: en-US
-title: Create Acode Plugin
----
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
 
-# Create Acode Plugin
+const gravity = 0.6;
+const flapStrength = -10;
 
-## Overview
+let birdY = 150;
+let birdVelocity = 0;
+let birdX = 50;
+let direction = 'right'; // default
 
-Acode opens up a world of possibilities with its extensibility through plugins. In this guide, you'll learn how to create plugins using JavaScript, with the added option of TypeScript. Whether you're customizing your coding experience or adding entirely new features, creating plugins for Acode is a straightforward and rewarding process.
+// Load images
+const birdRight = new Image();
+birdRight.src = 'images/bird-right.png';
 
-## Plugin Structure
+const birdLeft = new Image();
+birdLeft.src = 'images/bird-left.png';
 
-Acode plugins follow a specific structure within a zip file. The necessary components include:
+let birdImage = birdRight;
 
-1. **plugin.json:**
+let isFlapping = false;
 
-   - Contains crucial information about the plugin, such as its name, version, author, and more.
+// Handle flap
+function flap() {
+    birdVelocity = flapStrength;
+}
 
-2. **main.js:**
+// Input
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') flap();
+    if (e.code === 'ArrowRight') {
+        birdX += 10;
+        direction = 'right';
+        birdImage = birdRight;
+    }
+    if (e.code === 'ArrowLeft') {
+        birdX -= 10;
+        direction = 'left';
+        birdImage = birdLeft;
+    }
+});
 
-   - The heart of the plugin, this file contains the actual plugin code.
+canvas.addEventListener('click', flap);
 
-3. **readme.md:**
-   - Contains the description or about plugin
+// Game loop
+function update() {
+    birdVelocity += gravity;
+    birdY += birdVelocity;
 
-3. **changelogs.md:**
-   - contains changelogs of your plugin updates.
+    if (birdY > canvas.height - 32) {
+        birdY = canvas.height - 32;
+        birdVelocity = 0;
+    }
 
-## Plugin Templates
+    if (birdY < 0) {
+        birdY = 0;
+        birdVelocity = 0;
+    }
+}
 
-To make your journey smoother, we provide comprehensive plugin templates, which are preconfigured and catering to various use cases:
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(birdImage, birdX, birdY, 40, 40);
+}
 
-1. **[JavaScript Template](https://github.com/Acode-Foundation/acode-plugin)** <Badge type="tip" text="official" /> : Javascript based template for plugin development and comes preconfigured
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
 
-2. **[TypeScript Template](https://github.com/Acode-Foundation/AcodeTSTemplate)** <Badge type="tip" text="official" /> : Typescript template for plugin development and comes with type checking and all typescript feature
-
-## Getting Started
-
-1.  **Clone the Plugin Template:**
-
-    - Choose the template that suits your needs and clone it.
-
-2.  **Customize plugin.json:**
-
-    - Open the `plugin.json` file and update it with your plugin's information.
-
-3.  **Install the dependency:**
-
-    - Install the required dependency by your package manager but first navigate to the plugin template folder by `cd acode-template`
-
-    ::: code-group
-    ```sh [npm]
-    $ npm install
-    ```
-
-    ```sh [pnpm]
-    $ pnpm install
-    ```
-
-    ```sh [yarn]
-    $ yarn install
-    ```
-
-    ```sh [bun]
-    $ bun install
-    ```
-    :::
-
-4.  **Develop Locally:**
-
-    - Use given commands to initiate a development server that watches for changes.
-    - The development server automatically creates a plugin zip file, ready for installation.
-    
-    ::: code-group
-    ```sh [npm]
-    $ npm run dev
-    ```
-
-    ```sh [pnpm]
-    $ pnpm dev
-    ```
-
-    ```sh [yarn]
-    $ yarn dev
-    ```
-
-    ```sh [bun]
-    $ bun run dev
-    ```
-    :::
-
-    - Or you can build every time manually on changes using(this will build production build):
-
-    ::: code-group
-    ```sh [npm]
-    $ npm run build
-    ```
-
-    ```sh [pnpm]
-    $ pnpm build
-    ```
-
-    ```sh [yarn]
-    $ yarn build
-    ```
-
-    ```sh [bun]
-    $ bun run build
-    ```
-    :::
-
-5.  **Install the Plugin:**
-
-    - Use the **REMOTE** option in Acode's plugin manager.
-    - This option is available on both sidebar extension tab or on Plugin page from settings.
-    - Provide the plugin URL (e.g., `http://\<ip\>:3000/dist.zip`) when prompted.
-    - Or if you are building manually then you can use the **Local** option in Acode's plugin manager and select the plugin zip
-
-:::info
-Development server will only build the zip on file changes
-:::
-
-:::tip 
-For local development, start a dev server using `npm run dev`. In Acode, use the **Remote** option, either from the **sidebar** or the **plugin page**. Enter the server URL, hit **Install**, and the plugin will be installed.  
-
-It's more convenient to manage this from the sidebar. When you install a local plugin(either using url or selecting the zip), Acode will add a **reload** icon in the **Extensions** tab of the sidebar. This is useful because the server automatically builds the plugin ZIP when changes are made. Simply press the reload button to apply the latest changes instantly.  
-
-This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
-:::
-
-## Building and Publishing
-
-To share your plugin with the Acode community, follow these steps:
-
-1. **Bundle for production:**
-
-   - Use `build` command to create a production build. which will be lower in size
-
-   ::: code-group
-
-    ```sh [npm]
-    $ npm run build
-    ```
-
-    ```sh [pnpm]
-    $ pnpm build
-    ```
-
-    ```sh [yarn]
-    $ yarn build
-    ```
-
-    ```sh [bun]
-    $ bun run build
-    ```
-
-2. **Publish:**
-
-   - Publish your release build on [Acode's](https://acode.app) official website, making your plugin accessible to the broader community.
-
-   - Tutorial for publishing a plugin : [Youtube](https://youtube.com/shorts/cxF2pxyN1HM?si=kQ5_BRtIO2RU-zhb)
-
-## Tutorial
-
-- Checkout a small tutorial of 👉 [How to create Acode Plugins?](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
-
-- Tutorial for creating plugin using `acode-cli`: [Here](https://youtube.com/shorts/Uyy2dcLx6iI?si=8M-HorDu0YTPJP-J)
-
-## Customization
-
-Certainly! You have the flexibility to either utilize your own template or start your plugin from scratch. Additionally, you're free to employ alternative bundlers and tools. We'll delve deeper into these customization possibilities in subsequent sections.
-
-Happy coding, and may your plugins bring new dimensions to your Acode experience! 🚀✨
+loop();
