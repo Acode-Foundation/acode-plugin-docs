@@ -1,6 +1,6 @@
 # Editor File API
 
-The Editor File API provides functionality to create, manage, interact with files in the Acode editor. It handles file operations, state management, and editor session control.
+The Editor File API provides functionality to create, manage, interact with files/tabs in the Acode editor. It handles file operations, state management, editor session control, custom editor tab, etc.
 
 :::tip
 This API is defined in the [Acode source code (src/lib/editorFile.js)](https://github.com/Acode-Foundation/Acode/blob/52bf3a59c4aebe422d8cfdecf5c85191ed6f6004/src/lib/editorFile.js).
@@ -296,6 +296,10 @@ const file2 = new EditorFile('custom.html', {
 // Add additional styles later if needed
 file1.addStyle('/styles/additional.css');
 ```
+
+::: warning
+Custom Editor Tabs are isolated from main dom using shadow dom, so don't select tab elements using main dom(`document`).
+:::
 
 ### Saving File Changes
 
