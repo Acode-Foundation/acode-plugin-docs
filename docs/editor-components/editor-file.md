@@ -2,7 +2,7 @@
 
 The Editor File API provides functionality to create, manage, interact with files/tabs in the Acode editor. It handles file operations, state management, editor session control, custom editor tab, etc.
 
-:::tip
+::: tip
 This API is defined in the [Acode source code (src/lib/editorFile.js)](https://github.com/Acode-Foundation/Acode/blob/52bf3a59c4aebe422d8cfdecf5c85191ed6f6004/src/lib/editorFile.js).
 :::
 
@@ -18,7 +18,7 @@ const EditorFile = acode.require('editorFile');
 new EditorFile(filename, options)
 ```
 
-:::info
+::: info
 You can also use [`acode.newEditorFile(filename, options)`](../global-apis/acode.md#neweditorfilefilename-string-options-fileoptions-editorfile) as an alternative.
 Both methods are equivalent and accept & return the same parameters.
 :::
@@ -298,7 +298,7 @@ file1.addStyle('/styles/additional.css');
 ```
 
 ::: warning
-Custom Editor Tabs are isolated from main dom using shadow dom, so don't select tab elements using main dom(`document`).
+Custom Editor Tabs are isolated from main dom using shadow dom, so don't select tab elements using main DOM(`document`).
 :::
 
 ### Saving File Changes
@@ -344,10 +344,10 @@ try {
 }
 ```
 
-:::tip
+::: tip
 Use the `isChanged()` method to check for unsaved changes before closing files.
 :::
 
-:::warning
+::: warning
 Always handle file operations asynchronously and implement proper error handling.
 :::
