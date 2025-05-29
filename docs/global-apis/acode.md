@@ -224,3 +224,37 @@ await acode.installPlugin("com.example.pluginid", "mypluin.id");
 ::: info
 This api is added in `v1.10.6` , versionCode: `954`
 :::
+
+
+### `newEditorFile(filename: string, options?: FileOptions): EditorFile`
+::: warning
+Requires version code `958` or above
+:::
+
+Creates a new EditorFile instance. This is an alternative to using the [EditorFile](../editor-components/editor-file.md) constructor directly.
+
+**Parameters:**
+
+* `filename: string` - Name of the file
+* `options?: FileOptions` - File creation options (see [EditorFile API](../editor-components/editor-file.md#fileoptions) for details)
+
+**Returns:**
+
+* `EditorFile` - A new EditorFile instance
+
+**Example:**
+
+```js
+const file = acode.newEditorFile('example.js', {
+    text: 'console.log("Hello World");',
+    editable: true
+});
+```
+
+:::tip
+This method is equivalent to `new EditorFile(filename, options)`. Both methods accept and return the same parameters.
+:::
+
+::: info
+This API was added in `v1.11.0` (versionCode: `956`) and marked stable in `v1.11.2` (versionCode: `958`)
+:::
