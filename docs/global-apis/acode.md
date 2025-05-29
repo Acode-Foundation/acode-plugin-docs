@@ -251,7 +251,7 @@ const file = acode.newEditorFile('example.js', {
 });
 ```
 
-:::tip
+::: tip
 This method is equivalent to `new EditorFile(filename, options)`. Both methods accept and return the same parameters.
 :::
 
