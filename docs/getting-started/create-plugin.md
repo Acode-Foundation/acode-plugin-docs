@@ -129,7 +129,7 @@ It's more convenient to manage this from the sidebar. When you install a local p
 This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
 :::
 
-## Creating Plugins with the CLI
+## Creating Plugins with the CLI<Badge type="warning" text="community" />
 
 You can also quickly scaffold new Acode plugins using the [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli). This tool provides an interactive wizard to generate a plugin project from the official JavaScript or TypeScript templates.
 
