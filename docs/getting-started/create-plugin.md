@@ -129,6 +129,35 @@ It's more convenient to manage this from the sidebar. When you install a local p
 This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
 :::
 
+## Creating Plugins with the CLI
+
+You can also quickly scaffold new Acode plugins using the [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli). This tool provides an interactive wizard to generate a plugin project from the official JavaScript or TypeScript templates.
+
+### Installation
+
+If you have Rust installed, you can install the CLI with:
+
+```bash
+cargo install acode-plugin-cli
+```
+
+### Usage
+
+Run the CLI in your terminal:
+
+```bash
+acode-plugin-cli
+```
+
+The wizard will guide you to:
+
+- Choose plugin name, ID, version, and description
+- Enter author information
+- Pick license and keywords
+- Select JavaScript or TypeScript template
+
+After completion, your plugin folder will be ready to use.
+
 ## Building and Publishing
 
 To share your plugin with the Acode community, follow these steps:
@@ -164,8 +193,6 @@ To share your plugin with the Acode community, follow these steps:
 ## Tutorial
 
 - Checkout a small tutorial of 👉 [How to create Acode Plugins?](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
-
-- Tutorial for creating plugin using `acode-cli`: [Here](https://youtube.com/shorts/Uyy2dcLx6iI?si=8M-HorDu0YTPJP-J)
 
 ## Customization
 
