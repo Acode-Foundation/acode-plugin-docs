@@ -1,18 +1,20 @@
 {
   "name": "acode-plugin-docs",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "type": "module",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "docs:preview": "vitepress preview",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vitepress": "^1.2.3",
-    "vue": "^3.4.27"
+    "prettier": "^3.6.2",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.17"
   }
 }
