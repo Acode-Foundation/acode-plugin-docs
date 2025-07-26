@@ -1,6 +1,5 @@
 {
   "name": "acode-plugin-docs",
-  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,9 +8,6 @@
     "docs:preview": "vitepress preview",
     "format": "prettier --write ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "prettier": "^3.6.2",
     "vitepress": "^1.6.3",

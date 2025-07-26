@@ -98,14 +98,14 @@ function sideBarDocs() {
       text: 'Getting Started',
       collapsed: true,
       items: [
-        { text: 'Introduction', link: '/id/docs/getting-started/intro' },
+        { text: 'Introduction', link: 'getting-started/intro' },
         {
           text: 'Create new plugin',
-          link: '/id/docs/getting-started/create-plugin'
+          link: 'getting-started/create-plugin'
         },
         {
           text: 'Understanding Plugins',
-          link: '/id/docs/getting-started/understanding-plugin'
+          link: 'getting-started/understanding-plugin'
         }
       ]
     },
@@ -115,11 +115,11 @@ function sideBarDocs() {
       items: [
         {
           text: 'Manifest',
-          link: '/id/docs/plugin-essentials/manifest'
+          link: 'plugin-essentials/manifest'
         },
         {
           text: 'Core File',
-          link: '/id/docs/plugin-essentials/core-file'
+          link: 'plugin-essentials/core-file'
         }
       ]
     },
@@ -129,23 +129,23 @@ function sideBarDocs() {
       items: [
         {
           text: 'Ace',
-          link: '/id/docs/global-apis/ace'
+          link: 'global-apis/ace'
         },
         {
           text: 'Acode',
-          link: '/id/docs/global-apis/acode'
+          link: 'global-apis/acode'
         },
         {
           text: 'Added Folder',
-          link: '/id/docs/global-apis/added-folder'
+          link: 'global-apis/added-folder'
         },
         {
           text: 'EditorManager',
-          link: '/id/docs/global-apis/editor-manager'
+          link: 'global-apis/editor-manager'
         },
         {
           text: 'Other Global Utilities',
-          link: '/id/docs/global-apis/global-utilities'
+          link: 'global-apis/global-utilities'
         }
       ]
     },
@@ -159,49 +159,49 @@ function sideBarDocs() {
           items: [
             {
               text: 'Alert',
-              link: '/id/docs/ui-components/dialogs/alert'
+              link: 'ui-components/dialogs/alert'
             },
             {
               text: 'Confirm',
-              link: '/id/docs/ui-components/dialogs/confirm'
+              link: 'ui-components/dialogs/confirm'
             },
             {
               text: 'Color Picker',
-              link: '/id/docs/ui-components/dialogs/color-picker'
+              link: 'ui-components/dialogs/color-picker'
             },
             {
               text: 'Loader',
-              link: '/id/docs/ui-components/dialogs/loader'
+              link: 'ui-components/dialogs/loader'
             },
             {
               text: 'Multi Prompt',
-              link: '/id/docs/ui-components/dialogs/multi-prompt'
+              link: 'ui-components/dialogs/multi-prompt'
             },
             {
               text: 'Prompt',
-              link: '/id/docs/ui-components/dialogs/prompt'
+              link: 'ui-components/dialogs/prompt'
             },
             {
               text: 'Select',
-              link: '/id/docs/ui-components/dialogs/select'
+              link: 'ui-components/dialogs/select'
             },
             {
               text: 'Custom Dialog',
-              link: '/id/docs/ui-components/dialogs/custom-dialog'
+              link: 'ui-components/dialogs/custom-dialog'
             }
           ]
         },
         {
           text: 'Toast',
-          link: '/id/docs/ui-components/toast'
+          link: 'ui-components/toast'
         },
         {
           text: 'Tutorial',
-          link: '/id/docs/ui-components/tutorial'
+          link: 'ui-components/tutorial'
         },
         {
           text: 'Selection Menu',
-          link: '/id/docs/ui-components/selection-menu'
+          link: 'ui-components/selection-menu'
         }
       ]
     },
@@ -211,39 +211,39 @@ function sideBarDocs() {
       items: [
         {
           text: 'File System(fs)',
-          link: '/id/docs/utilities/fs'
+          link: 'utilities/fs'
         },
         {
           text: 'URL',
-          link: '/id/docs/utilities/url'
+          link: 'utilities/url'
         },
         {
           text: 'Projects',
-          link: '/id/docs/utilities/projects'
+          link: 'utilities/projects'
         },
         {
           text: 'ACE Modes',
-          link: '/id/docs/utilities/ace-modes'
+          link: 'utilities/ace-modes'
         },
         {
           text: 'Encoding',
-          link: '/id/docs/utilities/encoding'
+          link: 'utilities/encoding'
         },
         {
           text: 'OpenFolder',
-          link: '/id/docs/utilities/open-folder'
+          link: 'utilities/open-folder'
         },
         {
           text: 'Keyboard',
-          link: '/id/docs/utilities/keyboard'
+          link: 'utilities/keyboard'
         },
         {
           text: 'CreateKeyboardEvent',
-          link: '/id/docs/utilities/keyboard-event'
+          link: 'utilities/keyboard-event'
         },
         {
           text: 'Window Resize',
-          link: '/id/docs/utilities/window-resize'
+          link: 'utilities/window-resize'
         }
       ]
     },
@@ -253,27 +253,27 @@ function sideBarDocs() {
       items: [
         {
           text: 'File Browser',
-          link: '/id/docs/editor-components/file-browser'
+          link: 'editor-components/file-browser'
         },
         {
           text: 'Editor File',
-          link: '/id/docs/editor-components/editor-file'
+          link: 'editor-components/editor-file'
         },
         {
           text: 'File List',
-          link: '/id/docs/editor-components/file-list'
+          link: 'editor-components/file-list'
         },
         {
           text: 'Page',
-          link: '/id/docs/editor-components/page'
+          link: 'editor-components/page'
         },
         {
           text: 'Palette',
-          link: '/id/docs/editor-components/palette'
+          link: 'editor-components/palette'
         },
         {
           text: 'Settings',
-          link: '/id/docs/editor-components/settings'
+          link: 'editor-components/settings'
         }
       ]
     },
@@ -283,23 +283,23 @@ function sideBarDocs() {
       items: [
         {
           text: 'Input Hints',
-          link: '/id/docs/helpers/input-hints'
+          link: 'helpers/input-hints'
         },
         {
           text: 'Fonts',
-          link: '/id/docs/helpers/fonts'
+          link: 'helpers/fonts'
         },
         {
           text: 'Themes',
-          link: '/id/docs/helpers/themes'
+          link: 'helpers/themes'
         },
         {
           text: 'Theme Builder',
-          link: '/id/docs/helpers/theme-builder'
+          link: 'helpers/theme-builder'
         },
         {
           text: 'Color',
-          link: '/id/docs/helpers/color'
+          link: 'helpers/color'
         }
       ]
     },
@@ -309,15 +309,15 @@ function sideBarDocs() {
       items: [
         {
           text: 'SideBar Apps',
-          link: '/id/docs/interface-apis/sidebar-apps'
+          link: 'interface-apis/sidebar-apps'
         },
         {
           text: 'Side Buttons',
-          link: '/id/docs/interface-apis/side-buttons'
+          link: 'interface-apis/side-buttons'
         },
         {
           text: 'Context Menu',
-          link: '/id/docs/interface-apis/context-menu'
+          link: 'interface-apis/context-menu'
         }
       ]
     },
@@ -327,12 +327,12 @@ function sideBarDocs() {
       items: [
         {
           text: 'Action Stack',
-          link: '/id/docs/advanced-apis/action-stack'
+          link: 'advanced-apis/action-stack'
         },
 
         {
           text: 'Intent',
-          link: '/id/docs/advanced-apis/intent'
+          link: 'advanced-apis/intent'
         }
       ]
     }
@@ -344,11 +344,11 @@ function sideBarTutorials() {
   return [
     {
       text: 'Command Palette',
-      link: '/id/tutorials/command-palette'
+      link: 'command-palette'
     },
     {
       text: 'How to run java',
-      link: '/id/tutorials/how-to-run-java'
+      link: 'how-to-run-java'
     }
   ]
 }
