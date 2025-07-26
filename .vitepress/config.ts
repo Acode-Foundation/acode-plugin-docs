@@ -5,6 +5,7 @@ import id from '../id/config.js'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  // Change `/en` route to `/`
   rewrites: {
     'en/:rest*': ':rest*'
   },
