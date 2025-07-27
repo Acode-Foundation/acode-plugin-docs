@@ -5,7 +5,7 @@ export default defineConfig({
   lang: 'id-ID',
 
   title: 'Dokumentasi Acode',
-  description: 'Documentation for new users and developers',
+  description: 'Dokumentasi untuk pengguna baru dan pengembangan',
 
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
@@ -15,7 +15,7 @@ export default defineConfig({
 
     footer: {
       message: 'Dirilis dibawah Lisensi MIT.',
-      copyright: 'Hak Cipta © 2025 <a class="link" href="//acode.app">Acode</a>'
+      copyright: `Hak Cipta © 2019-${new Date().getFullYear()} <a class="link" href="//acode.app">Acode</a>`
     },
 
     sidebar: {
@@ -95,36 +95,36 @@ function searchOptions() {
 function sideBarDocs() {
   return [
     {
-      text: 'Getting Started',
+      text: 'Memulai',
       collapsed: true,
       items: [
-        { text: 'Introduction', link: 'getting-started/intro' },
+        { text: 'Pengantar', link: 'getting-started/intro' },
         {
-          text: 'Create new plugin',
+          text: 'Membuat plugin baru',
           link: 'getting-started/create-plugin'
         },
         {
-          text: 'Understanding Plugins',
+          text: 'Memahami Plugin',
           link: 'getting-started/understanding-plugin'
         }
       ]
     },
     {
-      text: 'Plugin Essentials',
+      text: 'Dasar Plugin',
       collapsed: true,
       items: [
         {
-          text: 'Manifest',
+          text: 'Manifesto',
           link: 'plugin-essentials/manifest'
         },
         {
-          text: 'Core File',
+          text: 'Berkas Inti',
           link: 'plugin-essentials/core-file'
         }
       ]
     },
     {
-      text: 'Global APIs',
+      text: 'API Global',
       collapsed: true,
       items: [
         {
@@ -136,7 +136,7 @@ function sideBarDocs() {
           link: 'global-apis/acode'
         },
         {
-          text: 'Added Folder',
+          text: 'AddedFolder',
           link: 'global-apis/added-folder'
         },
         {
@@ -144,33 +144,33 @@ function sideBarDocs() {
           link: 'global-apis/editor-manager'
         },
         {
-          text: 'Other Global Utilities',
+          text: 'Utilitas Global Lainnya',
           link: 'global-apis/global-utilities'
         }
       ]
     },
     {
-      text: 'UI Components',
+      text: 'Komponen UI',
       collapsed: true,
       items: [
         {
-          text: 'Dialogs',
+          text: 'Dialog',
           collapsed: true,
           items: [
             {
-              text: 'Alert',
+              text: 'Pemberitahuan',
               link: 'ui-components/dialogs/alert'
             },
             {
-              text: 'Confirm',
+              text: 'Konfirmasi',
               link: 'ui-components/dialogs/confirm'
             },
             {
-              text: 'Color Picker',
+              text: 'Pemilih Warna',
               link: 'ui-components/dialogs/color-picker'
             },
             {
-              text: 'Loader',
+              text: 'Pemuat',
               link: 'ui-components/dialogs/loader'
             },
             {
@@ -182,11 +182,11 @@ function sideBarDocs() {
               link: 'ui-components/dialogs/prompt'
             },
             {
-              text: 'Select',
+              text: 'Pilih',
               link: 'ui-components/dialogs/select'
             },
             {
-              text: 'Custom Dialog',
+              text: 'Dialog Kostum',
               link: 'ui-components/dialogs/custom-dialog'
             }
           ]
@@ -200,17 +200,17 @@ function sideBarDocs() {
           link: 'ui-components/tutorial'
         },
         {
-          text: 'Selection Menu',
+          text: 'Menu Pilihan',
           link: 'ui-components/selection-menu'
         }
       ]
     },
     {
-      text: 'Utilities',
+      text: 'Utilitas',
       collapsed: true,
       items: [
         {
-          text: 'File System(fs)',
+          text: 'Sistem Berkas (fs)',
           link: 'utilities/fs'
         },
         {
@@ -218,15 +218,15 @@ function sideBarDocs() {
           link: 'utilities/url'
         },
         {
-          text: 'Projects',
+          text: 'Proyek',
           link: 'utilities/projects'
         },
         {
-          text: 'ACE Modes',
+          text: 'Mode ACE',
           link: 'utilities/ace-modes'
         },
         {
-          text: 'Encoding',
+          text: 'Enkoding',
           link: 'utilities/encoding'
         },
         {
@@ -242,96 +242,96 @@ function sideBarDocs() {
           link: 'utilities/keyboard-event'
         },
         {
-          text: 'Window Resize',
+          text: 'WindowResize',
           link: 'utilities/window-resize'
         }
       ]
     },
     {
-      text: 'Editor Components',
+      text: 'Komponen Editor',
       collapsed: true,
       items: [
         {
-          text: 'File Browser',
+          text: 'Pencari Berkas',
           link: 'editor-components/file-browser'
         },
         {
-          text: 'Editor File',
+          text: 'Berkas Editor',
           link: 'editor-components/editor-file'
         },
         {
-          text: 'File List',
+          text: 'Daftar Berkas',
           link: 'editor-components/file-list'
         },
         {
-          text: 'Page',
+          text: 'Halaman',
           link: 'editor-components/page'
         },
         {
-          text: 'Palette',
+          text: 'Palet',
           link: 'editor-components/palette'
         },
         {
-          text: 'Settings',
+          text: 'Pengaturan',
           link: 'editor-components/settings'
         }
       ]
     },
     {
-      text: 'Helpers',
+      text: 'Pembantu',
       collapsed: true,
       items: [
         {
-          text: 'Input Hints',
+          text: 'Petunjuk Masukan',
           link: 'helpers/input-hints'
         },
         {
-          text: 'Fonts',
+          text: 'Huruf',
           link: 'helpers/fonts'
         },
         {
-          text: 'Themes',
+          text: 'Tema',
           link: 'helpers/themes'
         },
         {
-          text: 'Theme Builder',
+          text: 'Pembangun Tema',
           link: 'helpers/theme-builder'
         },
         {
-          text: 'Color',
+          text: 'Warna',
           link: 'helpers/color'
         }
       ]
     },
     {
-      text: 'Interface APIs',
+      text: 'API Tampilan',
       collapsed: true,
       items: [
         {
-          text: 'SideBar Apps',
+          text: 'Aplikasi Bilah Sisi',
           link: 'interface-apis/sidebar-apps'
         },
         {
-          text: 'Side Buttons',
+          text: 'Tombol Sisi',
           link: 'interface-apis/side-buttons'
         },
         {
-          text: 'Context Menu',
+          text: 'Menu Konteks',
           link: 'interface-apis/context-menu'
         }
       ]
     },
     {
-      text: 'Advanced APIs',
+      text: 'API Lanjutan',
       collapsed: true,
       items: [
         {
-          text: 'Action Stack',
+          text: 'Stak Aksi',
           link: 'advanced-apis/action-stack'
         },
 
         {
-          text: 'Intent',
+          text: 'Maksud',
           link: 'advanced-apis/intent'
         }
       ]
@@ -343,11 +343,11 @@ function sideBarDocs() {
 function sideBarTutorials() {
   return [
     {
-      text: 'Command Palette',
+      text: 'Palet Perintah',
       link: 'command-palette'
     },
     {
-      text: 'How to run java',
+      text: 'Cara menjalankan Java',
       link: 'how-to-run-java'
     }
   ]

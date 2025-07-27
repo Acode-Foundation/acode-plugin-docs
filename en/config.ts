@@ -15,7 +15,7 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2025 <a class="link" href="//acode.app">Acode</a>'
+      copyright: `Copyright © 2019-${new Date().getFullYear()} <a class="link" href="//acode.app">Acode</a>`
     },
 
     sidebar: {

@@ -1,11 +1,9 @@
-# Welcome To Acode Plugin Development Guide!
+# Selamat Datang Ke Panduan Pengembangan Plugin Acode!
 
-We are glad to have you here! This is the community driven documentation for **Acode Plugin Development**. Here you will find everything you need to know about plugin development.
+Kami senang Anda ada di sini! Ini adalah dokumentasi yang didorong oleh komunitas untuk **Pengembangan Plugin Acode**. Disini Anda akan menemukan semua yang Anda perlu tahu tentang pengembangan plugin.
 
-
-::: tip
-This documentation assumes you have a basic understanding of **JavaScript**. Additionally, knowledge of CSS/SCSS and HTML will be advantageous.
+:::tip Petunjuk
+Dokumentasi ini mengasumsikan Anda telah memiliki pemahaman dasar **JavaScript**. Selain itu, pengetahuan CSS/SCSS dan HTML akan menguntungkan.
 :::
 
-
-Wish you a happy learning!
+Semoga Anda belajar bahagia!

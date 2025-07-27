@@ -1,7 +1,13 @@
 import { defineConfig } from 'vitepress'
+import { createRequire } from "node:module";
 
-import en from '../en/config.js'
-import id from '../id/config.js'
+const requireI18n = (folder, label) => {
+  const require = createRequire(import.meta.url);
+  return {
+    ...require(`../${folder}/config.ts`).default,
+    label,
+  }
+}
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -30,13 +36,7 @@ export default defineConfig({
   },
 
   locales: {
-    root: {
-      ...en,
-      label: 'English'
-    },
-    id: {
-      ...id,
-      label: 'Bahasa Indonesia'
-    }
+    root: requireI18n("en", "English"),
+    id: requireI18n("id", "Bahasa Indonesia")
   }
 })

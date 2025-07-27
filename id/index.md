@@ -3,38 +3,38 @@ layout: home
 
 hero:
   name: "Dokumentasi Acode"
-  text: "Your guide for every step of your Acode journey."
-  tagline: Build and Extend with Ease
+  text: "Panduan anda untuk setiap langkah perjalanan Acode anda."
+  tagline: Bangun dan Rentangkan dengan Mudah
   image:
     src: /acode.png
     alt: Acode
   actions:
     - theme: brand
-      text: Get Started
-      link: /docs/getting-started/intro
+      text: Mulai
+      link: /id/docs/getting-started/intro
     - theme: alt
-      text: What's Acode?
+      text: Apa itu Acode?
       link: https://github.com/deadlyjack/Acode
 
 features:
   - icon: 🔧
-    title: Easy Integration
-    details: Seamlessly integrate your plugins with Acode's robust API.
+    title: Integrasi Mudah
+    details: Integrasikan plugin Anda dengan mulus dengan API Kuat Acode.
   - icon: 🚀
-    title: Rapid Development
-    details: Utilize powerful tools and templates to accelerate your plugin creation.
+    title: Pengembangan Cepat
+    details: Memanfaatkan alat dan templat yang kuat untuk mempercepat pembuatan plugin Anda.
   - icon: 🧩
-    title: Extensible API
-    details: Leverage a flexible API to build diverse and complex plugins.
+    title: API Ekstensibel
+    details: Kumpulan API fleksibel untuk membangun plugin yang beragam dan kompleks.
   - icon: 🌍
-    title: Community Support
-    details: Join a vibrant community of developers for collaboration and support.
+    title: Dukungan Komunitas
+    details: Bergabunglah dengan komunitas pengembang yang bersemangat untuk kolaborasi dan dukungan.
   - icon: 🔍
-    title: Debugging Tools
-    details: Access debugging tools/plugins to troubleshoot and optimize your plugins
+    title: Alat-Alat Debugging
+    details: Akses alat debugging/plugin untuk memecahkan masalah dan mengoptimalkan plugin Anda.
   - icon: 📦
-    title: Plugin Distribution
-    details: Easily distribute and update your plugins to reach audience.
+    title: Distribusi Plugin
+    details: Mudah mendistribusikan dan memperbarui plugin Anda untuk mencapai audiens.
   
 ---
 

@@ -1,63 +1,63 @@
 ---
-lang: en-US
-title: Acode Plugins
+lang: id-ID
+title: Plugin Acode
 ---
-# Acode Plugins
+# Plugin Acode
 
-> Welcome to the world of Acode plugins! 🚀
+> Selamat datang ke dunia plugin Acode! 🚀
 
 
-### What are Acode Plugins?
+### Apa itu Plugin Acode?
 
-**Acode** plugins serve as powerful tools to enhance and extend the functionality of your **Acode editor**. Whether you're looking to introduce new features or tweak existing ones, plugins provide a flexible and customizable way to tailor Acode to your specific needs.
+Plugin **Acode** disediakan sebagai alat yang kuat untuk meningkatkan dan merentangkan fungsional **Editor Acode** Anda. Apakah Anda ingin memperkenalkan fitur baru atau men-tweak yang sudah ada, plugin menyediakan cara yang fleksibel dan bisa dikostumisasi untuk menyesuaikan Acode ke kebutuhan spesifik Anda.
 
-### Language Flexibility
+### Fleksibilitas Bahasa
 
-Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** — Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
+Plugin Acode terutama ditulis dalam JavaScript, menawarkan bahasa yang akrab dan banyak digunakan untuk pengembang. Selain itu, untuk mereka yang mengenal TypeScript, **berita baik 🥳** — Acode mendukung `TypeScript` untuk pengembangan plugin, menyediakan manfaat pengetikan statis dan meningkatkan pengalaman pengembangan.
 
-## Installing Acode Plugins
+## Memasang Plugin Acode
 
-Discovering and integrating plugins into your Acode editor is a simple and customizable process. There are multiple methods to install plugins, ensuring flexibility and convenience for developers. Before you proceed, it's essential to exercise caution when installing plugins from unknown sources, as they may potentially contain malicious code.
+Menjelajahi dan mengintegrasikan plugin ke dalam editor Acode Anda adalah proses yang mudah dan bisa dikostumisasi. Berikut adalah berbagai metode untuk pasang plugin, memastikan Fleksibilitas dan kemudahan untuk pengembang. Sebelum anda memproses, ini dasar untuk berhati-hati ketika memasang plugin dari sumber tidak dikenal, karena mereka berpotensi mengandung kode berbahaya.
 
-### Installation Methods:
+### Metode Pemasangan:
 
-1. **Local Installation:**
-   - Download the plugin file(`.zip`) to your device.
-   - Open Acode and navigate to **Settings**.
-   - Click on **Plugins** and then the `'+'` icon.
-   - Select **LOCAL** and choose the downloaded plugin file.
+1. **Pemasangan Lokal:**
+   - Unduh berkas plugin (`.zip`) ke perangkat anda.
+   - Buka Acode dan navigasi ke **Pengaturan**.
+   - Tekan **Plugin** dan kemudian ikon `'+'`.
+   - Pilih **LOKAL** dan pilih berkas plugin yang diunduh.
 
-2. **Remote Installation:**
-   - If you have a plugin file URL (e.g., a plugin file hosted on GitHub):
-     - Open Acode and go to **Settings**.
-     - Navigate to **Plugins** and click on the `'+'` icon.
-     - Choose **REMOTE** and enter the plugin file URL.
+2. **Pemasangan Jarak Jauh:**
+   - Jika anda memiliki sebuah URL berkas plugin (misalnya, berkas plugin yang di-*host* di GitHub):
+     - Buka Acode dan pergi ke **Pengaturan**.
+     - Navigasi ke **Plugin** dan klik ikon `'+'`.
+     - Pilih **JARAK JAUH** dan masukan URL berkas plugin.
 
-:::info
-Currently of no use because of security reason!
+:::info Informasi
+Saat ini tidak digunakan karena alasan keamanan!
 :::
 
-3. **Acode Plugins Manager:**
-   - Access the Acode **Settings** and click on **Plugins**.
-   - Explore the available plugins and select the one you want.
-   - Click on **Install** to seamlessly integrate the chosen plugin into your Acode editor.
+3. **Manager Plugin Acode:**
+   - Akses **Pengaturan** Acode dan klik **Plugin**.
+   - Jelajahi plugin yang tersedia dan pilih satu yang Anda inginkan.
+   - Klik **Pasang** untuk mengintegrasikan plugin yang dipilih ke dalam editor Acode Anda.
 
-4. **Acode SideBar:**
-    - Click on three horizontal slashes from top left corner
-    - Select plugin icon and Explore the plugins 
+4. **Bilah Sisi Acode:**
+    - Klik pada tiga tebasan horizontal dari sudut kiri atas
+    - Pilih ikon plugin dan jelajahi plugin
 
 
-:::info
+:::info Informasi
 
-**Source Persistence:**
-Once installed, plugins remember their source. If you choose to uninstall and reinstall, the plugin will be sourced from the same location, ensuring consistency in your development environment.
+**Kegigihan Sumber:**
+Setelah dipasang, plugin ingat sumbernya. Jika Anda memilih untuk menghapus instalan dan memasang ulang, plugin akan bersumber dari lokasi yang sama, memastikan konsistensi di lingkungan pengembangan Anda.
 :::
 
-:::danger
+:::danger Peringatan
 
-**Exercise Caution:**
-It's crucial to exercise caution when installing plugins, especially from unfamiliar sources. Plugins have the potential to contain malicious code, so be discerning and opt for reputable and well-known plugins whenever possible.
+**Berhati-hatilah:**
+Sangat penting untuk berhati-hati saat memasang plugin, terutama dari sumber yang tidak dikenal. Plugin memiliki potensi untuk mengandung kode berbahaya, jadi jadilah cerah dan pilihlah plugin yang memiliki reputasi baik dan terkenal bila memungkinkan.
 :::
 
 <br />
-Your Acode journey has just begun. Dive in, experiment, and let your coding adventure flourish in this realm of endless possibilities! 🚀✨
+Perjalanan Acode Anda baru saja dimulai. Menyelam, bereksperimen, dan biarkan petualangan pengkodean Anda berkembang di ranah kemungkinan tak berujung ini! 🚀✨
