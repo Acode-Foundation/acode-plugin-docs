@@ -24,6 +24,29 @@ const fontSize = settings.get('fontSize');
 const theme = settings.get('appTheme');
 ```
 
+### Adding New Fields 
+
+Add one field or more then one subfields using `value[]` attribute:
+
+```js
+// make sure to follow proper JSON syntax, these fields will be directly added to settings 
+
+// syntax 
+settings.value["your-superkey"] = {
+    key: value,
+    key: value
+    // repeat as per your needs 
+}
+
+// Example Use 
+settings.value["my-acode-plugin.id"] = {
+    fontSize: "16px",
+    port: 5000,
+    user: "john doe"
+}
+```
+
+
 ### Updating Settings
 
 Update one or more settings using the `update()` method:
