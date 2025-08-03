@@ -1,21 +1,21 @@
 ---
 lang: en-US
-title: Acode Plugins
+标题：Acode 插件
 ---
-# Acode Plugins
+#编码插件
 
-> Welcome to the world of Acode plugins! 🚀
+>欢迎来到 Acode 插件的世界!🚀
 
 
-### What are Acode Plugins?
+###什么是 Acode 插件？
 
-**Acode** plugins serve as powerful tools to enhance and extend the functionality of your **Acode editor**. Whether you're looking to introduce new features or tweak existing ones, plugins provide a flexible and customizable way to tailor Acode to your specific needs.
+**代码**  插件是增强和扩展您的功能的强大工具**Acode 编辑器**无论您是想引入新功能还是调整现有功能，插件都提供了一种灵活且可定制的方式，可根据您的特定需求定制 Acode。
 
-### Language Flexibility
+###语言灵活性
 
-Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** — Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
+Acode 插件主要用 JavaScript 编写,为开发人员提供一种熟悉且广泛使用的语言。 此外,对于那些喜欢 TypeScript 的人来说,**好消息🥳** - 代码支持'TypeScript`用于插件开发，提供静态类型的好处并改善开发人员体验。
 
-## Installing Acode Plugins
+##安装 Acode 插件
 
 Discovering and integrating plugins into your Acode editor is a simple and customizable process. There are multiple methods to install plugins, ensuring flexibility and convenience for developers. Before you proceed, it's essential to exercise caution when installing plugins from unknown sources, as they may potentially contain malicious code.
 
