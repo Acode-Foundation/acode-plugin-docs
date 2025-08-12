@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Te quiero Rosi</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+    }
+    h1 {
+        position: absolute;
+        top: 40px;
+        width: 100%;
+        text-align: center;
+        font-size: 2.8em;
+        color: red;
+        text-shadow: 0 0 15px red, 0 0 30px red;
+        user-select: none;
+    }
+    .floating {
+        position: absolute;
+        color: red;
+        font-size: 1.5em;
+        text-shadow: 0 0 10px red;
+        animation: float 4s linear infinite;
+        user-select: none;
+    }
+    @keyframes float {
+        0% { transform: translateY(0); opacity: 1; }
+        100% { transform: translateY(-150px); opacity: 0; }
+    }
+</style>
+</head>
+<body>
+    <h1>Te quiero Rosi - Happy Birthday</h1>
+    <canvas id="heart"></canvas>
+
+<script>
+const canvas = document.getElementById("heart");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function createHeartPoints() {
+    particles = [];
+    for (let t = 0; t < Math.PI * 2; t += 0.05) {
+        let x = 16 * Math.pow(Math.sin(t), 3);
+        let y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        particles.push({
+            x: x * 15 + canvas.width / 2,
+            y: -y * 15 + canvas.height / 2,
+            r: 2,
+            alpha: 1,
+            dx: (Math.random() - 0.5) * 2,
+            dy: (Math.random() - 0.5) * 2
+        });
+    }
+}
+
+function drawHeart() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,0,0,${p.alpha})`;
+        ctx.fill();
+    });
+}
+
+function animate() {
+    particles.forEach(p => {
+        p.r = Math.random() * 3 + 1;
+        p.alpha = Math.random();
+        p.x += p.dx * 0.2;
+        p.y += p.dy * 0.2;
+    });
+    drawHeart();
+    requestAnimationFrame(animate);
+}
+
+function createFloatingText() {
+    const text = document.createElement("div");
+    text.className = "floating";
+    text.innerText = "Te Amo ❤️";
+    text.style.left = Math.random() * (window.innerWidth - 100) + "px";
+    text.style.top = (window.innerHeight - 100) + "px";
+    document.body.appendChild(text);
+    setTimeout(() => text.remove(), 4000);
+}
+
+setInterval(createFloatingText, 1500);
+
+createHeartPoints();
+animate();
+</script>
+</body>
+</html>
