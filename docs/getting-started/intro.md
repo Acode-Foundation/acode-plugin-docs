@@ -53,6 +53,7 @@ Currently of no use because of security reason!
 Once installed, plugins remember their source. If you choose to uninstall and reinstall, the plugin will be sourced from the same location, ensuring consistency in your development environment.
 :::
 
+![1000053484](https://github.com/user-attachments/assets/2730c363-d453-47f3-a81b-4788b3875173)
 :::danger
 
 **Exercise Caution:**
