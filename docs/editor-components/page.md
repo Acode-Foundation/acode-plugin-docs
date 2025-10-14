@@ -69,7 +69,7 @@ function createSettingsPage() {
 				className: 'icon back',
 				dataset: {
         				action: "back-btn"
-      				}
+      				},
 				onclick: () => settingsPage.hide()
 		});
 
@@ -77,7 +77,7 @@ function createSettingsPage() {
 				className: 'icon save',
 				dataset: {
         				action: "save-btn"
-      				}
+      				},
 				onclick: () => {console.log("save settings")}
 		});
 
