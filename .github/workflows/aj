@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Love Letter Generator</title>
+  <style>
+    :root{
+      --bg:#FFF6F9; --card:#fff; --accent:#d6336c; --muted:#6b7280;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    body{margin:0;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);padding:24px}
+    .wrap{max-width:900px;margin:0 auto}
+    header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+    h1{margin:0;font-size:20px;color:var(--accent)}
+    .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(150,150,170,0.08)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], select, textarea{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px}
+    textarea{min-height:220px;resize:vertical}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    button{background:var(--accent);color:white;padding:10px 12px;border:none;border-radius:10px;cursor:pointer}
+    button.secondary{background:#374151}
+    .template-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .tpl{padding:8px 10px;border-radius:8px;background:#f8eef2;color:#7a1730;cursor:pointer;border:1px dashed #f3c2d1}
+    .tpl.active{background:var(--accent);color:white;border:none}
+    .preview{white-space:pre-wrap;background:#fff7fb;padding:12px;border-radius:10px;border:1px solid #fde8ef;min-height:160px}
+    footer{margin-top:12px;font-size:13px;color:var(--muted)}
+    .small{font-size:12px;color:var(--muted)}
+    .row{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Love Letter Maker ❤️</h1>
+      <div class="small">Gumawa ng mabilis at magandang love letter. Buksan lang sa Acode o browser.</div>
+    </header>
+
+    <div class="card grid">
+      <div>
+        <label for="recipient">To (pangalan ng recipient)</label>
+        <input id="recipient" type="text" placeholder="e.g. Ella" value="">
+
+        <label for="sender" style="margin-top:10px">From (iyong pangalan)</label>
+        <input id="sender" type="text" placeholder="e.g. Miguel" value="">
+
+        <label style="margin-top:10px">Tone / Mood</label>
+        <select id="tone">
+          <option value="romantic">Romantic</option>
+          <option value="playful">Playful / Cute</option>
+          <option value="sincere">Sincere</option>
+          <option value="short">Short & Sweet</option>
+        </select>
+
+        <label style="margin-top:10px">Pumili ng Template</label>
+        <div class="template-list" id="templateList"></div>
+
+        <div style="margin-top:10px">
+          <label>Custom message (optional)</label>
+          <textarea id="custom" placeholder="Magdagdag ng personal na linya o memory..."></textarea>
+        </div>
+
+        <div class="controls" style="margin-top:10px">
+          <button id="generate">Generate Letter</button>
+          <button id="copy" class="secondary">Copy</button>
+          <button id="download" class="secondary">Download .txt</button>
+          <button id="reset" style="background:#ef4444">Reset</button>
+        </div>
+      </div>
+
+      <div>
+        <label>Preview</label>
+        <div class="preview card" id="preview">(letter preview will appear here)</div>
+
+        <div style="margin-top:10px" class="row">
+          <label style="margin:0">Font size</label>
+          <input id="fontsize" type="range" min="12" max="26" value="16" style="flex:1">
+        </div>
+
+        <div style="margin-top:10px" class="small">Tip: Piliin ang template tapos i-edit ang "Custom message" para personal touch.</div>
+      </div>
+    </div>
+
+    <footer class="small">
+      Built to run locally on your phone or desktop. Copy-paste to a new file named <code>index.html</code> and open. — Enjoy ❤️
+    </footer>
+  </div>
+
+<script>
+/* Templates — madaling i-edit o magdagdag pa */
+const templates = [
+  {
+    id:'classic',
+    title:'Classic Romantic',
+    text:`Mahal kong {{recipient}},
+
+Mula nang makilala kita, tila nagbago ang bawat umaga ko. Ang mga simpleng sandali kasama ka ay nagiging mga alaala na pinapangarap kong balikan.
+{{custom}}
+
+Laging sa iyo,
+{{sender}}`
+  },
+  {
+    id:'playful',
+    title:'Playful & Cute',
+    text:`Hi {{recipient}}! 😊
+
+Alam mo ba na ikaw ang dahilan kung bakit ako laging nakangiti sa gitna ng araw? Kahit na maliit lang, ang mga ginagawa mo ay nagpapasaya sa akin nang sobra.
+{{custom}}
+
+Hug (o high-five!),
+{{sender}}`
+  },
+  {
+    id:'sincere',
+    title:'Sincere Promise',
+    text:`Mahal kong {{recipient}},
+
+Hindi ako perpekto, pero pangako ko ay ipapakita ko ang tunay kong pagmamahal sa pamamagitan ng oras, pagkalinga, at pagiging totoo sa'yo. Salamat sa pag-unawa at paglalakad sa tabi ko.
+{{custom}}
+
+Taos-pusong nagmamahal,
+{{sender}}`
+  },
+  {
+    id:'short',
+    title:'Short & Sweet',
+    text:`Dear {{recipient}},
+
+Simple lang: mahal kita. Salamat sa pagiging ikaw.
+{{custom}}
+
+— {{sender}}`
+  }
+];
+
+/* UI refs */
+const tplList = document.getElementById('templateList');
+const preview = document.getElementById('preview');
+const recipient = document.getElementById('recipient');
+const sender = document.getElementById('sender');
+const custom = document.getElementById('custom');
+const tone = document.getElementById('tone');
+const generateBtn = document.getElementById('generate');
+const copyBtn = document.getElementById('copy');
+const downloadBtn = document.getElementById('download');
+const resetBtn = document.getElementById('reset');
+const fontsize = document.getElementById('fontsize');
+
+let activeTpl = templates[0].id;
+
+/* render template buttons */
+function renderTemplateList(){
+  tplList.innerHTML = '';
+  templates.forEach(t=>{
+    const el = document.createElement('button');
+    el.className = 'tpl'+(t.id===activeTpl? ' active':'');
+    el.textContent = t.title;
+    el.onclick = ()=>{ activeTpl = t.id; renderTemplateList(); autoGenerate() };
+    tplList.appendChild(el);
+  });
+}
+renderTemplateList();
+
+/* build letter */
+function buildLetter(){
+  const tpl = templates.find(t=>t.id===activeTpl) || templates[0];
+  // small tone tweak: if tone selected 'short' force short template
+  if(tone.value==='short'){
+    const short = templates.find(t=>t.id==='short');
+    if(short) tpl = short;
+  }
+  let text = tpl.text;
+  text = text.replace(/{{recipient}}/g, recipient.value || 'Mahal');
+  text = text.replace(/{{sender}}/g, sender.value || 'Mahal mo');
+  // custom: preserve spacing but if empty remove placeholder
+  const customVal = custom.value.trim();
+  text = text.replace(/{{custom}}/g, customVal ? customVal : '');
+  // tidy extra blank lines
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return text.trim();
+}
+
+function autoGenerate(){ preview.textContent = buildLetter(); }
+
+/* events */
+generateBtn.addEventListener('click', ()=>{ autoGenerate(); });
+copyBtn.addEventListener('click', async ()=>{
+  const txt = buildLetter();
+  try{
+    await navigator.clipboard.writeText(txt);
+    copyBtn.textContent = 'Copied!';
+    setTimeout(()=>copyBtn.textContent = 'Copy',1100);
+  }catch(e){
+    alert('Copy failed — use Select All then copy.');
+  }
+});
+downloadBtn.addEventListener('click', ()=>{
+  const content = buildLetter();
+  const fn = `love-letter-${(recipient.value||'someone').replace(/\s+/g,'-').toLowerCase()}.txt`;
+  const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fn; document.body.appendChild(a); a.click();
+  a.remove(); URL.revokeObjectURL(url);
+});
+resetBtn.addEventListener('click', ()=>{
+  recipient.value=''; sender.value=''; custom.value=''; tone.value='romantic'; activeTpl='classic'; renderTemplateList(); autoGenerate();
+});
+fontsize.addEventListener('input', ()=>{ preview.style.fontSize = fontsize.value + 'px' });
+
+/* live updates */
+[recipient, sender, custom, tone].forEach(el => el.addEventListener('input', autoGenerate));
+
+/* initial render */
+autoGenerate();
+
+/* Handy: let user add a quick template by prompt (optional) */
+window.addQuickTemplate = function(title, body){
+  const id = 'tpl_'+Math.random().toString(36).slice(2,8);
+  templates.push({id,title,text:body});
+  renderTemplateList();
+};
+</script>
