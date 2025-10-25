@@ -1,20 +1,29 @@
----
+html lang="en"
 lang: en-US
 title: Acode Plugins
----
+head
 # Acode Plugins
-
+body
 > Welcome to the world of Acode plugins! 🚀
-
-
-### What are Acode Plugins?
-
+head
+body
+style
+body
+{background+image: url(neonpink.jpg
+background+repeat: no-repeat;
+background+attachment: fixed;
+backgroung+site: 100% 100%;
+}
+<style
+<div class="menu"
+> nav
+   <a href="#home" Home  a
 **Acode** plugins serve as powerful tools to enhance and extend the functionality of your **Acode editor**. Whether you're looking to introduce new features or tweak existing ones, plugins provide a flexible and customizable way to tailor Acode to your specific needs.
 
 ### Language Flexibility
 
 Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** — Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
-
+style
 ## Installing Acode Plugins
 
 Discovering and integrating plugins into your Acode editor is a simple and customizable process. There are multiple methods to install plugins, ensuring flexibility and convenience for developers. Before you proceed, it's essential to exercise caution when installing plugins from unknown sources, as they may potentially contain malicious code.
