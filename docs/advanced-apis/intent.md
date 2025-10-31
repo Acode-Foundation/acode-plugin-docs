@@ -131,3 +131,7 @@ intent?.addHandler(pluginHandler);
 			- Custom file type handlers
 			- Special handling for shared content
 			- Integration with external tools and services
+
+
+https://github.com/user-attachments/assets/d9de613e-fd20-43e5-8bc9-85b0bb98cbb7
+
