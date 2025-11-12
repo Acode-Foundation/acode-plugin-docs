@@ -1,4 +1,4 @@
-# Welcome To Acode Plugin Development Guide!
+# Welcome To Acode Plugin Developmen6t Guide!
 
 We are glad to have you here! This is the community driven documentation for **Acode Plugin Development**. Here you will find everything you need to know about plugin development.
 
