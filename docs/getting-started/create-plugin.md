@@ -1,3 +1,41 @@
+ html>
+<html>
+  <head>
+    <title>Happy Birthday My Moon</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: url('https://i.imgur.com/HTx0bqt.jpeg') no-repeat center/cover;
+        height: 100vh;
+        color: #ffffff;
+        text-align: center;
+        font-family: 'Segoe Script', cursive;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        backdrop-filter: blur(1px);
+      }
+
+      h1 {
+        font-size: 40px;
+        text-shadow: 0 0 12px #ffffff;
+      }
+
+      p {
+        font-size: 20px;
+        width: 70%;
+        margin: auto;
+        text-shadow: 0 0 8px #d6b6ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>🌙 Happy Birthday My Moon 🌙</h1>
+    <p>You light up my world even from miles away 💫</p>
+  </body>
+</html>
 ---
 lang: en-US
 title: Create Acode Plugin
