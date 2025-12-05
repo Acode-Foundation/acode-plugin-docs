@@ -33,10 +33,6 @@ Discovering and integrating plugins into your Acode editor is a simple and custo
      - Navigate to **Plugins** and click on the `'+'` icon.
      - Choose **REMOTE** and enter the plugin file URL.
 
-:::info
-Currently of no use because of security reason!
-:::
-
 3. **Acode Plugins Manager:**
    - Access the Acode **Settings** and click on **Plugins**.
    - Explore the available plugins and select the one you want.
