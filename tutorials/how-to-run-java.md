@@ -12,6 +12,11 @@ head:
 
 If you want to code in Java on **Acode Editor** (assuming you already have it installed), you'll need **Termux**, a Linux terminal emulator for Android. This guide will walk you through the entire setup process, step-by-step.
 
+:::tip 
+Now you can also use **Acode's built in terminal** instead of depending or using third party app like Termux.
+Just install official [Runner plugin](https://acode.app/plugin/acode.runner.plugin) and it will add play button to run java files easily, and also this plugin uses the builtin terminal to run stuff.
+:::
+
 ### Prerequisites
 - **Acode Editor** installed on your Android device.
 - **Termux**, a terminal emulator for running Linux on Android.
