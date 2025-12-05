@@ -54,7 +54,7 @@ After installing Termux, follow these steps to set it up:
 
 
 ::: info
-Skip step 3 , if you want don't want to run java code from Acode
+Skip step 3 , if you don't want to run java code from Acode
 :::
 
 
