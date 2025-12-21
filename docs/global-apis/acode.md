@@ -157,9 +157,13 @@ acode.registerFormatter("com.example.plugin", ["js"], () => { // [!code focus]
 
 This method is used to unregister a formatter. This method takes one parameter, `pluginId`. The pluginId is the ID of your plugin.
 
-### `addIcon(iconName: string, iconSrc: string)`
+### `addIcon(iconName: string, iconSrc: string, options?: { monochrome?: boolean })`
 
-This method is used to add an icon. This method takes two parameters, `iconName` and `iconSrc`. The `iconName` is the name of the icon. The `iconSrc` is the URL of the icon.
+This method is used to add an icon. This method takes two parameters, `iconName` , `iconSrc` and a optional. The `iconName` is the name of the icon. The `iconSrc` is the URL of the icon. If `options.monochrome` true, uses CSS masks to render the icon. This allows it to inherit the theme's currentColor(in case of svg).
+
+::: info 
+The `options.monochrome` is added in versionCode `967`.
+:::
 
 **Example:**
 
