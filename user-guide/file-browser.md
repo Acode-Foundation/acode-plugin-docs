@@ -54,7 +54,7 @@ The Home View acts as the centralized hub for all your file connections.
 
 Navigating into a folder or project changes the available tools to focus on content creation.
 
-![File Browser Project View](/file_broswer_project.png)
+![File Browser Project View](/file_browser_project.png)
 
 ### Managing Files
 
