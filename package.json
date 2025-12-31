@@ -18,5 +18,8 @@
 		"@biomejs/biome": "2.1.2",
 		"vitepress": "^1.2.3",
 		"vue": "^3.4.27"
+	},
+	"dependencies": {
+		"lucide-vue-next": "^0.562.0"
 	}
 }

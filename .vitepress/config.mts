@@ -16,10 +16,57 @@ export default defineConfig({
 			themeConfig: {
 				nav: [
 					{ text: "Home", link: "/" },
-					{ text: "Docs", link: "/docs" },
+					{ text: "User Guide", link: "/user-guide/" },
+					{ text: "Plugin Docs", link: "/docs" },
 					{ text: "Tutorials", link: "/tutorials" },
 				],
 				sidebar: {
+					"/user-guide/": [
+						{
+							text: "User Guide",
+							items: [
+								{ text: "Overview", link: "/user-guide/" },
+								{
+									text: "Command Palette",
+									link: "/user-guide/command-palette",
+								},
+								{ text: "File Browser", link: "/user-guide/file-browser" },
+								{ text: "Remote Access", link: "/user-guide/remote-access" },
+								{ text: "Plugins", link: "/user-guide/plugins" },
+								{ text: "Terminal", link: "/user-guide/terminal" },
+								{
+									text: "Settings",
+									link: "/user-guide/settings",
+									collapsed: true,
+									items: [
+										{
+											text: "App Settings",
+											link: "/user-guide/settings/app-settings",
+										},
+										{
+											text: "Editor Settings",
+											link: "/user-guide/settings/editor-settings",
+										},
+										{
+											text: "Terminal Settings",
+											link: "/user-guide/settings/terminal-settings",
+										},
+										{
+											text: "Preview Settings",
+											link: "/user-guide/settings/preview-settings",
+										},
+										{
+											text: "Formatter",
+											link: "/user-guide/settings/formatter",
+										},
+										{ text: "Themes", link: "/user-guide/settings/themes" },
+									],
+								},
+								{ text: "Keybindings", link: "/user-guide/keybindings" },
+								{ text: "QuickTools", link: "/user-guide/quicktools" },
+							],
+						},
+					],
 					"/docs/": [
 						{
 							text: "Getting Started",
