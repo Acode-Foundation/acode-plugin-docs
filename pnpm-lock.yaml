@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      lucide-vue-next:
+        specifier: ^0.562.0
+        version: 0.562.0(vue@3.4.27)
     devDependencies:
       '@biomejs/biome':
         specifier: 2.1.2
@@ -545,6 +549,11 @@ packages:
 
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
+
+  lucide-vue-next@0.562.0:
+    resolution: {integrity: sha512-LN0BLGKMFulv0lnfK29r14DcngRUhIqdcaL0zXTt2o0oS9odlrjCGaU3/X9hIihOjjN8l8e+Y9G/famcNYaI7Q==}
+    peerDependencies:
+      vue: '>=3.0.1'
 
   magic-string@0.30.10:
     resolution: {integrity: sha512-iIRwTIf0QKV3UAnYK4PU8uiEc4SRh5jX0mwpIwETPpHdhVM4f53RSwS/vXvN1JhGX+Cs7B8qIq3d6AH49O5fAQ==}
@@ -1146,6 +1155,10 @@ snapshots:
     optional: true
 
   hookable@5.5.3: {}
+
+  lucide-vue-next@0.562.0(vue@3.4.27):
+    dependencies:
+      vue: 3.4.27
 
   magic-string@0.30.10:
     dependencies:
