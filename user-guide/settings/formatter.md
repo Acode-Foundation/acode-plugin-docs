@@ -12,5 +12,5 @@ Formatters can be:
 - **Plugin-based**: Installed via the Plugin Registry (e.g., Prettier).
 
 ::: tip
-If you don't see your preferred formatter, check the [Plugin Registry](./plugins) for available formatter plugins.
+If you don't see your preferred formatter, check the [Plugin Registry](/user-guide/plugins) for available formatter plugins.
 :::

@@ -24,5 +24,5 @@ App themes control the overall look of the Acode interface. Available options in
 Editor themes control syntax highlighting for code. You can choose from many built-in themes or install more via plugins.
 
 ::: tip
-Many additional themes (both App and Editor) can be found in the [Plugin Registry](./settings/plugins).
+Many additional themes (both App and Editor) can be found in the [Plugin Registry](/user-guide/plugins).
 :::

@@ -40,5 +40,5 @@ You can open the Settings page using any of the following methods:
 |     <RotateCcw :size="18"/>     | **Restore Defaults**                                  | Reset all settings to defaults.               |
 |     <FileJson :size="18"/>      | **Edit settings.json**                                | Manually edit the JSON settings file.         |
 |     <AlignLeft :size="18"/>     | [**Formatter**](./settings/formatter)                 | Configure code formatters per language.       |
-|      <Puzzle :size="18"/>       | [**Plugins**](./settings/plugins)                     | Manage installed plugins or install new ones. |
+|      <Puzzle :size="18"/>       | [**Plugins**](/user-guide/plugins)                    | Manage installed plugins or install new ones. |
 |      <Palette :size="18"/>      | [**Theme**](./settings/themes)                        | Change app or editor themes.                  |
