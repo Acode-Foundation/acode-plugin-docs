@@ -2,6 +2,8 @@
 
 The `main.js`(can be of any name but that must be specified in `plugin.json`) file is the heart of your Acode plugin, serving as the entry point and execution hub when the plugin is loaded. Here we'll explore the essential concept of `main.js`, focusing on initialization, registration, and cleanup.
 
+For loader behavior and runtime lifecycle details, see [Understanding Plugin Lifecycle](../getting-started/understanding-plugin.md).
+
 ## Plugin Initialization
 
 ### Entry Point for Your Plugin
@@ -43,7 +45,7 @@ Here's an illustrative example of a `main.js` file:
 
 ```javascript
 acode.setPluginInit('com.example.plugin', (baseUrl, $page, cache) => {
-  const { commands } = editorManager.editor;
+  const commands = acode.require("commands");
   commands.addCommand({
     name: 'example-plugin',
     bindKey: { win: 'Ctrl-Alt-E', mac: 'Command-Alt-E' },
@@ -66,12 +68,16 @@ The `main.js` file must also define an unmount function, which is called when th
 
 ```javascript
 acode.setPluginUnmount('com.example.plugin', () => {
-  const { commands } = editorManager.editor;
+  const commands = acode.require("commands");
   commands.removeCommand('example-plugin');
 });
 ```
 
 In this example, the unmount function removes the 'example-plugin' command, ensuring that the plugin's impact on Acode is cleanly reverted upon unloading.
+
+::: tip
+For command registration APIs, see [Commands](../utilities/commands.md).
+:::
 
 :::tip
 You will not need to write this `unmount` or `initialize` functions for your plugin because templates comes with it , just you will need to write your plugin code inside the `AcodePlugin class`

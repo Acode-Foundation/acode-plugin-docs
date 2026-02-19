@@ -1,88 +1,62 @@
-# Ace Modes
+# Editor Languages (CodeMirror)
 
-The Ace Modes is a utility method in Acode allows you to manage the language modes supported by the Ace editor. This includes adding new modes, removing existing ones, and configuring how the editor handles different file types.
+Acode now uses CodeMirror.  
+For language registration, use `editorLanguages` as the primary API.
 
-## Importing Ace Modes
-
-To use the Ace Modes utilities, you need to import them using the `acode.require` method:
+## Import
 
 ```javascript
-const aceModes = acode.require('aceModes');
+const editorLanguages = acode.require("editorLanguages");
 ```
 
 ## Methods
 
-### `addMode(name: string, extensions: string | string[], caption: string)`
+### `register(name, extensions, caption?, loader?)`
 
-The `addMode` method adds a new mode to the Ace editor. This is useful when you want to support a custom language or file type.
+Registers a language mode.
 
-- **name**: The name of the mode.
-- **extensions**: The file extensions associated with this mode. This can be a string or an array of strings.
-- **caption**: The display name of the mode.
-
-#### Example
-
-```javascript
-const { addMode } = acode.require('aceModes');
-
-addMode('myMode', ['mymode', 'mym'], 'My Custom Mode');
-```
-
-:::info
- The `extensions` parameter can be a single string or an array of strings, making it flexible to accommodate multiple file types.
-:::
-
-### `removeMode(name: string)`
-
-The `removeMode` method removes a mode from the Ace editor. This is useful if you need to clean up or no longer need support for a particular mode.
-
-- **name**: The name of the mode to be removed.
-
-#### Example
+- `name`: Internal mode name.
+- `extensions`: String or string array (without `.`), for example `"mymode"` or `["mymode", "mym"]`.
+- `caption` (optional): Label shown in UI.
+- `loader` (optional): Function returning a CodeMirror extension (or a Promise resolving to one).
 
 ```javascript
-const { removeMode } = acode.require('aceModes');
+const editorLanguages = acode.require("editorLanguages");
 
-removeMode('myMode');
-```
-:::tip
-Removing a mode that is no longer needed can help keep editor environment clean and efficient.
-:::
-
-## Example
-
-Here’s a more detailed example that demonstrates how to add and remove a custom mode, and how to utilize these modes within the Ace editor.
-
-### Adding a Custom Mode
-
-Let's say you have a custom language with the extension `.mymode` and you want it to be recognized by the Ace editor.
-
-```javascript:line-numbers
-const aceModes = acode.require('aceModes');
-
-const onClick = () => {
-  // Action to perform when the menu item is clicked
-  console.log('Custom Mode Menu Item Clicked!');
-};
-
-// Adding the custom mode
-aceModes.addMode('myMode', ['mymode'], 'My Custom Mode');
-
-// Assuming you have the necessary mode definitions loaded for 'myMode'
-// Example of using the custom mode in the editor
-const editor = editorManager.editor;
-editor.session.setMode('ace/mode/myMode');
+editorLanguages.register(
+  "myMode",
+  ["mymode", "mym"],
+  "My Custom Mode",
+  async () => {
+    // Return a CodeMirror language extension here
+    return [];
+  }
+);
 ```
 
-### Removing a Custom Mode
+### `unregister(name)`
 
-If you decide to remove the custom mode from the Ace editor:
+Removes a previously registered language mode.
 
-```javascript:line-numbers
-const aceModes = acode.require('aceModes');
-
-// Removing the custom mode
-aceModes.removeMode('myMode');
-
-// The mode will no longer be available for use
+```javascript
+const editorLanguages = acode.require("editorLanguages");
+editorLanguages.unregister("myMode");
 ```
+
+## Apply A Mode To Active File
+
+```javascript
+editorManager.activeFile?.setMode("myMode");
+```
+
+## Legacy Alias (`aceModes`)
+
+`acode.require("aceModes")` is still available for backward compatibility:
+
+```javascript
+const aceModes = acode.require("aceModes");
+aceModes.addMode("myMode", ["mymode"], "My Custom Mode");
+aceModes.removeMode("myMode");
+```
+
+Prefer `editorLanguages` for new plugins.

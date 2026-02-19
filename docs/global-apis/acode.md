@@ -14,7 +14,7 @@ This method is used to register the plugin. This method takes two parameters, `p
 
 ```js
 acode.setPluginInit('com.example.plugin', (baseUrl, $page, cache) => { // [!code focus]
-  const { commands } = editorManager.editor;
+  const commands = acode.require("commands");
   commands.addCommand({
     name: 'example-plugin',
     bindKey: { win: 'Ctrl-Alt-E', mac: 'Command-Alt-E' },
@@ -95,7 +95,7 @@ This method is used to set the unmount function. This function will be called wh
 
 ```js
 acode.setPluginUnmount("com.example.plugin", () => { // [!code focus]
-  const { commands } = editorManager.editor;
+  const commands = acode.require("commands");
   commands.removeCommand("example-plugin");
 });
 ```
@@ -138,24 +138,55 @@ This method executes a command defined in file `src/lib/commands.js`. This metho
 acode.exec("console"); // Opens the console
 ```
 
-### `registerFormatter(pluginId: string, extensions: string[], format: Function)`
+### `registerFormatter(pluginId: string, extensions: string[], format: Function, displayName?: string)`
 
-This method is used to register a formatter. This method takes three parameters, `pluginId`, `extensions` and format function. The `pluginId` is the ID of your plugin. The `extensions` is an array of file extensions. The format function is the function that will be called when the file is formatted.
+This method is used to register a formatter. It takes `pluginId`, `extensions`, formatter function, and optional display name.
 
 **Example:**
 
 ```js
 acode.registerFormatter("com.example.plugin", ["js"], () => { // [!code focus]
   // formats the active file if supported
-  const text = editorManager.editor.session.getValue();
+  const view = editorManager.editor;
+  const text = view.state.doc.toString();
   // format the text
-  editorManager.editor.session.setValue(text);
+  view.dispatch({
+    changes: { from: 0, to: view.state.doc.length, insert: text }
+  });
 });
 ```
 
 ### `unregisterFormatter(pluginId: string)`
 
 This method is used to unregister a formatter. This method takes one parameter, `pluginId`. The pluginId is the ID of your plugin.
+
+### `format(selectIfNull = true): Promise<boolean>`
+
+Formats the active editor file using the selected formatter for the current mode.
+
+- `selectIfNull` (optional): when `true`, Acode opens formatter selection if none is configured.
+
+Returns `true` when formatting succeeds, otherwise `false`.
+
+```js
+await acode.format();
+```
+
+### `formatters: Array<{ id: string, name: string, exts: string[] }>`
+
+List of registered formatters.
+
+```js
+console.log(acode.formatters);
+```
+
+### `getFormatterFor(extensions: string[]): Array<[string | null, string]>`
+
+Returns formatter options for the given extensions.
+
+```js
+const options = acode.getFormatterFor(["js", "ts"]);
+```
 
 ### `addIcon(iconName: string, iconSrc: string, options?: { monochrome?: boolean })`
 
@@ -230,35 +261,55 @@ This api is added in `v1.10.6` , versionCode: `954`
 :::
 
 
-### `newEditorFile(filename: string, options?: FileOptions): EditorFile`
+### `newEditorFile(filename: string, options?: FileOptions): void`
 ::: warning
 Requires version code `958` or above
 :::
 
-Creates a new EditorFile instance. This is an alternative to using the [EditorFile](../editor-components/editor-file.md) constructor directly.
+Creates a new EditorFile instance and adds it to the editor.
 
 **Parameters:**
 
 * `filename: string` - Name of the file
 * `options?: FileOptions` - File creation options (see [EditorFile API](../editor-components/editor-file.md#fileoptions) for details)
 
-**Returns:**
-
-* `EditorFile` - A new EditorFile instance
-
 **Example:**
 
 ```js
-const file = acode.newEditorFile('example.js', {
-    text: 'console.log("Hello World");',
-    editable: true
+acode.newEditorFile("example.js", {
+  text: 'console.log("Hello World");',
+  editable: true,
 });
 ```
 
 ::: tip
-This method is equivalent to `new EditorFile(filename, options)`. Both methods accept and return the same parameters.
+This method is equivalent to calling `new EditorFile(filename, options)`.
 :::
 
 ::: info
 This API was added in `v1.11.0` (versionCode: `956`) and marked stable in `v1.11.2` (versionCode: `958`)
 :::
+
+### `waitForPlugin(pluginId: string): Promise<boolean>`
+
+Resolves when the target plugin has loaded.
+
+```js
+await acode.waitForPlugin("com.example.other-plugin");
+```
+
+### `clearBrokenPluginMark(pluginId: string): void`
+
+Clears a plugin's broken mark so it can be retried on next load.
+
+```js
+acode.clearBrokenPluginMark("com.example.plugin");
+```
+
+## Related APIs
+
+- Commands API (preferred for adding/removing commands): [Commands](../utilities/commands.md)
+- CodeMirror editor theme API: [Editor Themes](../utilities/editor-themes.md)
+- Language server API: [LSP](../advanced-apis/lsp.md)
+- File handler API: [File Handlers](../advanced-apis/file-handlers.md)
+- Terminal API: [Terminal](../advanced-apis/terminal.md)

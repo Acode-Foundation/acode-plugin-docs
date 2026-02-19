@@ -6,18 +6,54 @@ The `editorManager` allows to interact with the Editor Instance and listen to va
 
 ## Methods and Properties
 
-### `editor`  
-This is an instance of the Ace editor. Check out editor methods [here](https://ajaxorg.github.io/ace-api-docs/classes/ace.Editor-1.html)
+### `editor`
+This is the active **CodeMirror `EditorView`** instance.
 
-- `addCommand(args: string | object)` This method allows you add a command to command palette of Acode app. You can use it like:
+Read text:
 ```javascript
- editorManager.editor.commands.addCommand("command name or command object")
- ```
+const text = editorManager.editor.state.doc.toString();
+```
 
-- `removeCommand(args: string | object)` This method allows you remove a command to command palette of Acode app. You can use it like:
-``` javascript
-editorManager.editor.commands.removeCommand("command name or command object")
- ```
+Update text:
+```javascript
+const view = editorManager.editor;
+view.dispatch({
+  changes: { from: 0, to: view.state.doc.length, insert: "new content" },
+});
+```
+
+Add a command:
+```javascript
+// Compatibility API
+editorManager.editor.commands.addCommand({
+  name: "my-command",
+  description: "My command",
+  exec: () => console.log("Run"),
+});
+```
+
+Remove a command:
+```javascript
+// Compatibility API
+editorManager.editor.commands.removeCommand("my-command");
+```
+
+::: tip
+Prefer `acode.require("commands")` for command registration/removal in new plugins.  
+See: [Commands API](../utilities/commands.md)
+:::
+
+Compatibility helpers are also available for legacy plugins:
+
+- `editor.session` (Ace-style session proxy for active file)
+- `editor.getValue()`
+- `editor.gotoLine(...)`
+- `editor.insert(text)`
+- `editor.getCursorPosition()`
+- `editor.moveCursorToPosition({ row, column })`
+- `editor.selection.getRange()`
+- `editor.getCopyText()`
+
 ### `addNewFile(filename?:string, options?: object)` 
 This function adds a new file to the workspace.
 

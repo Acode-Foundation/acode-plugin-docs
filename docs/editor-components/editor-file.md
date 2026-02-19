@@ -46,7 +46,7 @@ Both methods are equivalent and accept & return the same parameters.
 | cursorPos | `object` | Cursor position | - |
 | scrollLeft | `number` | Scroll left position | - |
 | scrollTop | `number` | Scroll top position | - |
-| folds | [`Array<Fold>`](https://ajaxorg.github.io/ace-api-docs/classes/src_edit_session_fold.Fold.html) | Code folds | - |
+| folds | `Array<{ fromLine: number, fromCol: number, toLine: number, toCol: number }>` | Code folds | - |
 | type | `string` | Type of content (e.g., 'editor') | `'editor'` |
 | tabIcon | `string` | Icon class for the file tab | `'file file_type_default'` |
 | content | string \|  [HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) | Custom content element or HTML string. Strings are sanitized using DOMPurify | - |
@@ -76,7 +76,7 @@ Both methods are equivalent and accept & return the same parameters.
 | SAFMode | `'single' \| 'tree' \| null` | Storage access framework mode |
 | loaded | `boolean` | Whether file has completed loading text |
 | loading | `boolean` | Whether file is still loading text |
-| session | `AceAjax.IEditSession` | EditSession of the file |
+| session | `Proxy<EditorState>` | Session state with Ace-compatible helper methods |
 | readOnly | `boolean` | Whether file is readonly |
 | markChanged | `boolean` | Whether to mark changes when session text changes |
 

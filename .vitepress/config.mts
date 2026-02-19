@@ -5,6 +5,7 @@ export default defineConfig({
 	lastUpdated: true,
 	cleanUrls: true,
 	base: "/",
+	srcExclude: ["Acode/**"],
 	head: [["link", { rel: "icon", href: "/acode.png" }]],
 
 	locales: {
@@ -102,7 +103,7 @@ export default defineConfig({
 							collapsed: true,
 							items: [
 								{
-									text: "Ace",
+									text: "CodeMirror & Legacy Ace",
 									link: "/docs/global-apis/ace",
 								},
 								{
@@ -196,8 +197,16 @@ export default defineConfig({
 									link: "/docs/utilities/projects",
 								},
 								{
-									text: "ACE Modes",
+									text: "Commands",
+									link: "/docs/utilities/commands",
+								},
+								{
+									text: "Editor Languages",
 									link: "/docs/utilities/ace-modes",
+								},
+								{
+									text: "Editor Themes",
+									link: "/docs/utilities/editor-themes",
 								},
 								{
 									text: "Encoding",
@@ -302,6 +311,14 @@ export default defineConfig({
 								{
 									text: "Terminal",
 									link: "/docs/advanced-apis/terminal",
+								},
+								{
+									text: "LSP",
+									link: "/docs/advanced-apis/lsp",
+								},
+								{
+									text: "File Handlers",
+									link: "/docs/advanced-apis/file-handlers",
 								},
 								{
 									text: "Action Stack",

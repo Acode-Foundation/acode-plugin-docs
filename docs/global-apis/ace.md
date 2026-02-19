@@ -1,26 +1,29 @@
-# Using the Ace Global API in Acode
+# CodeMirror and Legacy Ace Compatibility
 
-**Introduction**
+Acode now uses **CodeMirror 6** as the editor engine.
 
-Acode is built on the  Ace editor to provide a robust code editing experience. The Ace Global API offers a way to interact with the underlying Ace editor instance within the Acode environment.
+This page exists for plugin migration from Ace-era APIs.
 
-**Key Points**
+## What To Use Now
 
-* **Not the Raw Ace Instance:** The Ace Global API is not a direct reference to the current editor instance. For direct manipulation, use the `editorManager`.
-* **Official Ace API Reference:** For a comprehensive understanding of Ace's capabilities, refer to the official documentation: [https://ajaxorg.github.io/ace-api-docs/modules/ace.html](https://ajaxorg.github.io/ace-api-docs/modules/ace.html).
+- Use `editorManager.editor` as the active editor view (`EditorView`).
+- Use `acode.require("commands")` for command registration/removal.
+- Use `acode.require("editorLanguages")` to register or remove language modes.
+- Use `acode.require("editorThemes")` to register or apply editor themes.
 
-**Example: Including Language Tools**
+## Legacy Compatibility
 
-To enable language tools for a specific language, you can use the following code:
+Acode still provides some Ace-like compatibility for older plugins:
 
-```javascript
-// main.js
-ace.require("ace/ext/language_tools");
-```
+- `editorManager.editor.session` exposes a session object with Ace-style helper methods.
+- `acode.require("aceModes")` still maps to mode registration helpers.
 
-**Additional Considerations**
+These compatibility layers are for transition only. Prefer CodeMirror-first APIs for new plugins.
 
-* **API Differences:** While the Ace Global API provides access to many Ace features, there might be limitations or differences compared to directly interacting with the raw Ace instance.
-* **Acode-Specific Functionalities:** Explore the Acode documentation to discover additional features and customizations related to the Ace editor that might be available through the Ace Global API or other Acode-specific mechanisms.
+## Migration Quick Map
 
-By understanding the nuances of the Ace Global API and leveraging the official Ace documentation, you can effectively customize and extend Acode's editing capabilities.
+| Old pattern | New pattern |
+|---|---|
+| `acode.require("aceModes")` | `acode.require("editorLanguages")` |
+| `editor.session.setMode(...)` | `editorManager.activeFile?.setMode(...)` |
+| Ace global API usage (`ace.*`) | `editorManager.editor` + `editorLanguages` + `editorThemes` |
