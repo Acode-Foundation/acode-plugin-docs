@@ -5,3 +5,4 @@ A development guide for Acode plugins, fully updated with comprehensive document
 ## Contribution
 
 Want to help improve these docs? Simply open an issue describing what you'd like to add. This helps avoid conflicts and ensures smooth collaboration between contributors.
+
