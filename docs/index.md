@@ -6,6 +6,5 @@ We are glad to have you here! This is the community driven documentation for **A
 ::: tip
 This documentation assumes you have a basic understanding of **JavaScript**. Additionally, knowledge of CSS/SCSS and HTML will be advantageous.
 :::
-
-
+  
 Wish you a happy learning!
