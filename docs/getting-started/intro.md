@@ -56,4 +56,5 @@ It's crucial to exercise caution when installing plugins, especially from unfami
 :::
 
 <br />
-Your Acode journey has just begun. Dive in, experiment, and let your coding adventure flourish in this realm of endless possibilities! 🚀✨
+Your Acode journey has just begun. Dive in, experiment, and let your coding adventure flourish in this realm of endless possibil [Copilot_Icon_Black.pdf](https://github.com/user-attachments/files/26156981/Copilot_Icon_Black.pdf)
+ities! 🚀✨
