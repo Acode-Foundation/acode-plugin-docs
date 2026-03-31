@@ -3,7 +3,7 @@
 The Editor File API provides functionality to create, manage, interact with files/tabs in the Acode editor. It handles file operations, state management, editor session control, custom editor tab, etc.
 
 ::: tip
-This API is defined in the [Acode source code (src/lib/editorFile.js)](https://github.com/Acode-Foundation/Acode/blob/52bf3a59c4aebe422d8cfdecf5c85191ed6f6004/src/lib/editorFile.js).
+This API is defined in the [Acode source code (src/lib/editorFile.js)](https://github.com/Acode-Foundation/Acode/blob/228a339296a3869fff7ff84e0898378a438931b8/src/lib/editorFile.js).
 :::
 
 ## Import
@@ -68,6 +68,7 @@ Both methods are equivalent and accept & return the same parameters.
 | uri | `string` | File location on the device |
 | eol | `'windows' \| 'unix'` | End of line character |
 | editable | `boolean` | Whether file can be edited |
+| pinned | `boolean` | Whether the file is pinned |
 | isUnsaved | `boolean` | Whether file has unsaved changes |
 | name | `string` | File name (for plugin compatibility) |
 | cacheFile | `string` | Cache file URL |
@@ -90,6 +91,7 @@ Both methods are equivalent and accept & return the same parameters.
 | uri | `string` | Set file location |
 | eol | `'windows' \| 'unix'` | Set end of line character |
 | editable | `boolean` | Set file editability |
+| pinned   | `boolean` | Set file pinned state |
 | readOnly | `boolean` | Set file readonly state |
 
 ## Methods
@@ -110,11 +112,17 @@ Saves the file to a new location.
 await file.saveAs();
 ```
 
-#### [remove(force = false)](#removeforce--false)
+#### [remove(force = false, options = { ignorePinned = false, silentPinned = false })](#removeforce--false)
 Removes and closes the file.
 
 ```js
 await file.remove(true); // Force close without save prompt
+
+// Attempt to close a pinned tab, bypassing the pinned check
+editorFile.remove(false, { ignorePinned: true });
+
+// Attempt to close a pinned tab silently (toast suppressed)
+editorFile.remove(false, { silentPinned: true });
 ```
 
 #### [makeActive()](#makeactive)
@@ -130,6 +138,20 @@ Removes active state from the file.
 ```js
 file.removeActive();
 ```
+
+#### [setPinnedState(value: boolean, options = { reorder = false, emit = true })](#setPinnedState)
+Updates Pinned State for the file, triggers reorder (if true), emits Events (editorManger `update` event with `pin-tab` as the first argument and affected File - second argument )
+
+```js
+file.setPinnedState(false, {})
+
+editorManager.on("update", (action, file) => {
+    if(action === "pin-tab") doSomething();
+});
+```
+
+#### [togglePinned()](#togglePinned)
+Toggles the pinned State of the file
 
 ### Editor Operations
 
