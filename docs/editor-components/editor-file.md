@@ -151,8 +151,11 @@ editorManager.on("update", (action, file) => {
 });
 ```
 
-#### [togglePinned()](#togglePinned)
+#### [togglePinned()](#togglepinned)
 Toggles the pinned State of the file
+
+```js
+file.togglePinned();
 
 ### Editor Operations
 
