@@ -218,6 +218,82 @@ lsp.upsert({
 });
 ```
 
+## Custom URI Translation
+
+Use `rootUri` and `documentUri` when the server does not see the same
+filesystem layout as Acode.
+
+Typical cases:
+
+- the server runs in Termux
+- the server runs behind a remote WebSocket bridge
+- the editor opens files as `content://...` but the server expects `file://...`
+- the default cache-file fallback does not point at the real project path
+
+`rootUri` controls the workspace root sent during initialize and workspace
+folder handling.
+
+`documentUri` controls the URI used for opened documents, changes, formatting,
+and similar file-scoped LSP requests.
+
+Both hooks may be synchronous or async.
+
+`documentUri(uri, context)` receives:
+
+- `uri`: the original file URI known to Acode
+- `context.normalizedUri`: Acode's default normalized URI, including
+  `content:// -> file://` conversion or cache fallback when available
+- the same context fields available to `rootUri`, such as `file`, `view`,
+  `languageId`, and `rootUri`
+
+Example:
+
+```js
+const lsp = acode.require("lsp");
+
+const termuxWorkspaceUri =
+  "file:///data/data/com.termux/files/home/projects/my-project";
+
+function toTermuxDocumentUri(uri, fallbackUri) {
+  if (typeof uri !== "string") return fallbackUri || null;
+
+  if (uri.startsWith("file:///storage/emulated/0/")) {
+    return uri.replace(
+      "file:///storage/emulated/0/",
+      "file:///data/data/com.termux/files/home/storage/shared/",
+    );
+  }
+
+  return fallbackUri || uri;
+}
+
+const termuxServer = lsp.defineServer({
+  id: "termux-typescript",
+  label: "TypeScript (Termux)",
+  languages: [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "tsx",
+    "jsx",
+  ],
+  useWorkspaceFolders: true,
+  transport: {
+    kind: "websocket",
+    url: "ws://127.0.0.1:2087/",
+  },
+  rootUri() {
+    return termuxWorkspaceUri;
+  },
+  documentUri(uri, context) {
+    return toTermuxDocumentUri(uri, context.normalizedUri);
+  },
+});
+
+lsp.upsert(termuxServer);
+```
+
 ## Definition API
 
 ### `lsp.defineServer(options)`
@@ -240,7 +316,10 @@ Common fields:
 - `clientConfig`
 - `startupTimeout`
 - `capabilityOverrides`
-- `rootUri`
+- `rootUri`: optional workspace-root resolver; if provided it takes precedence
+  over Acode's default root detection
+- `documentUri`: optional document URI resolver for translating file paths before
+  they are sent to the server
 - `resolveLanguageId`
 - `useWorkspaceFolders`
 
@@ -318,3 +397,5 @@ console.log(activeClients);
 - Prefer structured installers over raw shell commands.
 - Use a bundle when your plugin owns a family of related servers or custom install logic.
 - Use `useWorkspaceFolders: true` for heavy workspace-aware servers like TypeScript or Rust.
+- If your server runs outside Acode's local filesystem view, define both `rootUri`
+  and `documentUri` so the server receives paths it can resolve.
