@@ -140,7 +140,7 @@ Removes active state from the file.
 file.removeActive();
 ```
 
-#### [setPinnedState(value: boolean, options = { reorder = false, emit = true })](#setPinnedState)
+#### [setPinnedState(value: boolean, options = { reorder = false, emit = true })](#setpinnedstate)
 Updates Pinned State for the file, triggers reorder (if true), emits Events (editorManager `update` event with `pin-tab` as the first argument and affected File - second argument )
 
 ```js
