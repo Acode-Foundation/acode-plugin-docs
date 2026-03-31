@@ -119,10 +119,11 @@ Removes and closes the file.
 await file.remove(true); // Force close without save prompt
 
 // Attempt to close a pinned tab, bypassing the pinned check
-editorFile.remove(false, { ignorePinned: true });
+// Attempt to close a pinned tab, bypassing the pinned check
+await file.remove(false, { ignorePinned: true });
 
 // Attempt to close a pinned tab silently (toast suppressed)
-editorFile.remove(false, { silentPinned: true });
+await file.remove(false, { silentPinned: true });
 ```
 
 #### [makeActive()](#makeactive)
