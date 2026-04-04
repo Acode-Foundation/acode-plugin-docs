@@ -1,59 +1,127 @@
----
-lang: en-US
-title: Acode Plugins
----
-# Acode Plugins
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Social</title>
 
-> Welcome to the world of Acode plugins! 🚀
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0d0d0d;
+    color: white;
+}
 
+header {
+    background: black;
+    padding: 15px;
+    text-align: center;
+    font-size: 22px;
+    border-bottom: 1px solid #333;
+}
 
-### What are Acode Plugins?
+.profile {
+    text-align: center;
+    padding: 20px;
+}
 
-**Acode** plugins serve as powerful tools to enhance and extend the functionality of your **Acode editor**. Whether you're looking to introduce new features or tweak existing ones, plugins provide a flexible and customizable way to tailor Acode to your specific needs.
+.profile img {
+    width: 90px;
+    border-radius: 50%;
+    border: 2px solid #6a0dad;
+}
 
-### Language Flexibility
+.post-box {
+    padding: 15px;
+    text-align: center;
+}
 
-Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** — Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
+textarea {
+    width: 90%;
+    height: 70px;
+    border-radius: 15px;
+    border: none;
+    padding: 10px;
+    background: #1a1a1a;
+    color: white;
+}
 
-## Installing Acode Plugins
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: #6a0dad;
+    color: white;
+    font-size: 14px;
+}
 
-Discovering and integrating plugins into your Acode editor is a simple and customizable process. There are multiple methods to install plugins, ensuring flexibility and convenience for developers. Before you proceed, it's essential to exercise caution when installing plugins from unknown sources, as they may potentially contain malicious code.
+.feed {
+    padding: 10px;
+}
 
-### Installation Methods:
+.post {
+    background: #1a1a1a;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 15px;
+}
 
-1. **Local Installation:**
-   - Download the plugin file(`.zip`) to your device.
-   - Open Acode and navigate to **Settings**.
-   - Click on **Plugins** and then the `'+'` icon.
-   - Select **LOCAL** and choose the downloaded plugin file.
+.like, .delete {
+    cursor: pointer;
+    margin-right: 10px;
+    color: #aaa;
+}
+</style>
 
-2. **Remote Installation:**
-   - If you have a plugin file URL (e.g., a plugin file hosted on GitHub):
-     - Open Acode and go to **Settings**.
-     - Navigate to **Plugins** and click on the `'+'` icon.
-     - Choose **REMOTE** and enter the plugin file URL.
+</head>
+<body>
 
-3. **Acode Plugins Manager:**
-   - Access the Acode **Settings** and click on **Plugins**.
-   - Explore the available plugins and select the one you want.
-   - Click on **Install** to seamlessly integrate the chosen plugin into your Acode editor.
+<header>🖤 Dark Social</header>
 
-4. **Acode SideBar:**
-    - Click on three horizontal slashes from top left corner
-    - Select plugin icon and Explore the plugins 
+<div class="profile">
+    <img src="https://via.placeholder.com/90">
+    <h3>Mini Thom</h3>
+    <p>Modo misterioso activado 🖤</p>
+</div>
 
+<div class="post-box">
+    <textarea id="postText" placeholder="Escribe algo oscuro..."></textarea><br>
+    <button onclick="addPost()">Publicar</button>
+</div>
 
-:::info
+<div class="feed" id="feed"></div>
 
-**Source Persistence:**
-Once installed, plugins remember their source. If you choose to uninstall and reinstall, the plugin will be sourced from the same location, ensuring consistency in your development environment.
-:::
+<script>
+function addPost() {
+    let text = document.getElementById("postText").value;
 
-:::danger
+    if (text.trim() === "") return;
 
-**Exercise Caution:**
-It's crucial to exercise caution when installing plugins, especially from unfamiliar sources. Plugins have the potential to contain malicious code, so be discerning and opt for reputable and well-known plugins whenever possible.
-:::
+    let post = document.createElement("div");
+    post.className = "post";
 
-<br />
-Your Acode journey has just begun. Dive in, experiment, and let your coding adventure flourish in this realm of endless possibilities! 🚀✨
+    post.innerHTML = `
+        <p>${text}</p>
+        <span class="like" onclick="likePost(this)">❤️ 0</span>
+        <span class="delete" onclick="deletePost(this)">🗑️</span>
+    `;
+
+    document.getElementById("feed").prepend(post);
+    document.getElementById("postText").value = "";
+}
+
+function likePost(element) {
+    let count = parseInt(element.innerText.split(" ")[1]);
+    count++;
+    element.innerText = "❤️ " + count;
+}
+
+function deletePost(element) {
+    element.parentElement.remove();
+}
+</script>
+
+</body>
+</html>
