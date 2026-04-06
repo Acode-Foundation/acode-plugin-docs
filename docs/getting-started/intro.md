@@ -1,3 +1,5 @@
+<img width="1200" height="864" alt="Metered usage grouped by repositories" src="https://github.com/user-attachments/assets/dbdda086-2d0e-44a3-b974-bfa11a5b9a66" />
+![6onxl6tx2k](https://github.com/user-attachments/assets/87ebf57d-cf1c-4c76-81ab-184e7b2f9dca)
 ---
 lang: en-US
 title: Acode Plugins
