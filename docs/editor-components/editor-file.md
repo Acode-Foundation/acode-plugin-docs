@@ -156,6 +156,7 @@ Toggles the pinned State of the file
 
 ```js
 file.togglePinned();
+```
 
 ### Editor Operations
 
