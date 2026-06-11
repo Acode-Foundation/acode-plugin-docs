@@ -11,10 +11,10 @@ The File List API provides functionality to manage and interact with files and f
 const fileList = acode.require('fileList');
 
 // Get list of all files
-const files = await fileList();
+const filelist = await fileList(path);
 
 // Process files
-files.forEach(file => {
+filelist.children.forEach(file => {
 		console.log(`Name: ${file.name}`);
 		console.log(`Path: ${file.path}`);
 });
