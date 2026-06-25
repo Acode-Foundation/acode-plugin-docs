@@ -356,13 +356,13 @@ Registers a Runtime Provider
 > Plugins that provide a runtime should usually also register their own server definitions (For Example, see [Register a Server For That Runtime](#register-a-server-for-that-runtime)) for that runtime. Do not rely on taking over Acode's built-in server definitions.
 
 Common Fields (`provider`):
-> This are the provider options.
+> These are the provider options.
 - `id`: required, normalized to lowercase by the registry
 - `label`: (optional) display label
 - `priority`: (optional) number, defaults to `0`. Higher numbers are preferred when multiple providers are available for the same runtime.
 - `canHandle(server, context)`: (optional) function that returns a boolean indicating whether this provider can handle the given server and context.
-- `checkInstallation(server, context)`: (optional) async function that returns an object with the following fields:
-  - `status`: one of `"present"`, `"missing"`, or `"unknown"`
+- `checkInstallation(server, context)`: (optional) async function that returns an object (or `null`/`undefined`) with the following fields:
+  - `status`: one of `"present"`, `"missing"`, `"failed"`, or `"unknown"`
   - `version`: (optional) string indicating the version of the runtime
   - `canInstall`: (optional) boolean indicating whether the runtime can be installed
   - `canUpdate`: (optional) boolean indicating whether the runtime can be updated
