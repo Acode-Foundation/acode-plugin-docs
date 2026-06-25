@@ -16,6 +16,7 @@ The public API is intentionally small:
 - `lsp.defineBundle(...)`
 - `lsp.register(entry, options?)`
 - `lsp.upsert(entry)`
+- `lsp.registerRuntimeProvider(...)`
 - `lsp.installers.*`
 - `lsp.servers.*`
 - `lsp.bundles.*`
@@ -304,6 +305,7 @@ Common fields:
 
 - `id`: required, normalized to lowercase by the registry
 - `label`: optional display label
+- `runtimes`: optional array of runtime provider ids that this server can run in. (See [Register a Server For That Runtime](#register-a-server-for-that-runtime) for an example)
 - `languages`: required non-empty array
 - `enabled`: defaults to `true`
 - `transport`
@@ -346,6 +348,81 @@ Registers either a server or bundle if the id is free.
 
 Registers or replaces either a server or bundle. This is the preferred method for plugin startup code.
 
+### `lsp.registerRuntimeProvider(provider, options={ replace?: false })`
+
+Registers a Runtime Provider
+
+> [!Note]
+> Plugins that provide a runtime should usually also register their own server definitions (For Example, see [Register a Server For That Runtime](#register-a-server-for-that-runtime)) for that runtime. Do not rely on taking over Acode's built-in server definitions.
+
+Common Fields (`provider`):
+> This are the provider options.
+- `id`: required, normalized to lowercase by the registry
+- `label`: (optional) display label
+- `priority`: (optional) number, defaults to `0`. Higher numbers are preferred when multiple providers are available for the same runtime.
+- `canHandle(server, context)`: (optional) function that returns a boolean indicating whether this provider can handle the given server and context.
+- `checkInstallation(server, context)`: (optional) async function that returns an object with the following fields:
+  - `status`: one of `"present"`, `"missing"`, or `"unknown"`
+  - `version`: (optional) string indicating the version of the runtime
+  - `canInstall`: (optional) boolean indicating whether the runtime can be installed
+  - `canUpdate`: (optional) boolean indicating whether the runtime can be updated
+- `install(server, context, mode)`: (optional) async function that installs the runtime. 
+  > The `mode` parameter is one of `"install"`, `"update"`, or `"reinstall"`.
+- `start(server, context)`: (optional) async function that starts the runtime. 
+   - Method is expected to return an object with the following fields:
+     - `kind`: one of `"websocket"`, `"transport"`
+     - `providerId`: string indicating the id of the provider that started the runtime. This is useful for tracking which provider is responsible for a given runtime (mostly the same `id` of current runtime provider).
+     - `url`: (optional) string indicating the URL of the runtime. This is only required if `kind` is `"websocket"`.
+     - `transport`: (optional) object indicating the transport handle. This is only required if `kind` is `"transport"`.
+     - `dispose`: async function that disposes the runtime. 
+
+::: details Example ⤵️
+```js
+const lsp = acode.require("lsp");
+
+lsp.registerRuntimeProvider({
+	id: "proot-distro:debian",
+	label: "Debian Distro",
+	priority: 10,
+
+	canHandle(server, context) {
+		return (
+			Array.isArray(server.runtimes) &&
+			server.runtimes.includes("proot-distro:debian")
+		);
+	},
+
+	async checkInstallation(server, context) {
+		// Run inside your runtime.
+		// Return: present, missing, failed, or unknown.
+		return {
+			status: "present",
+			version: null,
+			canInstall: true,
+			canUpdate: true,
+		};
+	},
+
+	async install(server, context, mode) {
+		// Install/update inside your runtime.
+		return true;
+	},
+
+	async start(server, context) {
+		// Start the server and return either a WebSocket URL or a TransportHandle.
+		return {
+			kind: "websocket",
+			providerId: "proot-distro:debian",
+			url: "ws://127.0.0.1:45130/",
+			dispose: async () => {
+				// Stop your process if you own it.
+			},
+		};
+	},
+});
+```
+:::
+
 ## Server Inspection API
 
 - `lsp.servers.get(id)`
@@ -376,6 +453,98 @@ lsp.servers.update("typescript-custom", (current) => ({
 - `lsp.bundles.getForServer(serverId)`
 - `lsp.bundles.unregister(id)`
 
+## LSP Runtime Provider Plugin API
+This API lets plugins run language servers outside Acode's built-in Alpine runtime.
+
+Normal users should not need to choose a runtime manually. Built-in Acode language servers continue to use the built-in Alpine runtime for terminal-accessible files. A plugin runtime is used only by language server definitions that explicitly opt into it.
+
+### Concepts
+  An LSP setup has two separate parts:
+
+- **Server definition**: which language server exists, which languages it supports, and how it is installed/launched.
+- **Runtime provider**: where that server runs, for example built-in Alpine, a plugin-managed distro, Termux, or an external WebSocket process.
+
+Plugins that provide a runtime should usually also register their own server definitions for that runtime. Do not rely on taking over Acode's built-in server definitions.
+
+### Register a Runtime Provider (Example)
+> Check the [lsp.registerRuntimeProvider()](#lsp-registerruntimeprovider-provider-options-replace-false) section for details on the available options.
+
+```js
+const lsp = acode.require("lsp");
+
+lsp.registerRuntimeProvider({
+	id: "proot-distro:debian",
+	label: "Debian Distro",
+	priority: 10,
+
+	canHandle(server, context) {
+		return (
+			Array.isArray(server.runtimes) &&
+			server.runtimes.includes("proot-distro:debian")
+		);
+	},
+
+	async checkInstallation(server, context) {
+		// Run inside your runtime.
+		// Return: present, missing, failed, or unknown.
+		return {
+			status: "present",
+			version: null,
+			canInstall: true,
+			canUpdate: true,
+		};
+	},
+
+	async install(server, context, mode) {
+		// Install/update inside your runtime.
+		return true;
+	},
+
+	async start(server, context) {
+		// Start the server and return either a WebSocket URL or a Transport Kind.
+		return {
+			kind: "websocket",
+			providerId: "proot-distro:debian",
+			url: "ws://127.0.0.1:45130/",
+			dispose: async () => {
+				// Stop your process if you own it.
+			},
+		};
+	},
+});
+```
+
+### Register a Server For That Runtime
+
+The important field is `runtimes`. Without it, a plugin runtime will not auto-claim the server.
+
+```js
+lsp.register({
+	id: "debian-typescript",
+	label: "TypeScript (Debian)",
+	languages: ["javascript", "typescript", "jsx", "tsx"],
+	runtimes: ["proot-distro:debian"],
+	transport: {
+		kind: "stdio",
+		command: "typescript-language-server",
+		args: ["--stdio"],
+	},
+	launcher: {
+		bridge: {
+			kind: "axs",
+			command: "typescript-language-server",
+			args: ["--stdio"],
+		},
+		checkCommand: "command -v typescript-language-server",
+		install: {
+			kind: "npm",
+			packages: ["typescript", "typescript-language-server"],
+			executable: "typescript-language-server",
+		},
+	},
+});
+```
+
 ## Client Manager
 
 - `lsp.clientManager.setOptions(options)`
@@ -399,3 +568,37 @@ console.log(activeClients);
 - Use `useWorkspaceFolders: true` for heavy workspace-aware servers like TypeScript or Rust.
 - If your server runs outside Acode's local filesystem view, define both `rootUri`
   and `documentUri` so the server receives paths it can resolve.
+
+## Definitions
+
+  ### `TransportHandle`
+  > An Object used by the LSP client to manage the transport connection to a language server.
+
+  Object Properties:
+  - transport: An Object representing [Codemirror 6's LSP Transport](https://codemirror.net/docs/ref/#lsp-client.Transport)
+  - dispose: An async function that cleans up the transport connection when the runtime is stopped or disposed.
+  - ready: `Promise<void>` that resolves when the transport is ready for use.
+  ---
+  ### `TransportContext`
+  > An Object that provides context information to the runtime provider when starting a language server.
+
+  Object Properties:
+  - uri: The URI of the file being edited in Acode.
+  - file: `EditorFile` object representing the file being edited.
+  - view: `EditorView` object representing the editor view.
+  - languageId: The language ID of the file being edited.
+  - rootUri?: `string | null` representing the workspace root URI, if available.
+  - originalRootUri?: `string | null` representing the original workspace root URI before any translation, if available.
+  - debugWebSocket?: `boolean` indicating whether the WebSocket connection should be in debug mode.
+  - dynamicPort?: `number` Dynamically discovered port number for the language server, if applicable.
+---
+
+  ### `LSPRuntimeContext`
+  > An Object that <u>extends</u> from `TransportContext` providing additional context information to the runtime provider when starting a language server.
+
+  Object Properties:
+  - All properties from `TransportContext`
+  - documentUri?: `string | null` representing the document URI after any translation, if available.
+  - originalDocumentUri?: `string` representing the original document URI before any translation, if available. 
+  - serverId?: The ID of the language server being started.
+  - workspaceKind?: `"app-private" | "builtin-alpine" | "termux-saf" | "saf" | "remote" | "proot-distro" | "virtual" | "unknown"` (**one** of the listed values) representing the kind of workspace the language server is running in.
