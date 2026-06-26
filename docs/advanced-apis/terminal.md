@@ -27,6 +27,10 @@ The module exposes these methods:
 - `themes.getNames()`: Returns an array of available theme names.
 - `themes.createVariant(baseName, overrides)`: Clones a theme with overrides.
 
+::: tip
+The native terminal environment is also exposed globally as `Terminal`. Methods such as `Terminal.isInstalled()` are available on that global object, not on `acode.require('terminal')`.
+:::
+
 ## Create
 
 ```js
@@ -128,6 +132,26 @@ terminal.themes.unregister('darkCustom', 'my-plugin-id');
 - Installation flow: When serverMode is true (default), terminal checks if the backend is installed and supported. If missing, an installation terminal opens and streams progress. Creation proceeds only if install succeeds.
 - IDs: If the backend provides a PID, it becomes the terminal id; otherwise a generated id like `terminal_1` is used.
 - Tab: Each terminal is an EditorFile tab with an icon and custom title (PID or generated id). On process exit, the tab closes and a toast shows the exit status.
+
+## Native Terminal Environment
+
+Use the global `Terminal` object when you need to inspect or manage the underlying terminal runtime directly.
+
+### `Terminal.isInstalled()`
+
+Returns a `Promise<boolean>` that resolves to `true` when the Alpine terminal environment has already been downloaded and extracted.
+
+```js
+if (globalThis.Terminal) {
+  const installed = await Terminal.isInstalled();
+
+  if (!installed) {
+    console.log('Terminal environment is not installed yet.');
+  }
+}
+```
+
+This is useful when a plugin needs to decide whether it can use terminal-backed features before opening a server terminal. For normal terminal creation, prefer `terminal.create()` or `terminal.createServer()`, because they already run the install flow when needed.
 
 ## Background Execution (No Terminal)
 

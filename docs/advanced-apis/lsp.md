@@ -1,57 +1,37 @@
 # LSP API
 
-Use this API to register and manage language servers for Acode's CodeMirror LSP integration.
-
-## Import
+Use the LSP API to register language servers for Acode's CodeMirror LSP integration.
 
 ```js
 const lsp = acode.require("lsp");
 ```
 
-## Current API Shape
+## API Overview
 
-The public API is intentionally small:
+The public module exposes:
 
-- `lsp.defineServer(...)`
-- `lsp.defineBundle(...)`
-- `lsp.register(entry, options?)`
-- `lsp.upsert(entry)`
-- `lsp.registerRuntimeProvider(...)`
-- `lsp.installers.*`
-- `lsp.servers.*`
-- `lsp.bundles.*`
+- `defineServer(options)`: Creates a normalized server manifest for common local servers.
+- `defineBundle(options)`: Groups multiple server manifests and optional install hooks.
+- `register(entry, options?)`: Registers a server or bundle.
+- `upsert(entry)`: Registers or replaces a server or bundle.
+- `installers.*`: Helpers for structured install metadata.
+- `servers.*`: Server registry inspection and updates.
+- `bundles.*`: Bundle registry inspection.
+- `runtimes.*`: Runtime provider registry helpers.
+- `registerRuntimeProvider(provider)`: Alias for `runtimes.register(provider)`.
+- `unregisterRuntimeProvider(id)`: Alias for `runtimes.unregister(id)`.
+- `clientManager.*`: Limited client-manager access for advanced plugins.
 
-`bundle` is the public name for what the internal runtime still calls a provider:
+Most plugins should use `defineServer()` plus `upsert()`. Use raw server manifests only when you need fields that the helper does not cover, such as `runtimes`.
 
-- a bundle can own one or more server definitions
-- a bundle can also provide install/check behavior hooks
-- most plugins only need a single server
-- use a bundle when you ship a family of related servers or custom install logic
+## Server Setup
 
-## Transport Reality
-
-Acode's LSP client still speaks WebSocket to the transport layer.
-
-- `transport.kind: "websocket"` is the normal and recommended setup
-- local stdio servers should usually be launched through `launcher.bridge`
-- `transport.kind: "stdio"` still expects a WebSocket bridge URL
-- `transport.kind: "external"` is available for custom transport factories
-
-For local servers, prefer `transport.kind: "websocket"` plus an AXS bridge.
-
-::: warning
-`transport.kind: "stdio"` is not a direct pipe from the editor to the server.
-It still resolves to the WebSocket transport layer and requires a bridge URL.
-:::
-
-## Recommended Single-Server Setup
-
-Use `defineServer()` and `upsert()` for idempotent registration.
+This is the recommended shape for a plugin that contributes one local language server. `defineServer()` turns `command`, `args`, and `installer` into the internal `launcher` configuration that Acode uses to start the server through its AXS WebSocket bridge.
 
 ```js
 const lsp = acode.require("lsp");
 
-const typescriptServer = lsp.defineServer({
+const server = lsp.defineServer({
   id: "typescript-custom",
   label: "TypeScript (Custom)",
   languages: [
@@ -59,42 +39,115 @@ const typescriptServer = lsp.defineServer({
     "javascriptreact",
     "typescript",
     "typescriptreact",
-    "tsx",
     "jsx",
+    "tsx",
   ],
   useWorkspaceFolders: true,
-  transport: {
-    kind: "websocket",
-  },
   command: "typescript-language-server",
   args: ["--stdio"],
-  checkCommand: "which typescript-language-server",
+  checkCommand: "command -v typescript-language-server",
   installer: lsp.installers.npm({
     executable: "typescript-language-server",
-    packages: ["typescript-language-server", "typescript"],
+    packages: ["typescript", "typescript-language-server"],
   }),
   initializationOptions: {
     provideFormatter: true,
   },
 });
 
-lsp.upsert(typescriptServer);
+lsp.upsert(server);
 ```
 
-## Bundle Setup
+`upsert()` is preferred during plugin startup because it replaces an existing definition with the same id instead of throwing.
 
-Use a bundle when one plugin contributes multiple servers or needs custom install behavior.
+## Transport Model
+
+Acode's CodeMirror LSP client talks to language servers through a transport object. In practice, local stdio servers are normally proxied through AXS and reached by WebSocket.
+
+- `transport.kind: "websocket"` connects to a WebSocket URL or to an auto-discovered AXS bridge port.
+- `transport.kind: "stdio"` is not a direct editor-to-process pipe. It still resolves through the WebSocket transport layer and needs a bridge URL or a runtime-provided dynamic port.
+- `transport.kind: "external"` is for custom transport factories.
+
+::: warning
+Do not register a plain stdio process and expect Acode to pipe directly to it from the editor. For local servers, use `defineServer()` with `command` and `args`, or provide a `launcher.bridge` manually.
+:::
+
+## Remote WebSocket Server
+
+Use a raw manifest when the language server is already running and exposes a WebSocket endpoint.
+
+```js
+const lsp = acode.require("lsp");
+
+lsp.upsert({
+  id: "remote-json",
+  label: "Remote JSON",
+  languages: ["json"],
+  enabled: true,
+  transport: {
+    kind: "websocket",
+    url: "ws://127.0.0.1:2087/",
+    options: {
+      timeout: 5000,
+      binary: true,
+    },
+  },
+});
+```
+
+This is managed by Acode's built-in external WebSocket runtime. Install and update actions are not available for this shape because the server is externally managed.
+
+## Structured Installers
+
+Structured installers describe how Acode can install or update the executable for a local server.
+
+Available helpers:
+
+- `lsp.installers.apk(options)`
+- `lsp.installers.npm(options)`
+- `lsp.installers.pip(options)`
+- `lsp.installers.cargo(options)`
+- `lsp.installers.githubRelease(options)`
+- `lsp.installers.manual(options)`
+- `lsp.installers.shell(options)`
+
+Example:
+
+```js
+const pythonServer = lsp.defineServer({
+  id: "python-pylsp",
+  label: "Python (pylsp)",
+  languages: ["python"],
+  command: "pylsp",
+  args: [],
+  checkCommand: "command -v pylsp",
+  installer: lsp.installers.pip({
+    executable: "pylsp",
+    packages: ["python-lsp-server[all]"],
+  }),
+});
+
+lsp.upsert(pythonServer);
+```
+
+Notes:
+
+- Managed installers should declare the executable they provide.
+- `githubRelease()` is intended for architecture-specific downloaded binaries.
+- `manual()` is useful when the binary already exists at a known path.
+- `shell()` is the advanced fallback when no structured installer fits.
+
+## Bundles
+
+Use a bundle when one plugin contributes multiple related servers or owns shared install logic.
 
 ```js
 const lsp = acode.require("lsp");
 
 const htmlServer = lsp.defineServer({
   id: "my-html",
-  label: "My HTML Server",
+  label: "HTML",
   languages: ["html"],
-  transport: {
-    kind: "websocket",
-  },
   command: "vscode-html-language-server",
   args: ["--stdio"],
   installer: lsp.installers.npm({
@@ -105,11 +158,8 @@ const htmlServer = lsp.defineServer({
 
 const cssServer = lsp.defineServer({
   id: "my-css",
-  label: "My CSS Server",
+  label: "CSS",
   languages: ["css", "scss", "less"],
-  transport: {
-    kind: "websocket",
-  },
   command: "vscode-css-language-server",
   args: ["--stdio"],
   installer: lsp.installers.npm({
@@ -118,35 +168,29 @@ const cssServer = lsp.defineServer({
   }),
 });
 
-const webBundle = lsp.defineBundle({
-  id: "my-web-bundle",
-  label: "My Web Bundle",
-  servers: [htmlServer, cssServer],
-});
-
-lsp.upsert(webBundle);
+lsp.upsert(
+  lsp.defineBundle({
+    id: "my-web-tools",
+    label: "Web Tools",
+    servers: [htmlServer, cssServer],
+  }),
+);
 ```
 
-## Bundle Hooks
+### Bundle Hooks
 
-Bundles can own behavior, not just server lists.
-
-Available hooks:
-
-- `getExecutable(serverId, manifest)`
-- `checkInstallation(serverId, manifest)`
-- `installServer(serverId, manifest, mode, options?)`
-
-Example:
+Bundles can also provide behavior for their servers.
 
 ```js
 const bundle = lsp.defineBundle({
-  id: "my-bundle",
-  label: "My Bundle",
-  servers: [myServer],
+  id: "my-toolchain",
+  label: "My Toolchain",
+  servers: [htmlServer, cssServer],
   hooks: {
     getExecutable(serverId, manifest) {
-      return manifest.launcher?.install?.binaryPath || null;
+      return manifest.launcher?.install?.binaryPath
+        || manifest.launcher?.install?.executable
+        || null;
     },
     async checkInstallation(serverId, manifest) {
       return {
@@ -162,100 +206,37 @@ const bundle = lsp.defineBundle({
     },
   },
 });
+
+lsp.upsert(bundle);
 ```
 
-## Structured Installers
+Supported hooks:
 
-Prefer structured installers over raw shell whenever possible.
+- `getExecutable(serverId, manifest)`
+- `checkInstallation(serverId, manifest)`
+- `installServer(serverId, manifest, mode, options?)`
 
-Available installer builders:
+## URI Translation
 
-- `lsp.installers.apk(...)`
-- `lsp.installers.npm(...)`
-- `lsp.installers.pip(...)`
-- `lsp.installers.cargo(...)`
-- `lsp.installers.githubRelease(...)`
-- `lsp.installers.manual(...)`
-- `lsp.installers.shell(...)`
+Use `rootUri` and `documentUri` when the language server sees a different filesystem layout than Acode.
 
-Example:
+Common cases:
 
-```js
-const server = lsp.defineServer({
-  id: "python-custom",
-  label: "Python (pylsp)",
-  languages: ["python"],
-  command: "pylsp",
-  installer: lsp.installers.pip({
-    executable: "pylsp",
-    packages: ["python-lsp-server[all]"],
-  }),
-});
-```
+- The server runs in Termux.
+- The server runs behind a remote bridge.
+- Acode opens a file as `content://...`, but the server expects `file://...`.
+- The default cache-file fallback is not the project path that the server should analyze.
 
-### Installer Notes
+`rootUri(uri, context)` controls the workspace root sent during initialization and workspace-folder handling.
 
-- managed installers should declare the executable they provide
-- `githubRelease()` is intended for arch-aware downloaded binaries
-- `manual()` is useful when the binary already exists at a known path
-- `shell()` should be treated as the advanced fallback, not the default path
+`documentUri(uri, context)` controls the URI used for opened documents, changes, formatting, and other file-scoped requests. Its context includes `normalizedUri`, which is Acode's default normalized URI.
 
-## Remote WebSocket Server
-
-```js
-lsp.upsert({
-  id: "remote-json-lsp",
-  label: "Remote JSON LSP",
-  languages: ["json"],
-  transport: {
-    kind: "websocket",
-    url: "ws://127.0.0.1:2087/",
-    options: {
-      binary: true,
-      timeout: 5000,
-    },
-  },
-  enabled: true,
-});
-```
-
-## Custom URI Translation
-
-Use `rootUri` and `documentUri` when the server does not see the same
-filesystem layout as Acode.
-
-Typical cases:
-
-- the server runs in Termux
-- the server runs behind a remote WebSocket bridge
-- the editor opens files as `content://...` but the server expects `file://...`
-- the default cache-file fallback does not point at the real project path
-
-`rootUri` controls the workspace root sent during initialize and workspace
-folder handling.
-
-`documentUri` controls the URI used for opened documents, changes, formatting,
-and similar file-scoped LSP requests.
-
-Both hooks may be synchronous or async.
-
-`documentUri(uri, context)` receives:
-
-- `uri`: the original file URI known to Acode
-- `context.normalizedUri`: Acode's default normalized URI, including
-  `content:// -> file://` conversion or cache fallback when available
-- the same context fields available to `rootUri`, such as `file`, `view`,
-  `languageId`, and `rootUri`
-
-Example:
+Both hooks may return a string, `null`, or a promise.
 
 ```js
 const lsp = acode.require("lsp");
 
-const termuxWorkspaceUri =
-  "file:///data/data/com.termux/files/home/projects/my-project";
-
-function toTermuxDocumentUri(uri, fallbackUri) {
+function toTermuxUri(uri, fallbackUri) {
   if (typeof uri !== "string") return fallbackUri || null;
 
   if (uri.startsWith("file:///storage/emulated/0/")) {
@@ -268,162 +249,313 @@ function toTermuxDocumentUri(uri, fallbackUri) {
   return fallbackUri || uri;
 }
 
-const termuxServer = lsp.defineServer({
+const server = lsp.defineServer({
   id: "termux-typescript",
-  label: "TypeScript (Termux)",
-  languages: [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "tsx",
-    "jsx",
-  ],
+  label: "TypeScript (Termux bridge)",
+  languages: ["javascript", "typescript", "jsx", "tsx"],
   useWorkspaceFolders: true,
   transport: {
     kind: "websocket",
     url: "ws://127.0.0.1:2087/",
   },
-  rootUri() {
-    return termuxWorkspaceUri;
+  rootUri(uri, context) {
+    return toTermuxUri(context.rootUri || uri, context.rootUri || null);
   },
   documentUri(uri, context) {
-    return toTermuxDocumentUri(uri, context.normalizedUri);
+    return toTermuxUri(uri, context.normalizedUri);
   },
 });
 
-lsp.upsert(termuxServer);
+lsp.upsert(server);
 ```
 
-## Definition API
+## Runtime Providers
 
-### `lsp.defineServer(options)`
+A runtime provider decides where and how a server runs. Built-in Acode servers normally use the built-in Alpine runtime for terminal-accessible files. A plugin can register its own runtime for cases such as a plugin-managed distro, Termux, or another external process manager.
 
-Builds a normalized server manifest for later registration.
+Runtime providers are advanced API. If your plugin only registers a normal local server, use `defineServer()`.
 
-Common fields:
+Runtime selection has two gates:
 
-- `id`: required, normalized to lowercase by the registry
-- `label`: optional display label
-- `runtimes`: optional array of runtime provider ids that this server can run in. (See [Register a Server For That Runtime](#register-a-server-for-that-runtime) for an example)
-- `languages`: required non-empty array
-- `enabled`: defaults to `true`
-- `transport`
-- `command` and `args`: used to create an AXS launcher bridge
-- `installer`: structured installer config
+- `server.runtimes`, when present, limits which provider ids are allowed for that server.
+- `provider.canHandle(server, context)` decides whether that provider can handle the current file, root, workspace kind, and server.
+
+Acode derives `context.workspaceKind` from the current URI/root. These values come from Acode's `WorkspaceKind` type: `"app-private"`, `"builtin-alpine"`, `"termux-saf"`, `"saf"`, `"remote"`, `"proot-distro"`, `"virtual"`, and `"unknown"`.
+
+### Register a Runtime Provider
+
+Runtime provider ids must be unique. If your plugin can be reloaded during development, unregister the old provider before registering it again.
+
+```js
+const lsp = acode.require("lsp");
+
+lsp.unregisterRuntimeProvider("termux");
+
+lsp.registerRuntimeProvider({
+  id: "termux",
+  label: "Termux",
+  priority: 10,
+
+  canHandle(server, context) {
+    const isTermuxServer = server.runtimes?.includes("termux");
+    const isTermuxWorkspace = context.workspaceKind === "termux-saf"
+      || /termux/i.test(context.rootUri || context.uri || "");
+
+    return isTermuxServer && isTermuxWorkspace;
+  },
+
+  async checkInstallation(server, context) {
+    // Check inside Termux whether the server executable exists.
+    return {
+      status: "present",
+      version: null,
+      canInstall: true,
+      canUpdate: true,
+    };
+  },
+
+  async install(server, context, mode) {
+    // Install or update inside Termux, for example with npm, pip, or pkg.
+    console.log("install in Termux", server.id, mode);
+    return true;
+  },
+
+  async start(server, context) {
+    const command = [
+      server.transport.command,
+      ...(server.transport.args || []),
+    ].filter(Boolean).join(" ");
+
+    // Start the command inside Termux and expose it through a WebSocket bridge.
+    console.log("start in Termux", command);
+
+    return {
+      kind: "websocket",
+      providerId: "termux",
+      url: "ws://127.0.0.1:45130/",
+      dispose: async () => {
+        // Stop the Termux process or bridge if this plugin owns it.
+      },
+    };
+  },
+});
+```
+
+Required provider fields:
+
+- `id`
+- `label`
+- `canHandle(server, context)`
+- `start(server, context)`
+
+Optional provider fields:
+
+- `priority`
+- `resolveUris(server, context)`
+- `checkInstallation(server, context)`
+- `install(server, context, mode, options?)`
+- `uninstall(server, context, options?)`
+- `getInstallCommand(server, context, mode?)`
+- `getUninstallCommand(server, context)`
+- `stop(connection)`
+
+Higher `priority` values are tried first. Provider ids are normalized to lowercase.
+
+### Register a Server for a Runtime
+
+The `runtimes` field restricts a server to specific runtime provider ids. `defineServer()` does not currently preserve `runtimes`, so use a raw server manifest for runtime-specific servers.
+
+```js
+const lsp = acode.require("lsp");
+
+lsp.upsert({
+  id: "termux-typescript",
+  label: "TypeScript (Termux)",
+  languages: ["javascript", "typescript", "jsx", "tsx"],
+  enabled: true,
+  runtimes: ["termux"],
+  useWorkspaceFolders: true,
+  transport: {
+    kind: "stdio",
+    command: "typescript-language-server",
+    args: ["--stdio"],
+  },
+});
+```
+
+If `runtimes` is omitted, any registered provider whose `canHandle()` returns `true` may be selected. Use `runtimes` when your plugin owns both the runtime and the server definition.
+
+### Runtime URI Resolution
+
+A runtime provider can translate both document and root URIs after it has been selected.
+
+```js
+lsp.unregisterRuntimeProvider("termux");
+
+lsp.registerRuntimeProvider({
+  id: "termux",
+  label: "Termux",
+  priority: 10,
+
+  canHandle(server, context) {
+    return server.runtimes?.includes("termux")
+      && context.workspaceKind === "termux-saf";
+  },
+
+  resolveUris(server, context) {
+    function toTermuxShared(uri) {
+      return uri?.replace(
+        "file:///storage/emulated/0/",
+        "file:///data/data/com.termux/files/home/storage/shared/",
+      ) || null;
+    }
+
+    return {
+      documentUri: toTermuxShared(context.normalizedDocumentUri),
+      rootUri: toTermuxShared(context.normalizedRootUri),
+      scope: "workspace",
+    };
+  },
+
+  async start(server, context) {
+    return {
+      kind: "websocket",
+      providerId: "termux",
+      url: "ws://127.0.0.1:45130/",
+    };
+  },
+});
+```
+
+`resolveUris()` receives:
+
+- `originalDocumentUri`
+- `originalRootUri`
+- `normalizedDocumentUri`
+- `normalizedRootUri`
+- all `LspRuntimeContext` fields, including `file`, `view`, `languageId`, `documentUri`, `rootUri`, `serverId`, and `workspaceKind`
+
+It may return `scope: "workspace"` or `scope: "document"`. Document scope starts a separate client for each document.
+
+## Definition Reference
+
+### `defineServer(options)`
+
+Convenience helper for local bridge-backed servers.
+
+Supported fields:
+
+- `id`: Required server id.
+- `label`: Required display label.
+- `languages`: Required non-empty language id array.
+- `enabled`: Defaults to `true`.
+- `useWorkspaceFolders`: Use one client per server and workspace folders. Useful for TypeScript and Rust.
+- `command`: Executable used for the AXS bridge.
+- `args`: Arguments passed to `command`.
+- `transport`: Optional partial transport descriptor. Defaults to `{ kind: "websocket" }`.
+- `bridge`: Optional AXS bridge details such as `port` or `session`.
+- `installer`: Structured installer config from `lsp.installers.*`.
 - `checkCommand`
 - `versionCommand`
 - `updateCommand`
+- `uninstallCommand`
+- `startupTimeout`
+- `initializationOptions`
+- `clientConfig`
+- `resolveLanguageId`
+- `rootUri`
+- `documentUri`
+- `capabilityOverrides`
+
+### Raw Server Manifest
+
+Use a raw manifest when you need fields outside `defineServer()`.
+
+Common fields:
+
+- `id`
+- `label`
+- `enabled`
+- `languages`
+- `transport`
+- `launcher`
+- `runtimes`
+- `useWorkspaceFolders`
 - `initializationOptions`
 - `clientConfig`
 - `startupTimeout`
 - `capabilityOverrides`
-- `rootUri`: optional workspace-root resolver; if provided it takes precedence
-  over Acode's default root detection
-- `documentUri`: optional document URI resolver for translating file paths before
-  they are sent to the server
+- `rootUri`
+- `documentUri`
 - `resolveLanguageId`
-- `useWorkspaceFolders`
 
-### `lsp.defineBundle(options)`
+For `transport.kind: "websocket"`, provide either `transport.url` or `launcher.bridge.command`. For `transport.kind: "stdio"`, provide `transport.command`.
 
-Creates a bundle record.
+Raw local bridge example:
 
-Fields:
+```js
+lsp.upsert({
+  id: "raw-typescript",
+  label: "TypeScript (Raw)",
+  languages: ["javascript", "typescript", "jsx", "tsx"],
+  enabled: true,
+  useWorkspaceFolders: true,
+  transport: {
+    kind: "websocket",
+  },
+  launcher: {
+    bridge: {
+      kind: "axs",
+      command: "typescript-language-server",
+      args: ["--stdio"],
+    },
+    checkCommand: "command -v typescript-language-server",
+    install: {
+      kind: "npm",
+      executable: "typescript-language-server",
+      packages: ["typescript", "typescript-language-server"],
+    },
+  },
+});
+```
 
-- `id`: required bundle id
-- `label`: optional
-- `servers`: array returned by `lsp.defineServer(...)`
-- `hooks?`: optional behavioral hooks
-
-## Registration API
+## Registration
 
 ### `lsp.register(entry, options?)`
 
-Registers either a server or bundle if the id is free.
+Registers a server or bundle. It throws if the id already exists unless `options.replace` is `true`.
 
-- `options.replace?: boolean` defaults to `false`
+```js
+lsp.register(server, { replace: true });
+```
 
 ### `lsp.upsert(entry)`
 
-Registers or replaces either a server or bundle. This is the preferred method for plugin startup code.
+Registers or replaces a server or bundle.
 
-### `lsp.registerRuntimeProvider(provider, options={ replace?: false })`
-
-Registers a Runtime Provider
-
-> [!Note]
-> Plugins that provide a runtime should usually also register their own server definitions (For Example, see [Register a Server For That Runtime](#register-a-server-for-that-runtime)) for that runtime. Do not rely on taking over Acode's built-in server definitions.
-
-Common Fields (`provider`):
-> These are the provider options.
-- `id`: required, normalized to lowercase by the registry
-- `label`: (optional) display label
-- `priority`: (optional) number, defaults to `0`. Higher numbers are preferred when multiple providers are available for the same runtime.
-- `canHandle(server, context)`: (optional) function that returns a boolean indicating whether this provider can handle the given server and context.
-- `checkInstallation(server, context)`: (optional) async function that returns an object (or `null`/`undefined`) with the following fields:
-  - `status`: one of `"present"`, `"missing"`, `"failed"`, or `"unknown"`
-  - `version`: (optional) string indicating the version of the runtime
-  - `canInstall`: (optional) boolean indicating whether the runtime can be installed
-  - `canUpdate`: (optional) boolean indicating whether the runtime can be updated
-- `install(server, context, mode)`: (optional) async function that installs the runtime. 
-  > The `mode` parameter is one of `"install"`, `"update"`, or `"reinstall"`.
-- `start(server, context)`: (optional) async function that starts the runtime. 
-   - Method is expected to return an object with the following fields:
-     - `kind`: one of `"websocket"`, `"transport"`
-     - `providerId`: string indicating the id of the provider that started the runtime. This is useful for tracking which provider is responsible for a given runtime (mostly the same `id` of current runtime provider).
-     - `url`: (optional) string indicating the URL of the runtime. This is only required if `kind` is `"websocket"`.
-     - `transport`: (optional) object indicating the transport handle. This is only required if `kind` is `"transport"`.
-     - `dispose`: async function that disposes the runtime. 
-
-::: details Example ⤵️
 ```js
-const lsp = acode.require("lsp");
+lsp.upsert(server);
+```
 
-lsp.registerRuntimeProvider({
-	id: "proot-distro:debian",
-	label: "Debian Distro",
-	priority: 10,
+## Inspection and Updates
 
-	canHandle(server, context) {
-		return (
-			Array.isArray(server.runtimes) &&
-			server.runtimes.includes("proot-distro:debian")
-		);
-	},
+### Servers
 
-	async checkInstallation(server, context) {
-		// Run inside your runtime.
-		// Return: present, missing, failed, or unknown.
-		return {
-			status: "present",
-			version: null,
-			canInstall: true,
-			canUpdate: true,
-		};
-	},
+```js
+const jsServers = lsp.servers.listForLanguage("javascript");
+const server = lsp.servers.get("typescript-custom");
 
-	async install(server, context, mode) {
-		// Install/update inside your runtime.
-		return true;
-	},
+lsp.servers.update("typescript-custom", (current) => ({
+  ...current,
+  enabled: false,
+}));
 
-	async start(server, context) {
-		// Start the server and return either a WebSocket URL or a TransportHandle.
-		return {
-			kind: "websocket",
-			providerId: "proot-distro:debian",
-			url: "ws://127.0.0.1:45130/",
-			dispose: async () => {
-				// Stop your process if you own it.
-			},
-		};
-	},
+const unsubscribe = lsp.servers.onChange((event, changedServer) => {
+  console.log(event, changedServer.id);
 });
 ```
-:::
 
-## Server Inspection API
+Available methods:
 
 - `lsp.servers.get(id)`
 - `lsp.servers.list()`
@@ -432,123 +564,41 @@ lsp.registerRuntimeProvider({
 - `lsp.servers.unregister(id)`
 - `lsp.servers.onChange(listener)`
 
-Example:
+`listForLanguage()` accepts `{ includeDisabled?: boolean }`.
+
+### Bundles
 
 ```js
-const jsServers = lsp.servers.listForLanguage("javascript");
-
-lsp.servers.update("typescript-custom", (current) => ({
-  ...current,
-  enabled: false,
-}));
+const bundles = lsp.bundles.list();
+const bundle = lsp.bundles.getForServer("my-html");
+lsp.bundles.unregister("my-web-tools");
 ```
 
-`listForLanguage()` options:
-
-- `includeDisabled?: boolean` default `false`
-
-## Bundle Inspection API
+Available methods:
 
 - `lsp.bundles.list()`
 - `lsp.bundles.getForServer(serverId)`
 - `lsp.bundles.unregister(id)`
 
-## LSP Runtime Provider Plugin API
-This API lets plugins run language servers outside Acode's built-in Alpine runtime.
-
-Normal users should not need to choose a runtime manually. Built-in Acode language servers continue to use the built-in Alpine runtime for terminal-accessible files. A plugin runtime is used only by language server definitions that explicitly opt into it.
-
-### Concepts
-  An LSP setup has two separate parts:
-
-- **Server definition**: which language server exists, which languages it supports, and how it is installed/launched.
-- **Runtime provider**: where that server runs, for example built-in Alpine, a plugin-managed distro, Termux, or an external WebSocket process.
-
-Plugins that provide a runtime should usually also register their own server definitions for that runtime. Do not rely on taking over Acode's built-in server definitions.
-
-### Register a Runtime Provider (Example)
-> Check the [lsp.registerRuntimeProvider()](#lsp-registerruntimeprovider-provider-options-replace-false) section for details on the available options.
+### Runtimes
 
 ```js
-const lsp = acode.require("lsp");
-
-lsp.registerRuntimeProvider({
-	id: "proot-distro:debian",
-	label: "Debian Distro",
-	priority: 10,
-
-	canHandle(server, context) {
-		return (
-			Array.isArray(server.runtimes) &&
-			server.runtimes.includes("proot-distro:debian")
-		);
-	},
-
-	async checkInstallation(server, context) {
-		// Run inside your runtime.
-		// Return: present, missing, failed, or unknown.
-		return {
-			status: "present",
-			version: null,
-			canInstall: true,
-			canUpdate: true,
-		};
-	},
-
-	async install(server, context, mode) {
-		// Install/update inside your runtime.
-		return true;
-	},
-
-	async start(server, context) {
-		// Start the server and return either a WebSocket URL or a Transport Kind.
-		return {
-			kind: "websocket",
-			providerId: "proot-distro:debian",
-			url: "ws://127.0.0.1:45130/",
-			dispose: async () => {
-				// Stop your process if you own it.
-			},
-		};
-	},
-});
+const runtimes = lsp.runtimes.list();
+const runtime = lsp.runtimes.get("builtin-alpine");
+lsp.runtimes.unregister("my-runtime");
 ```
 
-### Register a Server For That Runtime
+Available methods:
 
-The important field is `runtimes`. Without it, a plugin runtime will not auto-claim the server.
-
-```js
-lsp.register({
-	id: "debian-typescript",
-	label: "TypeScript (Debian)",
-	languages: ["javascript", "typescript", "jsx", "tsx"],
-	runtimes: ["proot-distro:debian"],
-	transport: {
-		kind: "stdio",
-		command: "typescript-language-server",
-		args: ["--stdio"],
-	},
-	launcher: {
-		bridge: {
-			kind: "axs",
-			command: "typescript-language-server",
-			args: ["--stdio"],
-		},
-		checkCommand: "command -v typescript-language-server",
-		install: {
-			kind: "npm",
-			packages: ["typescript", "typescript-language-server"],
-			executable: "typescript-language-server",
-		},
-	},
-});
-```
+- `lsp.runtimes.register(provider)`
+- `lsp.runtimes.unregister(id)`
+- `lsp.runtimes.get(id)`
+- `lsp.runtimes.list()`
+- `lsp.runtimes.select(server, context?)`
 
 ## Client Manager
 
-- `lsp.clientManager.setOptions(options)`
-- `lsp.clientManager.getActiveClients()`
+The public client manager API is intentionally small.
 
 ```js
 lsp.clientManager.setOptions({
@@ -559,46 +609,66 @@ const activeClients = lsp.clientManager.getActiveClients();
 console.log(activeClients);
 ```
 
+Available methods:
+
+- `lsp.clientManager.setOptions(options)`
+- `lsp.clientManager.getActiveClients()`
+
+## Important Types
+
+### `TransportHandle`
+
+Object returned by transport factories.
+
+- `transport`: CodeMirror LSP transport object.
+- `dispose`: Function that cleans up the transport.
+- `ready`: `Promise<void>` that resolves when the transport is ready.
+
+### `LspRuntimeConnection`
+
+Runtime providers return one of these shapes from `start()`.
+
+```js
+{
+  kind: "websocket",
+  providerId: "my-runtime",
+  url: "ws://127.0.0.1:45130/",
+  protocols: [],
+  dispose: async () => {},
+}
+```
+
+```js
+{
+  kind: "transport",
+  providerId: "my-runtime",
+  transport: transportHandle,
+  dispose: async () => {},
+}
+```
+
+### `LspRuntimeContext`
+
+Context passed to runtime providers.
+
+- `uri`
+- `file`
+- `view`
+- `languageId`
+- `rootUri`
+- `originalRootUri`
+- `documentUri`
+- `originalDocumentUri`
+- `serverId`
+- `workspaceKind`: One of `"app-private"`, `"builtin-alpine"`, `"termux-saf"`, `"saf"`, `"remote"`, `"proot-distro"`, `"virtual"`, or `"unknown"`.
+- `allowNonTerminalWorkspace`
+
 ## Best Practices
 
-- Prefer `lsp.upsert(...)` during plugin init.
-- Prefer `defineServer()` and `defineBundle()` instead of hand-assembling objects everywhere.
-- Prefer structured installers over raw shell commands.
-- Use a bundle when your plugin owns a family of related servers or custom install logic.
-- Use `useWorkspaceFolders: true` for heavy workspace-aware servers like TypeScript or Rust.
-- If your server runs outside Acode's local filesystem view, define both `rootUri`
-  and `documentUri` so the server receives paths it can resolve.
-
-## Definitions
-
-  ### `TransportHandle`
-  > An Object used by the LSP client to manage the transport connection to a language server.
-
-  Object Properties:
-  - transport: An Object representing [Codemirror 6's LSP Transport](https://codemirror.net/docs/ref/#lsp-client.Transport)
-  - dispose: An async function that cleans up the transport connection when the runtime is stopped or disposed.
-  - ready: `Promise<void>` that resolves when the transport is ready for use.
-  ---
-  ### `TransportContext`
-  > An Object that provides context information to the runtime provider when starting a language server.
-
-  Object Properties:
-  - uri: The URI of the file being edited in Acode.
-  - file: `EditorFile` object representing the file being edited.
-  - view: `EditorView` object representing the editor view.
-  - languageId: The language ID of the file being edited.
-  - rootUri?: `string | null` representing the workspace root URI, if available.
-  - originalRootUri?: `string | null` representing the original workspace root URI before any translation, if available.
-  - debugWebSocket?: `boolean` indicating whether the WebSocket connection should be in debug mode.
-  - dynamicPort?: `number` Dynamically discovered port number for the language server, if applicable.
----
-
-  ### `LSPRuntimeContext`
-  > An Object that <u>extends</u> from `TransportContext` providing additional context information to the runtime provider when starting a language server.
-
-  Object Properties:
-  - All properties from `TransportContext`
-  - documentUri?: `string | null` representing the document URI after any translation, if available.
-  - originalDocumentUri?: `string` representing the original document URI before any translation, if available. 
-  - serverId?: The ID of the language server being started.
-  - workspaceKind?: `"app-private" | "builtin-alpine" | "termux-saf" | "saf" | "remote" | "proot-distro" | "virtual" | "unknown"` (**one** of the listed values) representing the kind of workspace the language server is running in.
+- Use `lsp.upsert()` during plugin initialization.
+- Use `defineServer()` for ordinary local servers.
+- Use a raw manifest when you need `runtimes` or a custom `launcher`.
+- Prefer structured installers over shell installers.
+- Use `useWorkspaceFolders: true` for heavy workspace-aware servers.
+- If the server cannot see Acode's file paths, define `documentUri` and usually `rootUri`.
+- Runtime plugins should register their own server definitions instead of taking over built-in Acode server ids.
