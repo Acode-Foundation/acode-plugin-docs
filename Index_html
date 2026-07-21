@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✰║𝑺𝑨𝑻𝑶𝑹𝑼⏤͟͟͞͞ ❄️ 𝑺𝑻𝑰𝑪𝑲𝑬𝑹𝑺║✰</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#0b1020,#1b2d55,#090b15);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.card{
+    width:90%;
+    max-width:850px;
+    padding:40px;
+    border-radius:20px;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(10px);
+    text-align:center;
+    box-shadow:0 0 35px rgba(0,180,255,.35);
+}
+
+h1{
+    font-size:38px;
+    color:#8fdcff;
+    text-shadow:0 0 15px cyan;
+}
+
+h2{
+    color:#fff;
+    margin-top:25px;
+}
+
+p{
+    font-size:19px;
+    line-height:1.8;
+    color:#ddd;
+}
+
+.box{
+    margin:30px auto;
+    width:85%;
+    padding:20px;
+    border-radius:15px;
+    background:rgba(255,255,255,.06);
+}
+
+.button{
+    display:inline-block;
+    margin-top:30px;
+    padding:16px 40px;
+    text-decoration:none;
+    color:white;
+    background:#00aaff;
+    border-radius:40px;
+    transition:.3s;
+    font-size:20px;
+}
+
+.button:hover{
+    background:#0088dd;
+    transform:scale(1.05);
+}
+
+footer{
+    margin-top:35px;
+    color:#aaa;
+}
+</style>
+
+</head>
+<body>
+
+<div class="card">
+
+<h1>✰║𝑺𝑨𝑻𝑶𝑹𝑼⏤͟͟͞͞ ❄️ 𝑺𝑻𝑰𝑪𝑲𝑬𝑹𝑺║✰</h1>
+
+<h2>༺❄️ أهـلاً وسهـلاً بكم في عالم ساتورو ❄️༻</h2>
+
+<div class="box">
+
+<p>
+✦ مرحبًا بجميع عشاق الأنمي! ✦
+</p>
+
+<p>
+هذا القروب مخصص لكل محبي الأنمي، حيث ستجدون:
+</p>
+
+<p>
+🌸 استيكرات أنمي عالية الجودة<br>
+🖼️ خلفيات فخمة للهاتف والكمبيوتر<br>
+👤 افتارات احترافية ومميزة<br>
+🤝 تبادل الصور والاستيكرات بين الأعضاء<br>
+🎌 مجتمع ودّي يجمع عشاق الأنمي من كل مكان
+</p>
+
+<p>
+نتمنى لكم وقتًا ممتعًا، ونتطلع لرؤية مشاركاتكم وإبداعاتكم داخل القروب.
+</p>
+
+</div>
+
+<a class="button" href="https://chat.whatsapp.com/L6NZi84REOn3KWHfA1dGvh?s=cl&p=a&ilr=4--" target="_blank">
+📩 الانضمام إلى القروب
+</a>
+
+<footer>
+Made with ❤️ for Anime Fans
+</footer>
+
+</div>
+
+</body>
+</html>
