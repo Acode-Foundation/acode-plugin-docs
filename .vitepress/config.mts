@@ -328,6 +328,10 @@ export default defineConfig({
 									text: "Intent",
 									link: "/docs/advanced-apis/intent",
 								},
+								{
+									text: "WebView",
+									link: "/docs/advanced-apis/webview",
+								},
 							],
 						},
 					],
