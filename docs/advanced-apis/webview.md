@@ -29,6 +29,12 @@ Each instance exposes these methods:
 - `reload()`: Reloads the current page.
 - `destroy()`: Destroys the instance and releases its resources. **You must call this when the WebView is no longer needed.**
 
+> [!Warning]
+> Always call `destroy()` once the WebView is no longer required. Every instance holds a native WebView, so leaving instances alive leaks memory and keeps pages (and their scripts/timers/network activity) running in the background.
+
+> [!Note]
+> After an instance is destroyed (via `destroy()` or by the user closing a fullscreen WebView), calling any method on it throws `WebView has been destroyed`.
+
 ## Create
 
 ```js
@@ -81,12 +87,6 @@ const title = await view.evaluate('document.title');
 await view.reload();
 await view.destroy();
 ```
-
-> [!Warning]
-> Always call `destroy()` once the WebView is no longer required. Every instance holds a native WebView, so leaving instances alive leaks memory and keeps pages (and their scripts/timers/network activity) running in the background.
-
-> [!Note]
-> After an instance is destroyed (via `destroy()` or by the user closing a fullscreen WebView), calling any method on it throws `WebView has been destroyed`.
 
 ## Messaging
 
