@@ -126,7 +126,7 @@ For local development, start a dev server using `npm run dev`. In Acode, use the
 
 It's more convenient to manage this from the sidebar. When you install a local plugin(either using url or selecting the zip), Acode will add a **reload** icon in the **Extensions** tab of the sidebar. This is useful because the server automatically builds the plugin ZIP when changes are made. Simply press the reload button to apply the latest changes instantly.  
 
-This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
+This makes plugin development a much smoother experience - previously, it was quite frustrating, but this feature was recently added to improve the workflow.
 :::
 
 ## Creating Plugins with the CLI<Badge type="warning" text="community" />

@@ -13,7 +13,7 @@ title: Acode Plugins
 
 ### Language Flexibility
 
-Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** — Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
+Acode plugins are primarily written in JavaScript, offering a familiar and widely-used language for developers. Additionally, for those who prefer TypeScript, **good news 🥳** - Acode supports `TypeScript` for plugin development, providing the benefits of static typing and improved developer experience.
 
 ## Installing Acode Plugins
 

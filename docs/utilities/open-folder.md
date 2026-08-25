@@ -97,7 +97,6 @@ const folder = openFolder.find('/path/to/fileOrFolder');
 The `openFolder` utility emits various events to help manage folder operations:
 - `add-folder`
 - `remove-folder`
-- `update-folder`
 
 These events can be listened to for performing custom actions upon folder operations.
 

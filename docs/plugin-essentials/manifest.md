@@ -69,6 +69,11 @@ The `plugin.json` file is a crucial component of every Acode plugin, serving as 
 ## 15. **repository:** <Badge type="tip" text="new" />
   - Github/Gitlab url of your plugin source(only for free plugins)
 
+## 16. **permissions:** <Badge type="tip" text="new" />
+  - An array of permission strings granted to your plugin's context.
+  - Permissions are bound to your plugin's [context token](./plugin-context.md) when it loads and can be checked at runtime with `ctx.grantedPermission(permission)` or `ctx.listAllPermissions()`.
+  - Only the permissions listed here are granted; there is no runtime permission prompt.
+
 # Updating Plugins:
 
 If you wish to publish an update for your plugin, follow these guidelines:
@@ -98,6 +103,7 @@ If you wish to publish an update for your plugin, follow these guidelines:
   "price": 0,
   "license": "MIT",
   "keywords": ["foo","bar"],
+  "permissions": ["read", "write"],
   "changelogs": "changelogs.md",
   "author": {
     "name": "Example Author",

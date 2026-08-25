@@ -10,7 +10,7 @@ This page exists for plugin migration from Ace-era APIs.
 - Use `acode.require("commands")` for command registration/removal.
 - Use `acode.require("editorLanguages")` to register or remove language modes.
 - Use `acode.require("editorThemes")` to register or apply editor themes.
-- Use `acode.require("codemirror")` (or `@codemirror/*` / `@lezer/*`) for the same CodeMirror packages the app uses — see [CodeMirror packages](../utilities/codemirror.md).
+- Use `acode.require("codemirror")` (or `@codemirror/*` / `@lezer/*`) for the same CodeMirror packages the app uses - see [CodeMirror packages](../utilities/codemirror.md).
 - Use `editorManager.isCodeMirror` to check whether current acode uses codemirror or ace, if its true then its codemirror and if it is null or undefined then its ace.
 
 ## Legacy Compatibility

@@ -13,7 +13,7 @@ You can open the Command Palette using the standard shortcut:
 
 ### Mobile Devices (QuickTools)
 
-On mobile devices where a physical keyboard might not be present, Acode provides **QuickTools**—a toolbar above the keyboard that contains essential keys like `Ctrl`.
+On mobile devices where a physical keyboard might not be present, Acode provides **QuickTools** - a toolbar above the keyboard that contains essential keys like `Ctrl`.
 
 ![QuickTools](/quicktools.png)
 

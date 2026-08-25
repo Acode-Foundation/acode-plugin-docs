@@ -144,7 +144,7 @@ Use `off(event, callback)` to remove a listener.
 - Modes: `fullscreen` hosts the WebView in its own activity; `hidden` is headless and never displayed, useful for background automation or scraping.
 - Back button: In fullscreen mode it navigates back through page history first; when nothing is left, the WebView closes and the `closed` event fires.
 - Hide/Show: `hide()` backgrounds the fullscreen activity without destroying it, so `show()` restores it with the page state intact.
-- Cleanup: Instances are not tied to your plugin's lifecycle. Destroy every instance you create — ideally in your plugin's `destroy()` function — so hidden WebViews don't outlive the plugin.
+- Cleanup: Instances are not tied to your plugin's lifecycle. Destroy every instance you create - ideally in your plugin's `destroy()` function - so hidden WebViews don't outlive the plugin.
 - Security: Hosted content is isolated. File and content scheme access is disabled, only `http(s)` URLs can load, and non-http(s) navigation (`file:`, `intent:`, `javascript:`, `tel:`, ...) is always blocked. When `allowNavigation` is `false`, all navigation is blocked.
 
 ## Example: Headless Title Fetcher
