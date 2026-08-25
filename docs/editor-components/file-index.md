@@ -11,7 +11,7 @@ Available from **versionCode `1002`**. Set `"minVersionCode": 1002` in `plugin.j
 | | `fileList` (legacy) | `fileIndex` (new) |
 | --- | --- | --- |
 | SAF / `file://` | No longer fully listed | Native SQLite index |
-| FTP / SFTP / custom | Still works | Not supported - use `fileList` |
+| FTP / SFTP / custom | Still works | Not supported — use `fileList` |
 | API style | Sync tree objects | Async flat records |
 | Large workspaces | Heavy WebView tree | Paginated native queries |
 | Search | App-side workers | Optional native streaming search |
@@ -29,7 +29,7 @@ Feature detection:
 ```js
 const fileIndex = acode.require("fileIndex");
 if (!fileIndex?.query) {
-  // Running on an older Acode build - use fileList fallback
+  // Running on an older Acode build — use fileList fallback
 }
 ```
 
@@ -307,11 +307,11 @@ const { entries } = await fileIndex.query({
 
 Key differences:
 
-1. **`fileIndex` is asynchronous** - always `await` queries and scans.
-2. **Results are flat records** - no `children` / `parent` tree navigation.
-3. **Pagination** - use `cursor` / `hasMore` for large result sets.
-4. **SAF + `file://` only** - keep using `fileList` for FTP/SFTP if needed.
-5. **Search events may be batched** - handle `search-results` as well as `search-result`.
+1. **`fileIndex` is asynchronous** — always `await` queries and scans.
+2. **Results are flat records** — no `children` / `parent` tree navigation.
+3. **Pagination** — use `cursor` / `hasMore` for large result sets.
+4. **SAF + `file://` only** — keep using `fileList` for FTP/SFTP if needed.
+5. **Search events may be batched** — handle `search-results` as well as `search-result`.
 
 Hybrid pattern (native roots + remote fallback):
 
@@ -347,7 +347,7 @@ Scan and search jobs emit events with a shared shape. Common `type` values:
 | Type | When |
 | --- | --- |
 | `status` | Progress message during scan/search |
-| `progress` | Numeric progress (`data` is 0-100) |
+| `progress` | Numeric progress (`data` is 0–100) |
 | `batch` | Optional entry batches during scan |
 | `search-result` | One file's matches (`batchResults: false`) |
 | `search-results` | Array of file match payloads (`batchResults: true`) |

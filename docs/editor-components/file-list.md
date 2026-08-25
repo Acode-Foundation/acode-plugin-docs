@@ -1,10 +1,10 @@
 # File List API <Badge type="warning" text="Deprecated" />
 
-::: warning Deprecated - migrate to File Index
+::: warning Deprecated — migrate to File Index
 `acode.require("fileList")` is **deprecated** from **versionCode `1002`**.
 
 - SAF (`content:`) and `file://` workspaces are no longer fully listed here.
-- Those roots live in the native index - use [`fileIndex`](./file-index.md) <Badge type="tip" text="v1002+" />.
+- Those roots live in the native index — use [`fileIndex`](./file-index.md) <Badge type="tip" text="v1002+" />.
 - `fileList` still contains **non-native** providers only (FTP, SFTP, custom storage).
 
 ```js

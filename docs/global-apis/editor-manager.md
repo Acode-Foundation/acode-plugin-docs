@@ -69,43 +69,6 @@ Open-file tab list (pane-aware when multi-pane layout is active).
 
 Whether the active editor is currently scrolling.
 
-### `TIMEOUT_VALUE: number`
-
-Internal debounce/operation timeout used by the editor manager (default `500` ms). Used internally when waiting for editor operations; plugins generally only need it for tuning their own timeouts to match.
-
-### `readOnlyCompartment`
-
-The CodeMirror [`Compartment`](https://codemirror.net/docs/ref/#state.Compartment) used to toggle the read-only state of editor views. Useful for advanced plugins that build their own CodeMirror configuration.
-
-### `getLspMetadata(file): object | null`
-
-Builds the LSP metadata object for a file:
-
-- `uri` - file uri (or an `untitled://acode/<id>` uri for untitled files)
-- `languageId` - resolved language id
-- `languageName` - `file.currentMode` or the language id
-- `view` - the target editor view
-- `file` - the file
-- `rootUri` - the matching added-folder url, or the file uri
-
-Returns `null` for non-editor files.
-
-### `getEditorHeight(editor): number`
-
-Returns the scrollable height of an editor view (`max(scrollHeight - clientHeight, 0)`).
-
-### `getEditorWidth(editor): number`
-
-Returns the scrollable width of an editor view.
-
-### `reapplyActiveFile()`
-
-Force-recreates the active file's editor state in the current pane (used after configuration changes).
-
-### `syncOpenFileList()`
-
-Synchronizes the visible open-file tab list with the current pane layout and file order.
-
 ## Opening files
 
 There is no `editorManager.addNewFile` API. Create tabs with:
@@ -223,21 +186,6 @@ editorManager.openNextEditorFromHistory();
 editorManager.recordHistory(file); // usually automatic on switch
 ```
 
-History state is also exposed for inspection:
-
-- `editorManager.editorHistory` - array of `EditorFile` entries in the navigation history (max 100, oldest first).
-- `editorManager.editorHistoryIndex` - index of the current position within `editorHistory`.
-
-```javascript
-const backStack = editorManager.editorHistory.slice(
-  0,
-  editorManager.editorHistoryIndex + 1,
-);
-const forwardStack = editorManager.editorHistory.slice(
-  editorManager.editorHistoryIndex + 1,
-);
-```
-
 ## LSP / cache helpers
 
 ```javascript
@@ -258,14 +206,13 @@ await editorManager.flushCacheWrites();
 | `rename-file` | File renamed |
 | `save-file` | File saved |
 | `file-loaded` | File finished loading |
-| `file-loading-preview` | Remote-file preview text became available (payload: file, text) |
 | `file-content-changed` | File content changed |
 | `add-folder` | Workspace folder added |
 | `remove-folder` | Workspace folder removed |
+| `update-folder` | Workspace folder updated |
 | `new-file` | New file created |
-| `int-open-file-list` | Open file list initialized |
+| `init-open-file-list` | Open file list initialized |
 | `remove-file` | File removed |
-| `editor-state-changed` | The active editor's document changed (payload: the CodeMirror view) |
 | `update` | Generic update (often with a sub-action) |
 
 `update` listeners may receive a sub-action as the first argument, for example:
@@ -273,9 +220,6 @@ await editorManager.flushCacheWrites();
 - `"pin-tab"`
 - `"switch-file"`
 - `"read-only"`
-- `"file-changed"`
-
-For each `update` emission, a detailed `update:<sub>` event is also emitted (e.g. `update:pin-tab`) whose payload is everything after the sub-action.
 
 ```javascript
 editorManager.on("switch-file", () => {

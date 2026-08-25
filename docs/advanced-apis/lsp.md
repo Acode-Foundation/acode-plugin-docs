@@ -449,7 +449,7 @@ Returns a `TransportHandle`:
 { kind: "ready" }
 ```
 
-**Error** (worker → main) if initialization fails - rejects `ready` immediately and tears down the worker:
+**Error** (worker → main) if initialization fails — rejects `ready` immediately and tears down the worker:
 
 ```js
 { kind: "error", message: "Failed to initialize worker" }
@@ -586,7 +586,7 @@ lsp.servers.unregister(SERVER_ID);
 lsp.runtimes.unregister(RUNTIME_ID);
 ```
 
-Use `transport: { kind: "external" }` for worker servers - the runtime returns the real transport handle. Register your own server id; do not replace built-in ids like `html`, `css`, `json`, or `typescript`.
+Use `transport: { kind: "external" }` for worker servers — the runtime returns the real transport handle. Register your own server id; do not replace built-in ids like `html`, `css`, `json`, or `typescript`.
 
 ### Runtime URI Resolution
 

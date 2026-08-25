@@ -13,7 +13,7 @@ This method is used to register the plugin. This method takes two parameters, `p
 **Example:**
 
 ```js
-acode.setPluginInit(plugin.id, (baseUrl, $page, { cacheFileUrl, cacheFile, firstInit, ctx }) => { // [!code focus]
+acode.setPluginInit('com.example.plugin', (baseUrl, $page, cache) => { // [!code focus]
   const commands = acode.require("commands");
   commands.addCommand({
     name: 'example-plugin',
@@ -29,10 +29,6 @@ acode.setPluginInit(plugin.id, (baseUrl, $page, { cacheFileUrl, cacheFile, first
 });
 ```
 
-::: tip
-The official templates wrap this in an `AcodePlugin` class with `init()` and `destroy()` methods. See [Understanding How Plugins Work](../getting-started/understanding-plugin.md) for the recommended `main.js` shape.
-:::
-
 ### `init(baseUrl: string, $page: WCPage, options: object)`
 
 When the init function is called, it will receive 3 parameters:
@@ -47,7 +43,6 @@ When the init function is called, it will receive 3 parameters:
 
    * `cacheFile File: object` File object of the cached file. Using this object, you can write/read the file.
    * `firstInit: boolean` If this is the first time the plugin is loaded, this value will be true. Otherwise, it will be `false`.
-   * `ctx: PluginContext` Your plugin's native context: encrypted secret storage and permission checks. See [Plugin Context (`ctx`)](../plugin-essentials/plugin-context.md).
 
 ### `Settings Object`
 
@@ -311,50 +306,11 @@ Clears a plugin's broken mark so it can be retried on next load.
 acode.clearBrokenPluginMark("com.example.plugin");
 ```
 
-### `joinUrl(...parts: string[]): string`
-
-Joins URL parts into a single url (delegates to the [`Url`](../utilities/url.md) module's `join`).
-
-```js
-const url = acode.joinUrl("file:///sdcard", "Acode", "file.txt");
-```
-
-### `setLoadingMessage(message: string): void`
-
-Sets a small loading message on the app body (`data-small-msg` attribute). Pass an empty string to clear it.
-
-```js
-acode.setLoadingMessage("Loading plugins...");
-```
-
-### `exitAppMessage: string | null`
-
-Read-only. Returns a localized warning string when there are unsaved files (used by Acode when the user tries to exit), otherwise `null`.
-
-```js
-const msg = acode.exitAppMessage; // "You have unsaved files..." or null
-```
-
-### `unmountPlugin(pluginId: string): void`
-
-Runs the unmount callback registered via [`setPluginUnmount`](#setpluginunmountpluginid-string-unmount-function), deletes the plugin's cache file, and removes the plugin's settings page. Called by Acode on disable/reload/uninstall - plugins normally do not need to call it.
-
-### `fsOperation(file: string): FsOperation`
-
-Returns a file-system operation object for the given path/uri (see [File System](../utilities/fs.md)).
-
-```js
-const fs = acode.fsOperation("file:///sdcard/Acode/plugin.json");
-const exists = await fs.exists();
-```
-
 ## Related APIs
 
 - Commands API (preferred for adding/removing commands): [Commands](../utilities/commands.md)
 - CodeMirror editor theme API: [Editor Themes](../utilities/editor-themes.md)
-- Static code highlighting status: [Code Highlight](../utilities/code-highlight.md)
+- Static CodeMirror highlighter (versionCode `1008+`): [Code Highlight](../utilities/code-highlight.md)
 - Language server API: [LSP](../advanced-apis/lsp.md)
 - File handler API: [File Handlers](../advanced-apis/file-handlers.md)
 - Terminal API: [Terminal](../advanced-apis/terminal.md)
-- Background process API: [Executor](../advanced-apis/executor.md)
-- Native Android bridge: [System](../advanced-apis/system.md)
