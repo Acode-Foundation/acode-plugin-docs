@@ -103,7 +103,6 @@ If you wish to publish an update for your plugin, follow these guidelines:
   "price": 0,
   "license": "MIT",
   "keywords": ["foo","bar"],
-  "permissions": ["read", "write"],
   "changelogs": "changelogs.md",
   "author": {
     "name": "Example Author",
