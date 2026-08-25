@@ -197,10 +197,6 @@ export default defineConfig({
 									link: "/docs/utilities/fs",
 								},
 								{
-									text: "Helpers",
-									link: "/docs/utilities/helpers",
-								},
-								{
 									text: "URL",
 									link: "/docs/utilities/url",
 								},
