@@ -235,18 +235,3 @@ Changes the soft-keyboard input type.
 ### `setNativeContextMenuDisabled(disabled, success, error)`
 
 Enables or disables the native context menu on the WebView.
-
-## Rewards
-
-### `getRewardStatus(success, error)`
-
-Resolves the current reward status (used by the ad-reward system).
-
-### `redeemReward(offerId, success, error)`
-
-Redeems a reward offer.
-
-## Related APIs
-
-- Install source & other globals: [Other Global Utilities](../global-apis/global-utilities.md)
-- `helpers.promisify` for callback-style methods: [Helpers](../utilities/helpers.md)
