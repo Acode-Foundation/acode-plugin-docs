@@ -155,27 +155,9 @@ This is useful when a plugin needs to decide whether it can use terminal-backed 
 
 ## Background Execution (No Terminal)
 
-Use the globally available `Executor` when you need to run a one‑off shell command without opening a visual terminal session.
+Use the globally available `Executor` to run shell commands without opening a visual terminal session - one-off commands, long-running processes with streaming output, and background-mode execution.
 
-> [!Warning]
-> Prefer visible terminals for transparency. Avoid hiding work in the background and do not start long‑running processes via `Executor.execute`. For interactive or long‑lived tasks, use a terminal session instead.
-
-### `Executor.execute(command, alpine?)`
-
-- Purpose: Runs a single shell command and waits for it to finish. Output is returned after the process exits (no live streaming of output).
-- Parameters:
-  - `command` (string): The command to run.
-  - `alpine` (boolean, optional): Run inside the Alpine sandbox when `true`; run in the Android environment when `false`.
-- Returns: `Promise<string>` that resolves with stdout on success, or rejects with an error/stderr on failure.
-
-#### Example
-
-```js
-// Quick directory listing without opening a terminal UI
-Executor.execute('ls -l')
-  .then(console.log)
-  .catch(console.error);
-```
+See [Executor](./executor.md).
 
 ## Example: Themed Output Terminal
 

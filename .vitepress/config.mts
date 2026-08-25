@@ -96,6 +96,10 @@ export default defineConfig({
 									text: "Core File",
 									link: "/docs/plugin-essentials/core-file",
 								},
+								{
+									text: "Plugin Context (ctx)",
+									link: "/docs/plugin-essentials/plugin-context",
+								},
 							],
 						},
 						{
@@ -117,6 +121,10 @@ export default defineConfig({
 								{
 									text: "EditorManager",
 									link: "/docs/global-apis/editor-manager",
+								},
+								{
+									text: "Config",
+									link: "/docs/global-apis/config",
 								},
 								{
 									text: "Other Global Utilities",
@@ -323,6 +331,14 @@ export default defineConfig({
 								{
 									text: "Terminal",
 									link: "/docs/advanced-apis/terminal",
+								},
+								{
+									text: "Executor",
+									link: "/docs/advanced-apis/executor",
+								},
+								{
+									text: "System",
+									link: "/docs/advanced-apis/system",
 								},
 								{
 									text: "LSP",
