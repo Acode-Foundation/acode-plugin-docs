@@ -8,4 +8,4 @@ This documentation assumes you have a basic understanding of **JavaScript**. Add
 :::
 
 
-Wish you a happy learning!
+Wish you a happy learning!https://github.com/deadlyjack/Acode/blob/HEAD/CHANGELOG.md
