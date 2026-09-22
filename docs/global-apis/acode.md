@@ -43,6 +43,7 @@ When the init function is called, it will receive 3 parameters:
 
    * `cacheFile File: object` File object of the cached file. Using this object, you can write/read the file.
    * `firstInit: boolean` If this is the first time the plugin is loaded, this value will be true. Otherwise, it will be `false`.
+   * `ctx: PluginContext` Your plugin's native context: encrypted secret storage and permission checks. See [Plugin Context (`ctx`)](../plugin-essentials/plugin-context.md).
    * `fileIcons` Plugin-bound [File Icons](../utilities/file-icons.md) API. Same instance as `acode.require("fileIcons")` captured in the main script. Available from **versionCode `1012`**.
 
 ### `Settings Object`
