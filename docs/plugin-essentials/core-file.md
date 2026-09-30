@@ -39,7 +39,7 @@ acode.setPluginInit(pluginId, init, settings?)
 | Argument | Type | Description |
 | --- | --- | --- |
 | `baseUrl` | `string` | URL of your plugin folder, for loading bundled files. |
-| `$page` | [`Page`](../editor-components/page.md) | A blank page for your UI. Call `$page.show()` to open it. |
+| `$page` | `WcPage` | A page object that facilitates the display of content within Acode. |
 | `options` | `object` | Extra information, described below. |
 
 `options` contains:
