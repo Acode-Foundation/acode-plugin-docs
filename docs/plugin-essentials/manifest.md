@@ -1,103 +1,48 @@
-# Manifesto - `plugin.json`
+---
+title: Manifest (plugin.json)
+description: Every field of plugin.json, which are required, and how Acode reads them.
+---
 
-The `plugin.json` file is a crucial component of every Acode plugin, serving as a manifest file that provides essential information about the plugin. This file is required for the proper functioning and identification of your plugin within the Acode ecosystem. Let's delve into the details of the `plugin.json` structure and its key attributes.
+# Manifest: `plugin.json`
 
-# Attributes in plugin.json:
+Every plugin has a `plugin.json` file at the root of its zip. It tells Acode and the plugin store who your plugin is, which file to run, and which files to ship.
 
-## 1. **id:**
-   - Unique identifier for the plugin, following the reverse domain name format or what ever you want *(e.g., "com.example.plugin")*.
+## Quick reference
 
-## 2. **name:**
-   - Descriptive name of the plugin.
+| Field | Type | Required | Summary |
+| --- | --- | --- | --- |
+| [`id`](#id) | `string` | Yes | Unique plugin identifier. |
+| [`name`](#name) | `string` | Yes | Display name. |
+| [`version`](#version) | `string` | Yes | Version of this release. |
+| [`main`](#main) | `string` | Yes | Path of the script Acode runs. |
+| [`minVersionCode`](#minversioncode) | `number` | Recommended | Oldest Acode build that can run it. |
+| [`author`](#author) | `object` | Recommended | Who made the plugin. |
+| [`readme`](#readme) | `string` | Recommended | Path of the store description. |
+| [`icon`](#icon) | `string` | Recommended | Path of the store icon. |
+| [`files`](#files) | `string[]` | No | Extra files to include. |
+| [`dependencies`](#dependencies) | `string[]` | No | Plugins to install first. |
+| [`price`](#price) | `number` | No | Price in INR. `0` is free. |
+| [`license`](#license) | `string` | No | License name. |
+| [`keywords`](#keywords) | `string[]` | No | Search terms. |
+| [`changelogs`](#changelogs) | `string` | No | Path of the changelog. |
+| [`contributors`](#contributors) | `object[]` | No | People who contributed. |
+| [`repository`](#repository) | `string` | No | Source code URL (free plugins only). |
 
-## 3. **main:**
-   - Path to the bundled `main.js` file or your plugin's main javascript file, which contains the actual code for the plugin.
+## Example
 
-## 4. **version:**
-   - Version number of the plugin. Must be incremented for updates.
-
-## 5. **readme:**
-   - Path to the `readme.md` file, providing documentation and information about the plugin.
-
-## 6. **icon:**
-   - Path to the `icon.png` file, serving as the visual representation of the plugin.
-
-   :::info
-   Icon file size must less than or equal to **50Kb**
-   :::
-
-## 7. **files:**
-   - An array listing the files to be included in the plugin zip file.
-
-## 8. **minVersionCode:**
-   - Minimum Acode version code required to run the plugin. The plugin will be available only for Acode versions greater than or equal to the specified code.
-   :::info
-   You can simply use `290`, as this option became available in that version. If you are using the latest Acode plugin API, specify the corresponding version.
-   :::
-
-
-## 9. **price:**
-   - Price of the plugin in INR (Indian Rupees). If set to 0 or omitted, the plugin is free. This attribute allows for monetization of plugins with a defined price range.
-
-   :::info
-   Price should be between INR 0 to 10,000
-   :::
-
-## 10. **author:**
-   - Details about the plugin author, including name, email, URL, and GitHub username.
-
-## 11. **license:** <Badge type="tip" text="new" />
-   - Name of the license under which the plugin is released.
-
-## 12. **keywords:** <Badge type="tip" text="new" />
-  - An array of strings providing searchable terms related to the plugin.
-
-## 13. **changelogs:** <Badge type="tip" text="new" />
-  - Path to the changelog file documenting version updates and modifications.
-
-   ::: warning
-   Make sure to include `changelogs.md` or whatever you named it, in the plugin zip.
-   :::
-
-## 14. **contributors:** <Badge type="tip" text="new" />
-  - An array of objects containing details about project contributors.
-  - Each object requires:
-    - `name`: Contributor's name
-    - `role`: Their role in the project
-    - `github`: Their GitHub username
-
-## 15. **repository:** <Badge type="tip" text="new" />
-  - Github/Gitlab url of your plugin source(only for free plugins)
-
-# Updating Plugins:
-
-If you wish to publish an update for your plugin, follow these guidelines:
-
-- **Version Increment:**
-  - Increase the version number in the `plugin.json` file.
-
-- **Update Information:**
-  - For changes in name, description, icon, etc., upload a new zip file containing the updated `plugin.json`.
-
-- **Price Modification:**
-  - If altering the plugin's price, update the `price` attribute in the `plugin.json` file and upload the new zip file.
-
-## Example plugin.json:
-
-::: code-group
 ```json [plugin.json]
 {
   "id": "com.example.plugin",
   "name": "Example Plugin",
-  "main": "dist/main.js",
   "version": "1.0.0",
+  "main": "dist/main.js",
   "readme": "readme.md",
   "icon": "icon.png",
   "files": ["worker.js"],
   "minVersionCode": 292,
   "price": 0,
   "license": "MIT",
-  "keywords": ["foo","bar"],
+  "keywords": ["example", "starter"],
   "changelogs": "changelogs.md",
   "author": {
     "name": "Example Author",
@@ -107,6 +52,137 @@ If you wish to publish an update for your plugin, follow these guidelines:
   }
 }
 ```
+
+## Required fields
+
+### `id`
+
+Unique identifier of the plugin. The reverse-domain style (`com.example.plugin`) is recommended because it avoids clashes, but any unique string works.
+
+This is the same id you pass to [`acode.setPluginInit`](../global-apis/acode.md#setplugininit-pluginid-init-settings) and [`acode.setPluginUnmount`](../global-apis/acode.md#setpluginunmount-pluginid-unmount).
+
+::: warning
+Changing the `id` creates a **different plugin**. Users of the old one will not receive it as an update.
 :::
 
-This example illustrates a basic `plugin.json` file.
+### `name`
+
+Display name shown in the plugin list and store.
+
+### `version`
+
+Version of this release, for example `1.2.0`. Acode compares this with the store's version to decide whether an update is available, so **increase it for every release**.
+
+### `main`
+
+Path, inside the zip, of the script Acode loads when the plugin starts. This is usually your bundled output (for example `dist/main.js`). See [Core File](./core-file.md) for what it must contain.
+
+## Recommended fields
+
+### `author`
+
+An object describing the author.
+
+| Key | Description |
+| --- | --- |
+| `name` | Author name. |
+| `email` | Contact email. |
+| `url` | Website. |
+| `github` | GitHub username. |
+
+### `minVersionCode`
+
+The oldest Acode **version code** that can run the plugin. Older builds do not offer it.
+
+Use the version code of the newest API your plugin needs. If it uses nothing recent, `290` is a safe floor because the field itself was introduced then. Pages in these docs mark newer APIs with badges such as `v954+`; use that number.
+
+### `readme`
+
+Path of a Markdown file shown as the plugin's description in the store.
+
+### `icon`
+
+Path of a PNG shown as the plugin's icon.
+
+::: info
+The icon must be **50 KB or smaller**.
+:::
+
+## Optional fields
+
+### `files`
+
+Extra files your plugin needs at runtime besides `main`, `readme` and `icon`: for example a web worker, fonts or images. List every one so it ends up in the zip, then load it through `baseUrl`.
+
+```json
+"files": ["worker.js", "fonts/Mono.woff2", "images/logo.png"]
+```
+
+### `dependencies`
+
+Ids of other plugins that must be installed first.
+
+```json
+"dependencies": ["com.example.core", "com.example.themes"]
+```
+
+When a user installs your plugin, Acode looks each id up in the store, lists the ones that are missing or outdated, and asks for confirmation. If the user agrees, they are installed before your plugin. Dependencies of dependencies are resolved too.
+
+::: warning
+Installation fails if an id does not exist in the store. Use exact ids of published plugins.
+:::
+
+### `price`
+
+Price in Indian Rupees (INR). `0` or omitted means free. The allowed range is **0 to 10,000**.
+
+### `license`
+
+Name of the license, for example `MIT` or `GPL-3.0`.
+
+### `keywords`
+
+Search terms that help people find the plugin.
+
+### `changelogs`
+
+Path of a Markdown changelog.
+
+::: warning
+The file must be listed in [`files`](#files), or it will not be in the zip.
+:::
+
+### `contributors`
+
+People who helped build the plugin. Each entry needs:
+
+| Key | Description |
+| --- | --- |
+| `name` | Contributor's name. |
+| `role` | What they did. |
+| `github` | GitHub username. |
+
+### `repository`
+
+URL of the source code on GitHub or GitLab. Only available for **free** plugins.
+
+## How Acode reads the file
+
+When installing, Acode checks the manifest against the zip:
+
+- `plugin.json` must exist at the **root** of the zip, or the plugin is rejected as invalid.
+- If `main` is missing or points to a file that is not in the zip, Acode falls back to `main.js`. If that is missing too, installation fails.
+- If `icon` or `readme` is missing or does not exist in the zip, Acode falls back to `icon.png` and `readme.md`.
+
+So a typo in `main` does not always fail loudly. Check that the path matches a real file.
+
+## Publishing updates
+
+1. Increase `version`.
+2. Make your changes, including any to `name`, `icon`, `readme` or `price`.
+3. Build a new zip that contains the updated `plugin.json`, and upload it.
+
+## Related
+
+- [Core File](./core-file.md)
+- [Create a plugin](../getting-started/create-plugin.md)
