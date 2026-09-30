@@ -35,7 +35,7 @@ Every plugin has a `plugin.json` file at the root of its zip. It tells Acode and
   "id": "com.example.plugin",
   "name": "Example Plugin",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "main.js",
   "readme": "readme.md",
   "icon": "icon.png",
   "files": ["worker.js"],
