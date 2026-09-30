@@ -244,6 +244,10 @@ export default defineConfig({
 									text: "Window Resize",
 									link: "/docs/utilities/window-resize",
 								},
+								{
+									text: "Fullscreen and Orientation",
+									link: "/docs/utilities/fullscreen-orientation",
+								},
 							],
 						},
 						{
