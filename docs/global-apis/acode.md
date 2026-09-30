@@ -137,7 +137,7 @@ acode.require("say-hello").hello(); // Hello World!
 
 ### `require(moduleName)`
 
-Returns a built-in or plugin-defined module, or `undefined` if the name is unknown. Module names are case-insensitive. See [Available Modules](./modules.md) for the list of built-in names.
+This method is used to require a module. This method takes one parameter, `moduleName`. The `moduleName` is the name of the module. Module name is case insensitive.
 
 **Example:**
 
