@@ -1,6 +1,6 @@
 ---
 title: Acode
-description: The global acode object: register plugins, load modules, and more.
+description: "The global acode object: register plugins, load modules, and more."
 ---
 
 # Acode

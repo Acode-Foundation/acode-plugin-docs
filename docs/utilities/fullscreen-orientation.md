@@ -7,7 +7,7 @@ description: Handle the Android Back button and lock screen orientation while an
 
 <Badge type="tip" text="Requires versionCode 1012+" />
 
-These modules were added in Acode versionCode `1012` (PR #2919, 2026-09-22) and are currently available in nightly builds. Set `minVersionCode` to at least `1012` if your plugin requires them.
+These modules were added in Acode versionCode `1012`. Set `minVersionCode` to at least `1012` if your plugin requires them.
 
 Two small modules help plugins that show content in the browser's **fullscreen mode** (for example a video, canvas or game):
 
