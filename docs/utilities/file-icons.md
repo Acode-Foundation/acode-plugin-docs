@@ -1,9 +1,9 @@
-# File Icons API <Badge type="tip" text="v1012+" />
+# File Icons API
 
-Use `acode.require("fileIcons")` to register an icon pack. Acode owns matching and rendering; a pack supplies assets and association maps. Users select the active pack in **Settings → App settings → Icon pack**.
+Use `acode.require("fileIcons")` to register an icon pack. Acode owns matching and rendering; a pack supplies assets and association maps. Users select the active pack in **Settings → App settings → Interface → Icon pack** (setting key `iconTheme`).
 
 ::: info
-Available from **versionCode `1012`** (the next Acode release). Set `"minVersionCode": 1012` in `plugin.json` when your plugin depends on it.
+Present in the Acode **v1.13.5** source tree (`src/lib/fileIcons.ts`, `src/lib/fileIconsBuiltin.ts`). `CHANGELOG.md` does not record a `versionCode` for this API, so do not hardcode one — feature-detect with `acode.require("fileIcons")?.register`.
 :::
 
 ## Import
@@ -45,6 +45,47 @@ acode.setPluginUnmount(plugin.id, () => registration?.dispose());
 
 Both forms expose only `register`, `icon`, and `onChange`. Acquisition outside a loader-bound context throws with instructions to use these entry points. Pack ownership never comes from the pack's `id`; a plugin can still provide several separately named packs.
 
+## The plugin-bound API <Badge type="tip" text="new" />
+
+`fileIcons` is the one module `acode.require()` does **not** return directly. It is special-cased:
+
+```js
+require(module) {
+	if (module.toLowerCase() === "fileicons")
+		return fileIcons.getPluginApi(document.currentScript);
+	return this.#modules[module.toLowerCase()];
+}
+```
+
+The full internal registry (with `list()`, `active()`, `use()`, `resolve()`, `resolveMany()`, `unregister()` and `refreshRenderedIcons()`) is **never** exported to plugins. What you get is a frozen three-method view, created per plugin `<script>` element:
+
+```js
+const api = Object.freeze({
+	register: (pack) => { /* ownership is injected for you */ },
+	icon: registry.icon.bind(registry),
+	onChange: (listener) => { /* scoped + tracked per plugin */ },
+});
+```
+
+What "plugin-bound" means in practice:
+
+| Behaviour | Consequence |
+| --- | --- |
+| One frozen API object per plugin `<script>` | Mutating or extending it has no effect — `Object.freeze` |
+| `register()` injects `pluginId` for you | A pack's `pluginId` cannot point at another plugin; supplying a mismatching one throws |
+| Calling `bindPlugin` twice for the same id throws | `Plugin '<id>' is already bound` |
+| Every `onChange` subscription is tracked per plugin | Acode detaches them **before** pack-removal events fire during unload |
+| `unregisterByPlugin(pluginId)` runs on unmount, on script `onerror`, and when init throws | You do not have to dispose manually to avoid a leak |
+| After unload, `register` / `onChange` throw | `Icon API for plugin '<id>' has been unloaded`. A retained API object stays unusable even after the plugin reloads |
+
+Acquiring the API from anywhere other than the executing main script throws:
+
+```text
+Require "fileIcons" in the plugin main script, or use options.fileIcons in the init callback
+```
+
+`icon()` is the one method that keeps working after unload, because it does not assert plugin liveness — but it is still your frozen object, not the registry.
+
 ## Quick start
 
 ```js
@@ -84,23 +125,33 @@ There is one format, with association maps and defaults at the top level.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `id` | `string` | Required stable pack ID. Start with a letter; use letters, digits, `.`, `_`, or `-`. `builtin` is reserved. |
-| `pluginId` | `string` | Optional compatibility field. If supplied, it must match the loading plugin; a mismatch throws. Acode supplies ownership internally. |
-| `name` | `string` | Display name; defaults to `id`. |
-| `schemaVersion` | `number` | Optional; defaults to `1`. Unsupported versions are rejected. |
-| `icons` | `string` \| `object` | An absolute SVG directory URL, or a map of icon IDs to definitions. |
-| `fileNames` | `Record<string, string>` | Exact basenames mapped to icon IDs, such as `package.json`. |
-| `fileExtensions` | `Record<string, string>` | Extensions without leading dots, including compounds such as `test.ts`. |
-| `languageIds` | `Record<string, string>` | Acode CodeMirror mode names mapped to icon IDs. |
-| `folderNames` | `Record<string, string>` | Folder basenames mapped to closed icon IDs. |
-| `folderNamesExpanded` | `Record<string, string>` | Folder basenames mapped to expanded icon IDs. |
-| `file` | `string` | Default file icon ID. Omitted: built-in file fallback. |
-| `folder` | `string` | Default closed folder icon ID. Omitted: built-in folder fallback. |
-| `folderExpanded` | `string` | Expanded folder icon ID. Omitted: reuse `folder`. |
-| `rootFolder` | `string` | Workspace-root icon ID. Omitted: reuse `folder`. |
-| `rootFolderExpanded` | `string` | Expanded root icon ID. Falls back through `rootFolder`, `folderExpanded`, then `folder`. |
+| `id` | `string` | Required stable pack ID. Must match `/^[a-zA-Z][a-zA-Z0-9._-]*$/`. `builtin` is reserved and replacing it throws |
+| `pluginId` | `string` | Optional compatibility field. If supplied, it must match the loading plugin; a mismatch throws. Acode supplies ownership internally |
+| `name` | `string` | Display name; defaults to `id` |
+| `schemaVersion` | `number` | Optional; defaults to `1`. Any other value throws |
+| `icons` | `string` \| `object` | An absolute SVG directory URL, or a map of icon IDs to definitions |
+| `fileNames` | `Record<string, string>` | Exact basenames mapped to icon IDs, such as `package.json` |
+| `fileExtensions` | `Record<string, string>` | Extensions without leading dots, including compounds such as `test.ts` |
+| `languageIds` | `Record<string, string>` | Acode CodeMirror mode names mapped to icon IDs |
+| `folderNames` | `Record<string, string>` | Folder basenames mapped to closed icon IDs |
+| `folderNamesExpanded` | `Record<string, string>` | Folder basenames mapped to expanded icon IDs |
+| `file` | `string` | Default file icon ID. Omitted: built-in file fallback |
+| `folder` | `string` | Default closed folder icon ID. Omitted: built-in folder fallback |
+| `folderExpanded` | `string` | Expanded folder icon ID. Omitted: reuse `folder` |
+| `rootFolder` | `string` | Workspace-root icon ID. Omitted: reuse `folder` |
+| `rootFolderExpanded` | `string` | Expanded root icon ID. Falls back through `rootFolder`, `folderExpanded`, then `folder` |
 
 Unknown fields, ambiguous definitions, conflicting normalized associations, and unknown icon references throw descriptive errors during registration. A rejected replacement leaves the previous pack active. Same-icon duplicate associations are allowed, which makes combining maps convenient.
+
+### Key validation <Badge type="tip" text="new" />
+
+| Key kind | Rules |
+| --- | --- |
+| `fileExtensions` | Must not start or end with `.`, must not contain `..`, and must not contain whitespace, `/` or `\`. Lowercased. `".ts"` throws `Invalid fileExtension '.ts'; omit leading dots and paths` |
+| `languageIds`, `folderNames`, `folderNamesExpanded` | Lowercased; no other restriction |
+| `fileNames` | Case-sensitive, plus a separate case-insensitive index. Two keys that differ only by case must map to the **same** icon, otherwise `Conflicting fileName association` throws |
+
+Association values must all be non-empty strings, and every value must resolve to a defined icon — otherwise `fileExtensions.js references unknown icon 'nope'` throws.
 
 There are no `label`, nested `associations`/`defaults`, `iconDefinitions`, `iconPath`, string definitions, or automatic expanded-asset aliases. Light/dark asset variants are not part of version 1. Use monochrome icons for automatic color adaptation. This format is inspired by editor icon packs; it is **not** a drop-in VS Code or Zed schema.
 
@@ -108,7 +159,7 @@ There are no `label`, nested `associations`/`defaults`, `iconDefinitions`, `icon
 
 An explicit definition has exactly one of:
 
-- `src`: an absolute image URL. Use plugin-local SVG, PNG, or WebP assets. Optional `monochrome: true` uses the image as a mask with the current text color.
+- `src`: an **absolute image URL**. Optional `monochrome: true` uses the image as a CSS mask painted with the current text colour.
 - `className`: existing CSS classes, for integration with an icon font or plugin stylesheet. The plugin owns that stylesheet and its cleanup.
 
 ```js
@@ -116,10 +167,40 @@ icons: {
   javascript: { src: `${baseUrl}icons/javascript.svg` },
   folder: { src: `${baseUrl}icons/folder.svg`, monochrome: true },
   text: { className: "file file_type_default" },
+  logo: { src: "data:image/svg+xml;base64,PHN2Zy8+" },
 }
 ```
 
-Directory shorthand IDs use letters, digits, underscores, and hyphens. Explicit definition maps can use other non-empty IDs; generated CSS identifiers remain distinct.
+### Accepted `src` values <Badge type="tip" text="new" />
+
+A `src` is accepted only if it starts with one of:
+
+| Form | Example |
+| --- | --- |
+| `data:image/…` | `data:image/svg+xml;base64,PHN2Zy8+` |
+| `http:` / `https:` | `https://example.com/icon.svg` |
+| `blob:` | `blob:https://localhost/…` |
+| `file:` | `file:///sdcard/icon.svg` |
+| `content:` | `content://com.android.externalstorage.documents/…` |
+| `ftp:` | `ftp://example.com/icon.svg` |
+| a leading `/` | `/data/user/0/com.foxdebug.acode/files/icon.svg` |
+
+Everything else throws `Unsafe icon asset for 'icons.<id>.src'`. A `src` also may **not** contain whitespace, `"`, `'`, `(`, `)` or `\`, because the value is interpolated into a generated stylesheet.
+
+::: warning Inline SVG markup is not a `src`
+You cannot paste `<svg>…</svg>` as a definition value. Use a `data:image/svg+xml;base64,…` URI, a real URL, or the directory shorthand.
+:::
+
+Other validation rules:
+
+| Rule | Error |
+| --- | --- |
+| Both `src` and `className` set, or neither | `icons.<id> needs exactly one of src or className` |
+| `monochrome` without `src`, or not a boolean | `icons.<id>.monochrome requires src and must be a boolean` |
+| Empty `className` | `icons.<id>.className must be a non-empty string` |
+| Any other key inside a definition | `icons.<id>.<key> is not supported` |
+
+Directory shorthand IDs must match `/^[a-zA-Z0-9_-]+$/` — letters, digits, underscores and hyphens only, no dots. Explicit definition maps can use other non-empty IDs; generated CSS identifiers remain distinct.
 
 Acode cannot detect missing glyphs in a custom CSS class. CSS class definitions are the plugin's responsibility.
 
@@ -142,15 +223,25 @@ While an image loads, or if it fails, resolution returns a usable fallback. An u
 
 The examples below assume `const fileIcons = acode.require("fileIcons")`. These three methods and the returned cleanup functions are the complete plugin surface. An icon-pack-only plugin needs just `register` and its disposable. `icon` and `onChange` support plugins that render their own file lists.
 
+| Method | Signature |
+| --- | --- |
+| `register` | `register(pack: FileIconTheme) => { dispose(): void }` |
+| `icon` | `icon(resource: string \| IconResource) => string` |
+| `onChange` | `onChange(listener: (info: {activeId: string, preferredId: string}) => void) => () => void` |
+
 | Method | Contract |
 | --- | --- |
 | `register(pack)` | Validate and register a complete pack. Same ID and owner replaces the previous pack atomically. Returns `{ dispose() }`. |
-| `icon(resource)` | CSS class string for the resource's current icon or fallback. |
+| `icon(resource)` | CSS class string for the resource's current icon or fallback. Synchronous. |
 | `onChange(listener)` | Subscribe to active/preferred pack changes, active pack replacement/removal, and asset readiness. Returns an unsubscribe function. Listener receives `{ activeId, preferredId }`. |
 
-Only `register`, `icon`, and `onChange` are exported to plugins. Pack selection, catalog queries, detailed/batch resolution, settings binding, and DOM refresh are internal. There is no public `use`, `update`, `unregister`, override system, or method alias. Users choose packs in settings. Register a complete replacement to update; dispose the registration to remove it.
+Only `register`, `icon`, and `onChange` are exported to plugins. Pack selection (`use`), catalog queries (`list`, `active`), detailed/batch resolution (`resolve`, `resolveMany`), direct removal (`unregister`, `unregisterByPlugin`), settings binding (`bindSettings`, `syncFromSettings`) and DOM refresh (`refreshRenderedIcons`) are internal. There is no public `use`, `update`, `unregister`, override system, or method alias. Users choose packs in settings. Register a complete replacement to update; dispose the registration to remove it.
 
 Disposal is idempotent. Disposing an older registration cannot remove its replacement. Pack IDs owned by another plugin cannot be replaced. The loader binds lifecycle ownership independently of the pack definition. A retained registration API cannot register packs after its plugin unloads, including after that plugin reloads. This is lifecycle isolation, not a security sandbox between JavaScript plugins.
+
+::: tip Free automatic refresh
+Acode's own `refreshRenderedIcons()` sweeps the document for `[data-file-icon-name]` elements and rewrites their `className`. Any element you render with those attributes is updated for you whenever the pack changes or an asset finishes loading — no `onChange` subscription needed. This is how plugin settings rows using `ListItem.fileIcon` stay in sync.
+:::
 
 ### `register(pack)` — publish or replace a pack
 
@@ -243,21 +334,89 @@ Multiple asset completions may be grouped into one frame. `activeId` and `prefer
 
 Listeners run synchronously when notified. Keep them lightweight; resolve current rows instead of re-registering packs from the listener. One throwing listener is logged and does not prevent other listeners from running. Detached views can refresh their own elements directly; views that skip work while hidden should refresh when shown again.
 
+## Complete example <Badge type="tip" text="new" />
+
+Register a custom icon for a file extension, draw it in a plugin-owned list, and keep it live:
+
+```js
+// main.js
+if (window.acode) {
+  const fileIcons = acode.require("fileIcons");
+  const page = acode.require("page");
+
+  let registration;
+  let unsubscribe;
+  let listEl;
+
+  const rows = [
+    { kind: "file", name: "a.todo" },
+    { kind: "file", name: "README.md" },
+    { kind: "folder", name: "src", expanded: false },
+    { kind: "folder", name: "src", expanded: true },
+  ];
+
+  acode.setPluginInit(plugin.id, (baseUrl) => {
+    // 1. Register the pack. Acode injects pluginId for us.
+    registration = fileIcons.register({
+      id: plugin.id,
+      name: "My Icons",
+      icons: `${baseUrl}icons/`, // todo.svg, folder-todo.svg, folder-todo-open.svg
+      fileExtensions: { todo: "todo" },
+      folder: "folder-todo",
+      folderExpanded: "folder-todo-open",
+    });
+
+    // 2. Build a list that renders icons through the pack.
+    listEl = tag("ul", { className: "scroll" });
+
+    const render = () => {
+      listEl.content = rows.map((resource) =>
+        tag(
+          "li",
+          // Keep your own layout class; the pack supplies the glyph class.
+          { className: `row ${fileIcons.icon(resource)}` },
+          tag("span", { textContent: resource.name }),
+        ),
+      );
+    };
+    render();
+
+    // 3. Re-render whenever the active pack changes or an asset finishes loading.
+    unsubscribe = fileIcons.onChange(({ activeId, preferredId }) => {
+      console.log("icon pack changed:", activeId, preferredId);
+      render();
+    });
+
+    // 4. Publish it on the plugin page.
+    page.appendBody(listEl);
+  });
+
+  acode.setPluginUnmount(plugin.id, () => {
+    unsubscribe?.();
+    registration?.dispose();
+  });
+}
+```
+
+::: warning Assets must be reachable
+`icons: "${baseUrl}icons/"` must end with a `/`. Acode joins it with `<id>.svg`, so `javascript` becomes `<baseUrl>icons/javascript.svg`. If an asset 404s, resolution falls back and the console logs `[fileIcons] Theme '<id>' could not load '<src>'; using fallback` once per activation.
+:::
+
 ## Resource reference
 
 For `icon`, a resource is a filename string, or an object:
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `name` | `string` | Required basename or path. URI decoding is not performed. |
-| `kind` | `"file"` \| `"folder"` | Defaults to `file`. |
-| `languageId` | `string` | Optional known Acode mode name for a file; avoids language inference. Filename/extension associations still take precedence. |
-| `expanded` | `boolean` | Folder expansion state, `false` when omitted. |
-| `isRoot` | `boolean` | Whether a folder is a workspace root, `false` when omitted. |
+| `name` | `string` | Required basename or path. Only the basename is matched; URI decoding is not performed |
+| `kind` | `"file" \| "folder"` | Defaults to `file` |
+| `languageId` | `string` | Optional known Acode mode name for a file; avoids language inference. Filename/extension associations still take precedence |
+| `expanded` | `boolean` | Folder expansion state, `false` when omitted |
+| `isRoot` | `boolean` | Whether a folder is a workspace root, `false` when omitted |
 
 Names may be passed as paths for convenience; only the basename is matched. URI parsing is the caller's responsibility.
 
-The built-in ID `builtin` and stored setting key `iconTheme` remain unchanged. **Icon pack** and **Builtin** are the display names; existing saved selections continue to work.
+The built-in ID `builtin` and stored setting key `iconTheme` remain unchanged. **Icon pack** and **Builtin** are the display names; existing saved selections continue to work. When a plugin registers a pack whose ID matches the user's stored `iconTheme`, it is activated immediately — so a disabled-and-reenabled plugin restores the user's choice without any extra code.
 
 ## Custom plugin views
 
@@ -294,7 +453,7 @@ acode.setPluginInit(plugin.id, async (baseUrl) => {
 });
 ```
 
-The [icon pack example plugin](https://github.com/Acode-Foundation/acode-icon-plugin-example) shows JSON loading and conversion from an existing pack. Install its `plugin.zip`, then select **Icon Pack Example** in **Settings → App settings → Icon pack**.
+The [icon pack example plugin](https://github.com/Acode-Foundation/acode-icon-plugin-example) shows JSON loading and conversion from an existing pack. Install its `plugin.zip`, then select **Icon Pack Example** in **Settings → App settings → Interface → Icon pack**.
 
 ## Migrating from the draft API
 

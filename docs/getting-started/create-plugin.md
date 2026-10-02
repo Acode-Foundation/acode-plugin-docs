@@ -24,8 +24,115 @@ Acode plugins follow a specific structure within a zip file. The necessary compo
 3. **readme.md:**
    - Contains the description or about plugin
 
-3. **changelogs.md:**
+4. **changelogs.md:**
    - contains changelogs of your plugin updates.
+
+`plugin.json` must be at the **root** of the zip: Acode reads it from the archive root and refuses the install otherwise. The full field reference lives in [Manifest — `plugin.json`](../plugin-essentials/manifest.md), and the entry file is covered in [Plugin Main File](../plugin-essentials/core-file.md).
+
+## Minimal Plugin From Scratch <Badge type="tip" text="new" />
+
+If you would rather skip the templates, this is the smallest plugin Acode will load.
+
+```text
+my-plugin/
+├── plugin.json
+└── main.js
+```
+
+::: code-group
+```json [plugin.json]
+{
+	"id": "com.example.plugin",
+	"name": "Example Plugin",
+	"main": "main.js",
+	"version": "1.0.0",
+	"readme": "readme.md",
+	"icon": "icon.png",
+	"author": {
+		"name": "Example Author"
+	}
+}
+```
+
+```js [main.js]
+const plugin = { id: "com.example.plugin" };
+
+if (window.acode) {
+	acode.setPluginInit(plugin.id, async (baseUrl, $page) => {
+		const commands = acode.require("commands");
+
+		commands.addCommand({
+			name: "example-plugin",
+			description: "Open the example plugin page",
+			bindKey: { win: "Ctrl-Alt-E", mac: "Command-Alt-E" },
+			exec: () => {
+				$page.innerHTML = "<h1>Example Plugin</h1>";
+				$page.show();
+				return true;
+			},
+		});
+	});
+
+	acode.setPluginUnmount(plugin.id, () => {
+		acode.require("commands").removeCommand("example-plugin");
+	});
+}
+```
+:::
+
+::: warning `main.js` is a classic script — no `import` without a bundler
+Acode injects your entry file with `<script id="${pluginId}-mainScript" src={mainUrl}>` and `document.head.append($script)` (`src/lib/loadPlugin.js:48-49`, `:101`). There is no `type="module"`, no transform and no rewrite — so a bare `import` line is a syntax error at runtime, and zipping these two files as-is would fail with `Failed to load script for plugin <id>`.
+
+`import plugin from "../plugin.json";` is a **bundler convention** used by the official templates: esbuild/webpack resolve the JSON and inline it into `dist/main.js` at build time. See [Plugin Main File → `Accessing plugin-relative files`](../plugin-essentials/core-file.md#accessing-plugin-relative-files).
+
+Without a bundler the id has to come from somewhere else. Either hardcode it, as above, or read it back off the script element Acode created:
+
+```js
+// loadPlugin.js names the tag `<pluginId>-mainScript`
+const pluginId = document.currentScript.id.replace(/-mainScript$/, "");
+```
+
+Either way the string must equal the `id` in `plugin.json`, because the installer uses `pluginJson.id` as the plugin folder name (`src/lib/installPlugin.js:166`) and `acode.setPluginInit` / `acode.setPluginUnmount` are keyed by that id.
+:::
+
+Notes on that shape, taken from the loader:
+
+- The `id` string is the only thing you need from the manifest. Acode never reads the id out of your script — `plugin.json` is read by `loadPlugin.js` and by the installer, not by your entry file.
+- The `init` callback receives `(baseUrl, $page, options)`, where `options` is `{ cacheFileUrl, cacheFile, firstInit, ctx, fileIcons }`. This example only uses `$page`; [Plugin Main File](../plugin-essentials/core-file.md) documents every option.
+- `init` is awaited by Acode, so it may be `async`. `setPluginInit`'s third argument (`{ list, cb }`) is optional and adds a settings page for your plugin.
+- `main.js` is injected as a plain `<script>` tag, so only the callbacks you register participate in Acode's lifecycle. Keep the rest of your code inside them.
+
+Both manifest fields above are also the only two the installer validates: `plugin.json` must exist at the archive root (`installPlugin.js:108`) and `main` must resolve to a file that exists (`:118`, `:132`). `icon`, `readme` and `main` are patched to `icon.png` / `readme.md` / `main.js` when missing (`:117-131`), so the two-file zip installs as-is.
+
+## Packaging The Plugin Zip <Badge type="tip" text="new" />
+
+The zip must contain `plugin.json` **at the root** — not inside a folder:
+
+```text
+plugin.zip            <- the file you install
+├── plugin.json       <- root, required
+├── main.js           <- or whatever `main` points to
+├── icon.png          <- what `icon` points to
+├── readme.md
+└── changelogs.md
+```
+
+:::danger
+Zipping the containing folder (so the zip contains `my-plugin/plugin.json`) makes the install fail: Acode looks for `plugin.json` in the archive root and reports `Invalid Plugin`.
+:::
+
+While installing, Acode normalizes what it finds:
+
+| Manifest field | Behaviour when the file is missing |
+| --- | --- |
+| `main` | Patched to `main.js`; if that is also missing, the install fails with `Invalid Plugin` |
+| `icon` | Patched to `icon.png` |
+| `readme` | Patched to `readme.md` |
+| `changelogs` | Left as declared — ship the file or drop the field |
+
+Zip entry paths are sanitized before extraction: absolute entries (leading `/`, network paths, `C:/`-style roots) are skipped and reported as `Skipped N unsafe archive entries (e.g., …)`, and `..` segments cannot escape the plugin folder.
+
+Files present in a previous install but absent from the new zip are deleted, so an update replaces the plugin folder instead of merging into it.
 
 ## Plugin Templates
 
@@ -129,6 +236,50 @@ It's more convenient to manage this from the sidebar. When you install a local p
 This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
 :::
 
+## Testing The Plugin <Badge type="tip" text="new" />
+
+Acode installs a plugin from three kinds of source, and both entry points — *Settings → Plugins* and the sidebar's **Extensions** tab — accept the same two inputs: a **Remote** URL, or a **Local** file picked in the file browser.
+
+| Source | What you give Acode | Notes |
+| --- | --- | --- |
+| Remote | A URL to your `plugin.zip` | Downloaded with the Cordova HTTP client, so it can be any `http(s)`, `file`, or `content` URL |
+| Local | A file picked in the file browser | The selected `content://` / `file://` path is used directly |
+| Registry | A plugin id from the plugin list | Downloads the published zip from the Acode API |
+
+After the files are extracted, Acode loads the plugin immediately — there is no restart. A loader dialog shows the download/extract progress, and any error is surfaced as a toast.
+
+:::warning
+The **reload** icon in the sidebar's **Extensions** list only appears for plugins installed from a URL or a picked file. Acode stores that source in the manifest as `source`, and the icon re-runs the install from it. Plugins installed from the registry have no `source`, so there is nothing to reload.
+:::
+
+## Debugging <Badge type="tip" text="new" />
+
+Plugin failures are reported to the Acode console — open it from **Settings → Advanced → Console**, or run `acode.exec("console")` from another plugin. Turn on **Settings → Advanced → Developer mode** if you also want the in-app developer tools loaded at startup. Then reinstall your plugin and read the log — these are the exact strings Acode emits, so you can search for them:
+
+```text
+Failed to load script for plugin <id>: <error.message | error>
+Plugin load timeout
+Error loading plugin <id>: <error>
+Error while calling unmount callback for plugin "<id>"
+Command registration skipped: missing name
+Command registration skipped for "<name>": exec must be a function.
+Command "<name>" failed
+Failed to add command <name>
+Plugin installer: skipped unsafe absolute paths in archive: <list>
+```
+
+What they mean:
+
+- **`Failed to load script for plugin <id>`** — the `<script>` tag for your entry file failed to load or execute. Usually a wrong `main` path or a syntax error in the bundle.
+- **`Plugin load timeout`** — `init` did not settle within 15 seconds. Move slow work out of `init`.
+- **`Error loading plugin <id>`** — the batch loader caught a rejected load; the full error object follows.
+- **`Command registration skipped …`** — the command was silently ignored. `name` and `exec` are both required.
+- **`Command "<name>" failed`** — your `exec` threw; Acode catches it so one bad command cannot crash the palette.
+
+:::tip
+If your plugin stops loading after an update, it was probably auto-disabled: Acode disables a plugin that throws, shows it switched off in the plugin list, and skips it on every later start. Toggle it back on (or reinstall) once you have fixed the error. See [Understanding How Plugins Work → Failure Behavior](./understanding-plugin.md#failure-behavior-you-should-know).
+:::
+
 ## Creating Plugins with the CLI<Badge type="warning" text="community" />
 
 You can also quickly scaffold new Acode plugins using the [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli). This tool provides an interactive wizard to generate a plugin project from the official JavaScript or TypeScript templates.
@@ -183,6 +334,7 @@ To share your plugin with the Acode community, follow these steps:
     ```sh [bun]
     $ bun run build
     ```
+    :::
 
 2. **Publish:**
 
