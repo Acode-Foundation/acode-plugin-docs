@@ -168,12 +168,15 @@ view.dispatch({
 
 ## Minimal extension example
 
-A plugin-owned `Compartment` is what makes an extension removable again on unmount — reconfigure it to install the extension, and again with `[]` to take it away:
+A `Compartment` only does something once it is **part of the state it is applied to**, so the install and the remove must be two separate steps:
+
+1. **Install** — dispatch `StateEffect.appendConfig` carrying `compartment.of(extension)`. This adds the compartment to the running configuration, which is the only way a plugin can get one in there: `createMainEditorExtensions` builds the app's extension array from a fixed set of arguments (`src/cm/mainEditorExtensions.ts:35-65`) and nothing appends to it afterwards.
+2. **Remove** — now that the compartment is in the configuration, `compartment.reconfigure([])` really removes the extension. The document and undo history are untouched.
 
 ```js
 const cm = acode.require("codemirror");
 const { EditorView } = cm.view;
-const { Compartment, StateField } = cm.state;
+const { Compartment, StateEffect, StateField } = cm.state;
 
 // 1. A real piece of state, defined with the app's own StateField class.
 const activeLength = StateField.define({
@@ -188,25 +191,48 @@ const activeLength = StateField.define({
 const compartment = new Compartment();
 const extension = [activeLength, EditorView.theme({ "&": { tabSize: "4" } })];
 
+// 3. Install / remove against one view.
+function installOn(view) {
+  view.dispatch({ effects: StateEffect.appendConfig.of(compartment.of(extension)) });
+}
+
+function removeFrom(view) {
+  view.dispatch({ effects: compartment.reconfigure([]) });
+}
+
+function eachView(fn) {
+  const panes = window.editorManager?.panes;
+  const views = panes?.length ? panes.map((pane) => pane.editor) : [];
+  const fallback = window.editorManager?.editor;
+  const list = views.length ? views : fallback ? [fallback] : [];
+  list.forEach((view) => view && fn(view));
+}
+
+// 4. Read the field back off the live state, after the install transaction.
 acode.setPluginInit("com.example.editor-ext", () => {
-  const view = window.editorManager?.editor;
-  if (!view) return;
-
-  view.dispatch({ effects: compartment.reconfigure(extension) });
-
-  // 3. Read the field back off the live state.
-  console.log("document length:", view.state.field(activeLength));
+  eachView((view) => {
+    installOn(view);
+    console.log("document length:", view.state.field(activeLength, false));
+  });
 });
 
 acode.setPluginUnmount("com.example.editor-ext", () => {
-  window.editorManager?.editor?.dispatch({
-    effects: compartment.reconfigure([]),
-  });
+  eachView(removeFrom);
 });
 ```
 
+`view.state.field(activeLength)` without the second argument **throws** while the extension is absent (this is CodeMirror 6 API behaviour — `false` means "give me `undefined` instead"). Use the two-argument form when you might be called before `init`, or after `unmount`.
+
+::: warning
+Do **not** skip step 1 and dispatch only `compartment.reconfigure(extension)`. A compartment that is not in the configuration matches nothing, so the effect changes nothing and the state field never appears. The app itself never does this: every compartment it owns is pushed into the extension array when the state is created, with comments saying so — `themeCompartment` / `languageCompartment` / `readOnlyCompartment` at `src/lib/editorManager.js:2949`, `:2968`, `:2981` ("keep compartment in the state to allow dynamic theme changes later", "Ensure language compartment is present"), the loading state at `:2832-2844`, and the first state at `:1677-1681`.
+:::
+
 ::: tip
-The same `compartment` can be reconfigured at any time with a different extension list — that is how the app itself swaps themes, indent units, wrapping and read-only state.
+The same `compartment` can be reconfigured at any time with a different extension list — that is how the app itself swaps themes, indent units, wrapping and read-only state. For an extension that needs no handle at all, `StateEffect.appendConfig.of(ext)` installs it directly; `src/cm/foldingCommands.js:134` uses exactly that to switch `codeFolding()` on for a view that was created without it. That is append-only, though — to take such an extension away again you must reconfigure the compartment it lives in.
+:::
+
+::: warning
+Avoid `StateEffect.reconfigure` from a plugin. It throws away the whole configuration and replaces it with whatever you pass, which for a live Acode editor means dropping the theme, language, read-only, search and command-keymap compartments. There is no single "add an extension to the editor" API in Acode — `appendConfig` on your own compartment is the intended one.
 :::
 
 ## Language Example (StreamLanguage) <Badge type="tip" text="new" />
@@ -269,7 +295,7 @@ The loader may be sync or async — Acode reconfigures the editor's language com
 :::
 
 ::: warning
-A new `EditorView` is created per pane, not per file — a `StateField` you add stays installed across tab switches within that pane, and it is **not** applied to views created later (a new pane, or a view created before your `setPluginInit` ran). Re-dispatch `compartment.reconfigure(extension)` when a view becomes available.
+A new `EditorView` is created per pane, not per file — a `StateField` you add stays installed across tab switches within that pane, and it is **not** applied to views created later (a new pane, or a view created before your `setPluginInit` ran). Re-run `installOn(view)` for every view you find in `editorManager.panes`, and skip any view that already has your field (`view.state.field(activeLength, false) !== undefined`), otherwise `appendConfig` installs your compartment a second time.
 :::
 
 ::: warning

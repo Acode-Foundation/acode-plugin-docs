@@ -55,7 +55,7 @@ my-plugin/
 ```
 
 ```js [main.js]
-import plugin from "../plugin.json";
+const plugin = { id: "com.example.plugin" };
 
 if (window.acode) {
 	acode.setPluginInit(plugin.id, async (baseUrl, $page) => {
@@ -80,12 +80,29 @@ if (window.acode) {
 ```
 :::
 
+::: warning `main.js` is a classic script — no `import` without a bundler
+Acode injects your entry file with `<script id="${pluginId}-mainScript" src={mainUrl}>` and `document.head.append($script)` (`src/lib/loadPlugin.js:48-49`, `:101`). There is no `type="module"`, no transform and no rewrite — so a bare `import` line is a syntax error at runtime, and zipping these two files as-is would fail with `Failed to load script for plugin <id>`.
+
+`import plugin from "../plugin.json";` is a **bundler convention** used by the official templates: esbuild/webpack resolve the JSON and inline it into `dist/main.js` at build time. See [Plugin Main File → `Accessing plugin-relative files`](../plugin-essentials/core-file.md#accessing-plugin-relative-files).
+
+Without a bundler the id has to come from somewhere else. Either hardcode it, as above, or read it back off the script element Acode created:
+
+```js
+// loadPlugin.js names the tag `<pluginId>-mainScript`
+const pluginId = document.currentScript.id.replace(/-mainScript$/, "");
+```
+
+Either way the string must equal the `id` in `plugin.json`, because the installer uses `pluginJson.id` as the plugin folder name (`src/lib/installPlugin.js:166`) and `acode.setPluginInit` / `acode.setPluginUnmount` are keyed by that id.
+:::
+
 Notes on that shape, taken from the loader:
 
-- `import plugin from "../plugin.json"` is a bundler feature, used by the official templates. If you hand-write `main.js` with no bundler, inline the id as a string — Acode never reads the id out of your script, it only uses the folder name and your `plugin.json`.
+- The `id` string is the only thing you need from the manifest. Acode never reads the id out of your script — `plugin.json` is read by `loadPlugin.js` and by the installer, not by your entry file.
 - The `init` callback receives `(baseUrl, $page, options)`, where `options` is `{ cacheFileUrl, cacheFile, firstInit, ctx, fileIcons }`. This example only uses `$page`; [Plugin Main File](../plugin-essentials/core-file.md) documents every option.
 - `init` is awaited by Acode, so it may be `async`. `setPluginInit`'s third argument (`{ list, cb }`) is optional and adds a settings page for your plugin.
 - `main.js` is injected as a plain `<script>` tag, so only the callbacks you register participate in Acode's lifecycle. Keep the rest of your code inside them.
+
+Both manifest fields above are also the only two the installer validates: `plugin.json` must exist at the archive root (`installPlugin.js:108`) and `main` must resolve to a file that exists (`:118`, `:132`). `icon`, `readme` and `main` are patched to `icon.png` / `readme.md` / `main.js` when missing (`:117-131`), so the two-file zip installs as-is.
 
 ## Packaging The Plugin Zip <Badge type="tip" text="new" />
 

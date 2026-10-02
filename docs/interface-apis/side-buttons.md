@@ -146,6 +146,9 @@ acode.setPluginInit('com.example.sideactions', () => {
   acode.setPluginUnmount('com.example.sideactions', () => {
     problemsButton?.hide();
     wordCountButton?.hide();
+    // Acode never unsubscribes plugin listeners for you, so remove them here
+    editorManager.off('file-loaded', syncWordCountButton);
+    editorManager.off('save-file', syncWordCountButton);
   });
 });
 ```
@@ -162,6 +165,8 @@ The whole container is removed from the DOM when the user's **"show side buttons
 
 :::warning
 There is no lifecycle management. The handle you get back is not tied to your plugin, so a plugin that is disabled or unmounted leaves its buttons on screen until it calls `hide()`. Wire `hide()` into `acode.setPluginUnmount` — see [`acode`](../global-apis/acode.md).
+
+Event subscriptions need the same treatment: `acode.unmountPlugin()` only runs your unmount callback, deletes the `plugin-<id>` settings page and unregisters your file icons — it never touches listeners you registered with `editorManager.on()`, so remove every one of them in your unmount handler or they stay active after a reload.
 :::
 
 :::warning

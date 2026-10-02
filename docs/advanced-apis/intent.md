@@ -2,7 +2,7 @@
 
 The Intent API provides functionality to handle intents from other apps and implement custom URI scheme handling in Acode plugins.
 
-Verified against Acode **v1.13.5** (versionCode `1011`): `src/handlers/intent.js` in full, the module wrapper in `src/lib/acode.js` (lines 291-294), the native intent JSON in `src/plugins/system/android/com/foxdebug/system/System.java` (`getIntentJson`), the manifest in `config.xml`, and the in-app consumer `src/pages/plugin/plugin.js`.
+Verified against Acode **v1.13.5** (versionCode `1011`): `src/handlers/intent.js` in full, the module wrapper in `src/lib/acode.js` (line 394), the native intent JSON in `src/plugins/system/android/com/foxdebug/system/System.java` (`getIntentJson`), the manifest in `config.xml`, and the in-app consumer `src/pages/plugin/plugin.js`.
 
 ## Overview
 
@@ -95,8 +95,8 @@ A fresh `IntentEvent` class instance is created per intent and shared by every h
 | `defaultPrevented` | getter | `boolean`, read-only. |
 | `propagationStopped` | getter | `boolean`, read-only. |
 
-::: warning `value` is the raw third segment only
-Parsing is literally:
+::: warning `value` is the raw third segment only — and it is never decoded
+Parsing is literally (`src/handlers/intent.js:32-33`):
 
 ```js
 const path = url.replace("acode://", "");
@@ -105,11 +105,30 @@ const [module, action, value] = path.split("/");
 
 Three consequences:
 
-1. **Everything after the third `/` is discarded.** `acode://myplugin/open/a/b/c` gives `value === "a"`.
-2. **There is no URL-decoding.** `%20` stays `%20`, and a `+` stays `+`. Decode it yourself.
-3. **Query strings and fragments are part of `value`.** `acode://myplugin/search/hello%20world` arrives as the literal string `hello%20world`.
+1. **Everything after the third `/` is discarded.** Destructuring stops at the
+   third name, so `acode://myplugin/open/a/b/c` gives `value === "a"`. There is
+   no `join`, no remainder, nothing — a **raw multi-slash URI can never survive**.
+2. **There is no URL-decoding, anywhere.** `%20` stays `%20`, and a `+` stays `+`.
+   Neither `src/handlers/intent.js` nor the native `getIntentJson`
+   (`System.java:2038` passes `intent.getDataString()` through verbatim) calls
+   `decodeURIComponent`. Decoding is **the plugin's job**.
+3. **Query strings and fragments are part of `value`.** `acode://myplugin/search/hello%20world`
+   arrives as the literal string `hello%20world`.
+
+So the two cases behave like this:
+
+| Link as delivered | `event.value` | What you must do |
+| --- | --- | --- |
+| `acode://myplugin/open/file%3A%2F%2F%2Fa%2Fb.txt` | `file%3A%2F%2F%2Fa%2Fb.txt` | `decodeURIComponent(value)` → `file:///a/b.txt` — **the only form that works** |
+| `acode://myplugin/open/file:///a/b.txt` | `file:` | Nothing — the path is already gone. This link cannot work. |
 
 `url.replace("acode://", "")` replaces only the first occurrence, so a nested `acode://` later in the string is preserved.
+:::
+
+::: danger Always build the value as one encoded segment
+There is no raw multi-slash form to fall back on. Construct the link as `` `acode://${module}/${action}/${encodeURIComponent(value)}` `` and decode with `decodeURIComponent(value)` in the handler.
+
+Guard the decode — `decodeURIComponent` **throws** `URIError` on a malformed escape such as a lone `%`, and neither the dispatch loop (`intent.js:41-45`) nor your own caller catches it.
 :::
 
 ::: danger `preventDefault()` is ignored inside an async handler
@@ -143,7 +162,7 @@ The URL is taken from `intent.fileUri || intent.data || intent.extras["android.i
 | `acode://plugin/purchased/<pluginId>` | `plugin` / `purchased` / `<pluginId>` | Acode's plugin page already listens for this after a browser checkout (`src/pages/plugin/plugin.js`). |
 | `acode://plugin/uninstall/<pluginId>` | `plugin` / `uninstall` / `<pluginId>` | Same — Acode's plugin page listens for this after an external refund flow. |
 | `acode://pro/<anything>` | `pro` / `<anything>` / — | Acode refreshes `config.HAS_PRO` from the server and hides the banner. No other effect. |
-| `acode://myplugin/<action>/<value>` | `myplugin` / `<action>` / `<value>` | **Yours.** Any module name is yours; nothing in Acode claims it. |
+| `acode://myplugin/<action>/<encoded value>` | `myplugin` / `<action>` / `<encoded value>` | **Yours.** Any module name is yours; nothing in Acode claims it. Build the third segment with `encodeURIComponent` — a raw multi-slash URI is truncated to `"file:"`. |
 
 Acode's own built-in `plugin/install` and `pro` handling runs **only if no handler called `preventDefault()`** — the check is `if (defaultPrevented) return;` before both blocks.
 
@@ -231,7 +250,10 @@ async function openPath(uri) {
     return existing;
   }
 
-  const file = new EditorFile(uri.split('/').pop() || 'untitled.txt', {
+  // `uri` is already decoded, so decode nothing a second time — a basename
+  // containing a literal "%" would make decodeURIComponent throw URIError.
+  const name = uri.split('/').pop() || 'untitled.txt';
+  const file = new EditorFile(name, {
     uri,
     render: true,
   });
@@ -240,6 +262,10 @@ async function openPath(uri) {
   return file;
 }
 ```
+
+Pass this a **decoded** URI. `event.value` arrives exactly as it sat in the deep link, so a link built the correct way —
+`acode://myplugin/open/file%3A%2F%2F%2Fa%2Fb.txt` — needs `decodeURIComponent(event.value)` first. A raw
+`acode://myplugin/open/file:///a/b.txt` cannot work at all: the parser stops at the third `/`, so `value` is just `"file:"`.
 
 `new EditorFile(filename, options)` accepts `uri`, `text`, `isUnsaved`, `mode`, `encoding`, `cursorPos`, `render`, `onsave`, `readOnly`, `paneId` and `persistInSession` in its options object. `acode.newEditorFile(filename, options)` is a convenience wrapper but **returns `undefined`**, so use `new EditorFile(...)` when you need the instance.
 
@@ -286,9 +312,16 @@ const pluginHandler = (event) => {
   // Claim the intent so other plugins cannot also react to it.
   event.stopPropagation();
 
-  // `value` is the RAW third path segment — decode it yourself, and note
-  // that anything after a further "/" was already dropped.
-  const value = decodeURIComponent(event.value || '');
+  // `value` is the RAW third path segment: it is NOT decoded, and anything
+  // after a further "/" was already dropped. The link must have been built as
+  // acode://myplugin/search/QUERY with encodeURIComponent(QUERY). The try/catch
+  // is needed because decodeURIComponent THROWS on a malformed escape.
+  let value = '';
+  try {
+    value = decodeURIComponent(event.value || '');
+  } catch {
+    return; // malformed percent-escape — nothing sensible to dispatch
+  }
 
   switch (event.action) {
     case 'search':
@@ -337,6 +370,17 @@ const EditorFile = acode.require('EditorFile');
 // Only these actions are meaningful in an acode://myplugin/... deep link.
 const ALLOWED = new Set(['search', 'open', 'create']);
 
+// Acode hands you `value` exactly as it appeared in the URL, so decoding is
+// your job — and decodeURIComponent THROWS on a malformed escape such as "%".
+function decodeValue(value) {
+  try {
+    return decodeURIComponent(value || '');
+  } catch (error) {
+    acode.toast('Malformed deep link');
+    return null;
+  }
+}
+
 async function openPath(uri) {
   const existing = window.editorManager?.getFile(uri, 'uri');
   if (existing) {
@@ -344,10 +388,22 @@ async function openPath(uri) {
     return existing;
   }
 
-  const name = decodeURIComponent(uri.split('/').pop() || 'untitled.txt');
+  // `uri` is already decoded, so split on the last "/" and decode nothing.
+  const name = uri.split('/').pop() || 'untitled.txt';
   const file = new EditorFile(name, { uri, render: true });
   await file.load();
   return file;
+}
+
+// How to BUILD a link that will actually survive the parser:
+//
+//   encodeURIComponent('file:///sdcard/Acode/notes.md')
+//     -> 'file%3A%2F%2F%2Fsdcard%2FAcode%2Fnotes.md'
+//   acode://myplugin/open/file%3A%2F%2F%2Fsdcard%2FAcode%2Fnotes.md
+//
+// Only then is `value` the full URI, and decodeURIComponent(value) rebuilds it.
+function buildLink(action, rawValue) {
+  return `acode://${MODULE}/${action}/${encodeURIComponent(rawValue)}`;
 }
 
 function handleIntent(event) {
@@ -359,25 +415,30 @@ function handleIntent(event) {
   event.preventDefault();
   event.stopPropagation();
 
-  const value = event.value || '';
+  const value = decodeValue(event.value);
+  if (value === null) return;
 
   try {
     switch (event.action) {
       case 'search':
-        runSearch(decodeURIComponent(value));
+        runSearch(value);
         break;
 
       case 'open':
-        // acode://myplugin/open/<uri> — the whole URI is the value.
+        // acode://myplugin/open/<encodeURIComponent(uri)>
+        // `value` is RAW, so decode it — and the link must have been built with
+        // the URI in ONE percent-encoded segment. A raw
+        // `acode://myplugin/open/file:///a/b.txt` arrives as just "file:".
         openPath(value).catch((error) => acode.toast(error.message));
         break;
 
       case 'create':
-        createFile(decodeURIComponent(value));
+        createFile(value);
         break;
     }
   } catch (error) {
-    // Acode never catches handler rejections.
+    // The dispatch loop calls `handler(event)` with no try/catch, so a throw
+    // here escapes into Acode and aborts the remaining handlers.
     acode.toast(String(error && error.message));
   }
 }
@@ -399,7 +460,8 @@ acode.setPluginUnmount(PLUGIN_ID, () => {
 
 1. **Deep-linking into your plugin**:
    - Own a module namespace (`acode://myplugin/...`) so nothing collides
-   - Keep the value in the third path segment, encoded with `encodeURIComponent`
+   - Build every link as `` `acode://${module}/${action}/${encodeURIComponent(value)}` `` — the value must be **one** percent-encoded segment
+   - Decode with `decodeURIComponent` in the handler (guarded — it throws on a malformed escape)
 
 2. **Reacting to Acode's own deep links**:
    - `acode://plugin/install/<id>` — run your own install or upsell UI instead
@@ -414,7 +476,8 @@ acode.setPluginUnmount(PLUGIN_ID, () => {
 - **Only `acode://` URLs produce an `IntentEvent`.** Shared and opened files never do.
 - **`preventDefault()` / `stopPropagation()` are ignored after an `await`.** The dispatch loop is synchronous.
 - **Your handler's rejection is unhandled.** Acode does not `await` or `try/catch` it; wrap your own body.
-- **`value` is capped at the third path segment and is not URL-decoded.**
+- **`value` is capped at the third path segment and is not URL-decoded.** There is no raw multi-slash form: `acode://myplugin/open/file:///a/b.txt` arrives as `"file:"`. Encode the value with `encodeURIComponent` when you build the link.
+- **`decodeURIComponent` throws `URIError`** on a malformed escape, and nothing in the intent pipeline catches it — wrap your own decode.
 - **`removeHandler` removes only the first match** and compares by function identity — keep the reference.
 - **Handlers registered after a cold-start deep link miss it.** Register at the top level of `main.js`.
 - **`stopPropagation()` stops later handlers, not earlier ones.** An earlier handler may already have run.

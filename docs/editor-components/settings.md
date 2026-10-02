@@ -377,7 +377,10 @@ if (window.acode) {
 	acode.setPluginInit(
 		storageKey,
 		(baseUrl, $page) => {
-			const greeting = tag('p', { innerHTML: values.greeting });
+			// greeting is whatever the user typed into the prompt, so it must be
+			// text, not markup. Acode does the same: it only assigns innerHTML
+			// after DOMPurify.sanitize(), and uses textContent for plain text.
+			const greeting = tag('p', { textContent: values.greeting });
 			const level = tag('small', { textContent: values.level });
 
 			$page.appendBody(greeting, level);

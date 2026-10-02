@@ -163,8 +163,10 @@ Deletes the file or directory specified by the URL. On `file://` URLs a director
 await filesystem.delete();
 ```
 
-::: warning
-This is a permanent delete with no trash step and no undo. Delete children yourself if you need to filter what disappears.
+::: danger `delete()` on a directory takes its whole subtree with it
+This is a permanent delete with no trash step and no undo. Worse, **there is no way to ask for a shallow delete**: `delete()` takes no arguments at all, `fsOperation()` forwards only the URL to the provider factory (`src/fileSystem/index.js:68`), and the `file://` provider branches to `entry.removeRecursively()` for a directory (`src/fileSystem/internalFs.js:76-80`). So calling `delete()` on a directory removes every kept entry underneath it, no matter what you skipped while walking the tree.
+
+To delete selectively you must **delete the unwanted children first and then only the directories that are genuinely empty** — never `delete()` a directory that still has contents you want. See [Delete a tree, skipping some entries](#common-recipes).
 :::
 
 ### `copyTo(destination)`
@@ -554,19 +556,41 @@ for await (const entry of walk("file:///sdcard/Acode")) {
 ```js [Delete a tree, skipping some entries]
 const fs = acode.require("fs");
 
+// Returns true when `dirUrl` and everything under it is gone,
+// false when a kept entry survived and `dirUrl` had to stay.
 async function deleteTree(dirUrl, keep = new Set()) {
+  let keptSomething = false;
+
   for (const entry of await fs(dirUrl).lsDir()) {
-    if (keep.has(entry.name)) continue;
-    if (entry.isDirectory) {
-      await deleteTree(entry.url, keep);
+    // A kept name is left completely alone, subtree included.
+    if (keep.has(entry.name)) {
+      keptSomething = true;
+      continue;
     }
+
+    if (entry.isDirectory) {
+      // A subdirectory that still holds a kept entry must survive, and so
+      // must this one. `delete()` is recursive on file://, so we may only
+      // call it on a directory we know is empty.
+      if (!(await deleteTree(entry.url, keep))) {
+        keptSomething = true;
+        continue;
+      }
+    }
+
     await fs(entry.url).delete();
   }
-  // Deletes the now-empty folder itself; recursive on file:// URLs anyway.
-  await fs(dirUrl).delete();
+
+  if (!keptSomething) await fs(dirUrl).delete();
+  return !keptSomething;
 }
 
+// "cache" survives (at any depth); everything else under my-plugin is removed,
+// and my-plugin itself stays because "cache" is still inside it.
 await deleteTree(`${CACHE_STORAGE}/my-plugin`, new Set(["cache"]));
+
+// With an empty `keep` the whole tree, including the root, is deleted.
+await deleteTree(`${CACHE_STORAGE}/stale-cache`);
 ```
 
 ```js [Duplicate before editing]
@@ -592,7 +616,7 @@ Grounded in `src/fileSystem/*.js`:
 7. **`createDirectory()` / `createFile()` create exactly one level.** `createFile("a/b.txt", …)` fails because `a` does not exist — use `acode.require("helpers").createFileStructure()` for nested paths.
 8. **Every I/O method is async and can reject; there are no sync variants.** `exists()` is the sole exception that reports failure as a value (FTP/SFTP still reject on network errors).
 9. **Charset names are case-insensitive and alias-aware, and unknown ones silently fall back to UTF-8.** They do not throw, so a typo is a silent mis-decode rather than an error. See [Encoding](./encoding.md).
-10. **`delete()` on a directory is recursive** on `file://` (and SFTP). There is no `delete(recursive: false)` option.
+10. **`delete()` on a directory is recursive** on `file://` (`removeRecursively`) and on `sftp://` (the recursive flag is passed to `sftp.rm`). It takes **no arguments on any provider**, so there is no `delete(recursive: false)`, no `rmdir`-only variant and no children filter.
 11. **Encoding arguments are ignored for binary content** — `writeFile(buffer, "gbk")` writes the buffer unchanged.
 12. **`localName` only exists on FTP and SFTP handles.** `fs(url).localName` is `undefined` for `file://`, `content://` and `http(s)://`, so feature-detect it.
 13. **An unknown scheme yields `undefined`, not an error.** `fs('myapp://x').exists()` throws `TypeError: Cannot read properties of undefined`. Check the handle before use.

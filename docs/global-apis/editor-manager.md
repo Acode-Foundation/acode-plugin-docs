@@ -387,6 +387,10 @@ const onRemove = (file) => {
 commands.addCommand({
   name: "example.insertBanner",
   description: "Insert a banner at the cursor",
+  // This command mutates the document, so it must opt out of running in a
+  // read-only editor. readOnly defaults to true, which means "allowed to run
+  // in read-only mode" — omitting this would let it edit a protected tab.
+  readOnly: false,
   exec: (view, args) => {
     const manager = window.editorManager;
     const file = manager.activeFile;

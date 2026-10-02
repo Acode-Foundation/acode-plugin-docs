@@ -230,6 +230,14 @@ The file browser uses exactly this pattern: `actionStack.setMark()` when it open
 
 Acode uses it for modal loaders (`src/dialogs/loader.js`): `actionStack.freeze()` when the loader appears and `actionStack.unfreeze()` 300 ms later, once the fade-out has removed the dialog. That is the pattern to copy for a blocking overlay of your own.
 
+::: danger An unbalanced `freeze()` breaks Back for the whole app
+`freeze` is a module-level `let freeze = false` (`src/lib/actionStack.js:7`), set by `freeze()` and cleared by `unfreeze()` (`actionStack.js:141-146`) — **a boolean pair, not a counter.** `unfreeze()` is a plain assignment, so calling it when nothing is frozen is harmless and never throws; there is nothing to guard against.
+
+The danger is the other direction. If your plugin calls `freeze()` and then crashes, is disabled, is updated, or simply throws before the matching `unfreeze()`, the flag stays `true` for the rest of the process. `pop()` then returns on its very first line (`if (freeze) return;`, `actionStack.js:62`) — so Back is a **no-op app-wide**, and the user cannot even reach the exit flow until Acode restarts.
+
+So: **call `actionStack.unfreeze()` from your `acode.setPluginUnmount` handler, unconditionally**, and reset your own depth counter in the same place so the two can never disagree. That handler is the only safety net — `acode.unmountPlugin` (`src/lib/acode.js:784-800`) runs it on disable, uninstall and update, and nothing else will clear the flag for you.
+:::
+
 ::: warning `freeze()` is not re-entrant
 It is a boolean, not a counter. Two overlapping loaders that both freeze will both call `unfreeze()`, and the first one to finish releases the stack while the second is still up. If you freeze yourself, track your own depth and only call `unfreeze()` when it returns to zero.
 :::
@@ -367,7 +375,7 @@ function openSubScreen($subScreen) {
 - `pop()` with an empty stack exits the app (after an optional confirm). Anything you forget to `remove()` keeps the user one press away from the exit dialog instead of leaving your screen.
 - `pop()` is `async` but does not await your action. Do not rely on back-press ordering for async cleanup.
 - A throwing action is not caught and the entry is already gone.
-- `freeze()`/`unfreeze()` are a boolean pair, not a counter.
+- `freeze()`/`unfreeze()` are a boolean pair, not a counter. A freeze you never release makes Back a **permanent no-op app-wide** until Acode restarts — always `unfreeze()` in `acode.setPluginUnmount`.
 - `clearFromMark()` clears without executing, and a single mark is shared globally.
 - `onCloseApp` is a single global slot that Acode already owns.
 - `length` is a getter with no setter.
@@ -490,6 +498,14 @@ function hideBlockingOverlay($node) {
   if (--freezeDepth === 0) actionStack.unfreeze();
 }
 
+// The safety net for any freeze() above that never reached its unfreeze().
+function releaseFreezes() {
+  freezeDepth = 0;
+  // unfreeze() is a plain assignment, so this is harmless when nothing is
+  // frozen — which is exactly why it can be unconditional.
+  actionStack.unfreeze();
+}
+
 // Plugin unload / disable / update. Every id we pushed is removed here so a
 // reload never inherits a stale entry.
 acode.setPluginUnmount(PLUGIN_ID, () => {
@@ -497,6 +513,11 @@ acode.setPluginUnmount(PLUGIN_ID, () => {
   actionStack.remove(OVERLAY_ID);
   $preview = null;
   $overlay = null;
-  freezeDepth = 0;
+
+  // SAFETY NET: the freeze flag is module-level in `src/lib/actionStack.js`,
+  // so a freeze left behind by a crash in the code above outlives this
+  // plugin. `pop()` then returns immediately (`actionStack.js:62`) and Back
+  // does nothing anywhere in the app. Always run this.
+  releaseFreezes();
 });
 ```

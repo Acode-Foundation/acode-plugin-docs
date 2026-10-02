@@ -444,6 +444,10 @@ customTab.onsave = (event) => {
 
 Insert at the cursor, replace the selection, and save — all against the live CodeMirror view so dirty tracking and undo history stay correct.
 
+::: tip What `readOnly` means on a command
+`readOnly: true` means **"this command is allowed to run in a read-only editor"**, not "this command makes things read-only". The gate is `view.state.readOnly ? !!command.readOnly : true` (`src/cm/commandRegistry.js:1623-1626`), and the default for plugin commands is the permissive `true` (`:1798`). So a command that mutates the document must declare `readOnly: false` — otherwise it is allowed to run on a read-only tab, and Acode's transaction filter will not save you: it only drops transactions tagged as user edits (`input` / `delete` / `move` / `undo` / `redo`), so a bare `view.dispatch({ changes })` goes straight through (`src/cm/editorReadOnly.ts:41-50`). See [Commands API → `addCommand(descriptor)`](../utilities/commands.md#addcommanddescriptor).
+:::
+
 ```js
 const commands = acode.require('commands');
 
@@ -458,6 +462,7 @@ function activeEditorFile() {
 commands.addCommand({
   name: 'example.wrapSelection',
   description: 'Wrap the selection in a block comment',
+  readOnly: false,
   exec: (view) => {
     const file = activeEditorFile();
     if (!file) return false;
@@ -482,6 +487,7 @@ commands.addCommand({
 commands.addCommand({
   name: 'example.insertAtCursor',
   description: 'Insert a snippet at the cursor',
+  readOnly: false,
   exec: (view) => {
     const file = activeEditorFile();
     if (!file) return false;
