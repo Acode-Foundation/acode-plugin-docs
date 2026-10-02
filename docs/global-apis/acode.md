@@ -1,3 +1,8 @@
+---
+title: Acode
+description: "The global acode object: register plugins, load modules, and more."
+---
+
 # Acode
 
 ## window.acode or acode
@@ -6,92 +11,102 @@ The `acode` object is the global object that provides access to the **Acode API*
 
 ## Methods
 
-### `setPluginInit(pluginId: string, init: Function, settings? Object)`
+### `setPluginInit(pluginId, init, settings?)`
 
-This method is used to register the plugin. This method takes two parameters, `pluginId` and init function. The `pluginId` is the ID of your plugin. The `init` function is the function that will be called when the plugin is loaded.
+Registers the function Acode calls to start your plugin. See [Understanding Plugins](../getting-started/understanding-plugin.md) for when it runs.
 
-**Example:**
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `pluginId` | `string` | The `id` from your `plugin.json`. |
+| `init` | `(baseUrl, $page, options) => void \| Promise<void>` | Called when the plugin loads. See [`init` arguments](#init-arguments). |
+| `settings` | `PluginSettings` | Optional. Adds a settings page for your plugin. See [Plugin settings](#plugin-settings). |
 
 ```js
-acode.setPluginInit('com.example.plugin', (baseUrl, $page, cache) => { // [!code focus]
+acode.setPluginInit("com.example.plugin", async (baseUrl, $page, options) => {
   const commands = acode.require("commands");
   commands.addCommand({
-    name: 'example-plugin',
-    bindKey: { win: 'Ctrl-Alt-E', mac: 'Command-Alt-E' },
+    name: "example-plugin",
+    bindKey: { win: "Ctrl-Alt-E", mac: "Command-Alt-E" },
     exec: () => {
-      $page.innerHTML = `
-        <h1>Example Plugin</h1>
-        <p>This is an example plugin.</p>
-      `;
+      $page.innerHTML = `<h1>Example Plugin</h1>`;
       $page.show();
     },
   });
 });
 ```
 
-### `init(baseUrl: string, $page: WCPage, options: object)`
+#### `init` arguments
 
-When the init function is called, it will receive 3 parameters:
+| Argument | Type | Description |
+| --- | --- | --- |
+| `baseUrl` | `string` | Internal URL of your plugin folder. Use it to load files that ship with the plugin. It may not end with `/`; see [Understanding Plugins](../getting-started/understanding-plugin.md#recommended-main-js-shape). |
+| `$page` | `WcPage` | A page object that facilitates the display of content within Acode. |
+| `options.cacheFileUrl` | `string` | Internal URL of your plugin's cache file. |
+| `options.cacheFile` | `fsOperation` | File handle for the cache file. Use its `readFile()` and `writeFile()` methods. |
+| `options.firstInit` | `boolean` | `true` only on the run right after the plugin was installed. |
+| `options.ctx` | `PluginContext \| null` | Encrypted secret storage and permission checks. May be `null` if the trusted native session is unavailable, so check it before use. See [Plugin Context](../plugin-essentials/plugin-context.md). |
+| `options.fileIcons` | `object` | Plugin-bound [File Icons](../utilities/file-icons.md) API. Same as `acode.require("fileIcons")` called from your main script. Available from versionCode `1012`. |
 
-* `baseUrl: string` The base URL of the plugin. You can use this URL to access the files in the plugin directory.
+#### Plugin settings
 
-* `$page: WcPage` This page object can be used to show content.
+Pass a third argument to give your plugin a settings page under **Settings → Plugins → your plugin**.
 
-* `options: object` This object can be used to access the cached files.
+```ts
+{
+  list: SettingItem[],
+  cb: (key: string, value: any) => void
+}
+```
 
-   * `cacheFileUrl: string` Url of the cached file.
+`cb` runs when the user changes an item. You are responsible for saving the value, for example with the [Settings](../editor-components/settings.md) module.
 
-   * `cacheFile File: object` File object of the cached file. Using this object, you can write/read the file.
-   * `firstInit: boolean` If this is the first time the plugin is loaded, this value will be true. Otherwise, it will be `false`.
-   * `ctx: PluginContext | null` Your plugin's native context: encrypted secret storage and permission checks. It may be `null` if the trusted native session is unavailable, so guard it before use. See [Plugin Context (`ctx`)](../plugin-essentials/plugin-context.md).
-   * `fileIcons` Plugin-bound [File Icons](../utilities/file-icons.md) API. Same instance as `acode.require("fileIcons")` captured in the main script. Available from **versionCode `1012`**.
+**`SettingItem` fields**
 
-### `Settings Object`
+| Field | Type | Description |
+| --- | --- | --- |
+| `key` | `string` | **Required.** Identifier passed to `cb`. |
+| `text` | `string` | **Required.** Label. |
+| `info` | `string` | Description shown under the label. |
+| `value` | `any` | Current value. |
+| `valueText` | `(value) => string` | Turns `value` into the text displayed for it. |
+| `icon` | `string` | Icon class shown on the row. |
+| `iconColor` | `string` | Color of that icon. |
+| `category` | `string` | Groups items under a heading. |
+| `hidden` | `boolean` | Hide the item. |
 
-This parameter is optional. You can use this parameter to define the settings of the plugin. The settings will be displayed in the plugin page.
+Set exactly one of the following to choose how the user edits the item:
 
-Settings requires the following properties
+| Field | Type | Editing UI |
+| --- | --- | --- |
+| `checkbox` | `boolean` | Selects a checkbox UI and also supplies its initial checked state when truthy. Set it to the current boolean value, or set it to `false` and use `value` for the initial state. The value passed to `cb` is `true` or `false`. |
+| `select` | `Array<string \| [value, text]>` | A [select](../ui-components/dialogs/select.md) dialog. |
+| `prompt` | `string` | A [prompt](../ui-components/dialogs/prompt.md) with this text as the message. |
+| `promptType` | `string` | Input type of that prompt (default `text`). Only with `prompt`. |
+| `promptOptions` | `object` | [Prompt options](../ui-components/dialogs/prompt.md#promptoptions) such as `match`, `required`, `placeholder` and `test`. Only with `prompt`. |
+| `color` | `boolean` | A [color picker](../ui-components/dialogs/color-picker.md). |
+| `file` / `folder` | `boolean` | The file browser, in file or folder mode. The value is the chosen URL. |
+| `link` | `string` | Opens this URL in the browser. `cb` is not called. |
 
-* `list: Array<object>` An array of settings.
+```js
+acode.setPluginInit(
+  plugin.id,
+  init,
+  {
+    list: [
+      { key: "enabled", text: "Enable feature", checkbox: true, value: true },
+      { key: "port", text: "Port", prompt: "Port number", promptType: "number", value: 8080 },
+      { key: "mode", text: "Mode", select: ["fast", "safe"], value: "safe" },
+    ],
+    cb: (key, value) => save(key, value),
+  },
+);
+```
 
-   * `key: string` The key of the setting. This key will be used to access the value of the setting.
+### `setPluginUnmount(pluginId, unmount)`
 
-   * `text: string` The text of the setting. This text will be displayed in the settings page.
+Registers the function Acode calls when your plugin is disabled, uninstalled or reloaded. Use it to remove everything `init` added: commands, listeners, timers, UI elements and registered formatters.
 
-   * `icon?: string` The icon of the setting. This icon will be displayed in the settings page.
-
-   * `iconColor?: string` The icon color of the setting. This icon color will be displayed in the settings page.
-
-   * `info?: string` The info of the setting. This info will be displayed in the settings page.
-
-   * `value?: any` The value of the setting. This value will be displayed in the settings page.
-
-   * `valueText?: (value:any)=>string` The value text of the setting. This value text will be displayed in the settings page.
-
-   * `checkbox?: boolean` If this property is set to true, the setting will be displayed as a checkbox.
-
-   * `select?: Array<Array<string>|string>` If this property is set to an array, the setting will be displayed as a select. The array should contain the options of the select. Each option can be a string or an array of two strings. If the option is a string, the value and the text of the option will be the same. If the option is an array of two strings, the first string will be the value of the option and the second string will be the text of the option.
-
-   * `prompt?: string` If this property is set to true, the setting will be displayed as a prompt.
-
-   * `promptType?: string` The type of the prompt. This property is only used when the prompt property is set to true. The default value is text.
-
-   * `promptOptions?: Array<object>` The options of the prompt. This property is only used when the prompt property is set to true and the promptType property is set to select.
-
-     * `match: RegExp` The regular expression to match the value.
-
-     * `required: boolean` If this property is set to true, the value is required.
-
-     * `placeholder: string` The placeholder of the prompt.
-
-     * `test: (value: any) => boolean` The test function to test the value.
-
-   * `cb: (key: string, value: any) => void` The callback function that will be called when the settings are changed.
-
-
-### `setPluginUnmount(pluginId: string, unmount: Function)`
-
-This method is used to set the unmount function. This function will be called when the plugin is unloaded. You can use this function to clean up the plugin.
+Synchronous errors thrown by `unmount` are caught and logged, so they will not stop the plugin from unloading. Acode does not await the handler: if an `async` handler rejects, that rejection is not caught and may become an unhandled rejection. Acode also deletes your plugin's cache file after calling `unmount`.
 
 **Example:**
 
@@ -102,9 +117,9 @@ acode.setPluginUnmount("com.example.plugin", () => { // [!code focus]
 });
 ```
 
-### `define(moduleName: string, module: any)`
+### `define(moduleName, module)`
 
-This method is used to define a module. This method takes two parameters, `moduleName` and module. The `moduleName` is the name of the module. The module is the module object. Module name is case insensitive.
+Registers a module that other plugins can load with [`require`](#require-modulename). Module names are case-insensitive. Defining a name that already exists replaces the module, so prefix your names (for example `"my-plugin.utils"`) to avoid clashing with built-ins.
 
 **Example:**
 
@@ -120,7 +135,7 @@ acode.define("say-hello", {
 acode.require("say-hello").hello(); // Hello World!
 ```
 
-### `require(moduleName: string)`
+### `require(moduleName)`
 
 This method is used to require a module. This method takes one parameter, `moduleName`. The `moduleName` is the name of the module. Module name is case insensitive.
 
@@ -130,9 +145,9 @@ This method is used to require a module. This method takes one parameter, `modul
 acode.require("say-hello").hello(); // Hello World!
 ```
 
-### `exec(command: string, value?: any)`
+### `exec(command, value?)`
 
-This method executes a command defined in file `src/lib/commands.js`. This method takes one or two parameters, `command` and `value`. The command is the name of the command. The value is the value of the command. Command name is case insensitive.
+Runs one of Acode's built-in app commands (the ones defined in Acode's `src/lib/commands.js`) and returns its result, or `false` if no command has that name. This is different from the [Commands API](../utilities/commands.md), which registers your own editor commands.
 
 **Example:**
 
@@ -140,9 +155,13 @@ This method executes a command defined in file `src/lib/commands.js`. This metho
 acode.exec("console"); // Opens the console
 ```
 
-### `registerFormatter(pluginId: string, extensions: string[], format: Function, displayName?: string)`
+### `registerFormatter(pluginId, extensions, format, displayName?)`
 
-This method is used to register a formatter. It takes `pluginId`, `extensions`, formatter function, and optional display name.
+Registers a code formatter. Users choose it per language in **Settings → Formatter**.
+
+- `extensions`: file extensions the formatter supports, for example `["js", "ts"]`. An empty array or missing value means all files (`"*"`).
+- `format`: function that formats the active file. It receives no arguments and should modify the editor itself.
+- `displayName`: name shown in the formatter picker. Always pass it; there is no fallback, so the picker shows no name without it.
 
 **Example:**
 
@@ -158,9 +177,9 @@ acode.registerFormatter("com.example.plugin", ["js"], () => { // [!code focus]
 });
 ```
 
-### `unregisterFormatter(pluginId: string)`
+### `unregisterFormatter(pluginId)`
 
-This method is used to unregister a formatter. This method takes one parameter, `pluginId`. The pluginId is the ID of your plugin.
+Removes the formatter registered with `pluginId` and clears it from any language where the user had selected it. Call it from your unmount handler.
 
 ### `format(selectIfNull = true): Promise<boolean>`
 
@@ -190,9 +209,13 @@ Returns formatter options for the given extensions.
 const options = acode.getFormatterFor(["js", "ts"]);
 ```
 
-### `addIcon(iconName: string, iconSrc: string, options?: { monochrome?: boolean })`
+### `addIcon(iconName, iconSrc, options?)`
 
-This method is used to add an icon. This method takes two parameters, `iconName` , `iconSrc` and a optional. The `iconName` is the name of the icon. The `iconSrc` is the URL of the icon. If `options.monochrome` true, uses CSS masks to render the icon. This allows it to inherit the theme's currentColor(in case of svg).
+Registers a CSS class that shows an image as an icon.
+
+- `iconName`: the class name to create.
+- `iconSrc`: URL or data URI of the image.
+- `options.monochrome`: when `true`, the image is used as a mask and takes the current text color, so an SVG follows the theme. Otherwise the image keeps its own colors.
 
 ::: info 
 The `options.monochrome` is added in versionCode `967`.
@@ -212,9 +235,14 @@ Later you can use the icon by adding to class name my-icon to an element.
 <i class="icon my-icon"></i>
 ```
 
-### `toInternalUrl(url: string): Promise<string>`
+### `toInternalUrl(url)`
 
-When making Ajax or fetch requests, you need to convert file:// URLs to internal URLs. This method do it for you.
+Converts a `file://` URL into an internal URL that `fetch`, `<img>` and `<script>` can load. Returns a `Promise<string>`.
+
+```js
+const src = await acode.toInternalUrl("file:///storage/emulated/0/photo.png");
+image.src = src;
+```
 
 ### `pushNotification(title: string, message: string, options?: Object)` <Badge type="tip" text="v954+" />
 

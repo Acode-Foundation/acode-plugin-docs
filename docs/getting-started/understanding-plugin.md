@@ -1,3 +1,8 @@
+---
+title: Understanding Plugins
+description: How Acode loads, runs and unloads a plugin.
+---
+
 # Understanding How Plugins Work
 
 This page is the practical mental model for writing Acode plugins: what Acode does, what your plugin must do, and what happens during load/unload.

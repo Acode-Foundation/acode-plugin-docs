@@ -1,114 +1,125 @@
-# Plugin Main File
+---
+title: Core File (main.js)
+description: The entry point of a plugin - how to register init and unmount handlers.
+---
 
-The `main.js`(can be of any name but that must be specified in `plugin.json`) file is the heart of your Acode plugin, serving as the entry point and execution hub when the plugin is loaded. Here we'll explore the essential concept of `main.js`, focusing on initialization, registration, and cleanup.
+# Core File: `main.js`
 
-For loader behavior and runtime lifecycle details, see [Understanding Plugin Lifecycle](../getting-started/understanding-plugin.md).
+The core file is the script Acode runs when your plugin loads. It can have any name and location, as long as `plugin.json` points to it with the [`main`](./manifest.md#main) field.
 
-## Plugin Initialization
+It has two jobs:
 
-### Entry Point for Your Plugin
+1. **Register** an `init` function that starts your plugin.
+2. **Register** an `unmount` function that undoes everything `init` did.
 
-The `main.js` file acts as the entry point for your Acode plugin. It is executed upon loading, providing the ideal space to initialize and configure your plugin.
+For when and how Acode calls them, see [Understanding Plugins](../getting-started/understanding-plugin.md).
 
-### Access to Acode API
+::: tip You rarely write this by hand
+The [official templates](../getting-started/create-plugin.md#templates) already contain the registration code below. You only fill in the `init` and `destroy` methods of the `AcodePlugin` class.
+:::
 
-Within `main.js`, you gain access to the Acode API through the global variable [acode](../global-apis/acode). This variable serves as your gateway to interact with various Acode methods, enabling seamless integration of your plugin with the editor.
+## Register the plugin
 
-### Registering Your Plugin
+Your script has access to the global [`acode`](../global-apis/acode.md) object. Register the init function with `acode.setPluginInit`:
 
-To register your plugin, utilize the `acode.setPluginInit(pluginId: string, init: Function)` method. This method requires two parameters:
+```js
+acode.setPluginInit(pluginId, init, settings?)
+```
 
-1. **pluginId:**
-   - The unique identifier for your plugin.
+| Parameter | Description |
+| --- | --- |
+| `pluginId` | The `id` from your `plugin.json`. |
+| `init` | Function Acode calls to start the plugin. |
+| `settings` | Optional. Adds a settings page for your plugin. See [Plugin settings](../global-apis/acode.md#plugin-settings). |
 
-2. **init function:**
-   - The function to be executed when the plugin is loaded.
+### `init` arguments
 
-Upon execution, the `init` function will receive three arguments:
+`init` receives three arguments:
 
-- **baseUrl (string):**
-  - The base URL of the plugin, allowing access to files within the plugin directory.
+| Argument | Type | Description |
+| --- | --- | --- |
+| `baseUrl` | `string` | URL of your plugin folder, for loading bundled files. |
+| `$page` | `WcPage` | A page object that facilitates the display of content within Acode. |
+| `options` | `object` | Extra information, described below. |
 
-- **$page (WcPage):**
-  - A page object that facilitates the display of content within Acode.
+`options` contains:
 
-- **cache (object):**
-  - An object providing access to cached files, including:
-    - **cacheFileUrl (string):**
-      - URL of the cached file.
-    - **cacheFile (File):**
-      - File object of the cached file, enabling file read/write operations.
-    - **firstInit (boolean):**
-      - `true` when the plugin is being installed/loaded for the first time.
-    - **ctx (PluginContext):**
-      - Your plugin's native context. Provides encrypted secret storage (`getSecret`, `setSecret`, `deleteSecret`, `clearAllSecrets`) and permission checks (`grantedPermission`, `listAllPermissions`). See [Plugin Context (`ctx`)](./plugin-context.md).
-    - **fileIcons:**
-      - Plugin-bound [File Icons](../utilities/file-icons.md) API (`register`, `icon`, `onChange`). Same instance as `acode.require("fileIcons")` captured in the main script. Available from **versionCode `1012`**.
+| Property | Description |
+| --- | --- |
+| `cacheFileUrl` | URL of your plugin's cache file. |
+| `cacheFile` | File object for the cache file, so you can read and write it. |
+| `firstInit` | `true` only on the run right after installation. |
+| `ctx` | Encrypted secret storage and permission checks. See [Plugin Context](./plugin-context.md). |
+| `fileIcons` | Plugin-bound [File Icons](../utilities/file-icons.md) API. Available from versionCode `1012`. |
 
-### Example main.js File
+Every property is documented in more detail under [`acode.setPluginInit`](../global-apis/acode.md#init-arguments).
 
-The official templates structure the plugin as an `AcodePlugin` class. Here is an illustrative example of a `main.js` file:
+## Register the unmount handler
 
-```javascript
+```js
+acode.setPluginUnmount(pluginId, unmount)
+```
+
+Acode calls `unmount` when the plugin is disabled, uninstalled or reloaded. Use it to remove everything you added: commands, event listeners, timers, UI elements and formatters. Anything left behind stays active until Acode restarts.
+
+::: warning
+Do not skip this. A plugin that does not clean up will leave duplicate commands and listeners behind every time it is reloaded during development.
+:::
+
+## Full example
+
+This is the shape used by the official templates:
+
+```js
 import plugin from "../plugin.json";
 
 class AcodePlugin {
-	baseUrl = "";
+  baseUrl = "";
 
-	async init($page, cacheFile, cacheFileUrl, firstInit, ctx, fileIcons) {
-		const commands = acode.require("commands");
-		commands.addCommand({
-			name: "example-plugin",
-			bindKey: { win: "Ctrl-Alt-E", mac: "Command-Alt-E" },
-			exec: () => {
-				$page.innerHTML = `
+  async init($page, cacheFile, cacheFileUrl, firstInit, ctx, fileIcons) {
+    const commands = acode.require("commands");
+
+    commands.addCommand({
+      name: "example-plugin",
+      description: "Open the example plugin",
+      bindKey: { win: "Ctrl-Alt-E", mac: "Command-Alt-E" },
+      exec: () => {
+        $page.innerHTML = `
           <h1>Example Plugin</h1>
           <p>This is an example plugin.</p>
         `;
-				$page.show();
-			},
-		});
-	}
+        $page.show();
+      },
+    });
+  }
 
-	async destroy() {
-		const commands = acode.require("commands");
-		commands.removeCommand("example-plugin");
-	}
+  async destroy() {
+    const commands = acode.require("commands");
+    commands.removeCommand("example-plugin");
+  }
 }
 
 if (window.acode) {
-	const acodePlugin = new AcodePlugin();
+  const acodePlugin = new AcodePlugin();
 
-	acode.setPluginInit(plugin.id, async (baseUrl, $page, { cacheFileUrl, cacheFile, firstInit, ctx, fileIcons }) => {
-		acodePlugin.baseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-		await acodePlugin.init($page, cacheFile, cacheFileUrl, firstInit, ctx, fileIcons);
-	});
+  acode.setPluginInit(
+    plugin.id,
+    async (baseUrl, $page, { cacheFileUrl, cacheFile, firstInit, ctx, fileIcons }) => {
+      // Make sure baseUrl ends with "/" so you can append file names to it
+      acodePlugin.baseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+      await acodePlugin.init($page, cacheFile, cacheFileUrl, firstInit, ctx, fileIcons);
+    },
+  );
 
-	acode.setPluginUnmount(plugin.id, () => {
-		acodePlugin.destroy();
-	});
+  acode.setPluginUnmount(plugin.id, () => {
+    acodePlugin.destroy();
+  });
 }
 ```
 
-## Plugin Unmount Function
+The `if (window.acode)` check lets the same bundle be loaded outside Acode (for example in tests) without throwing.
 
-The `main.js` file must also define cleanup logic, which is called when the plugin is unloaded or uninstalled. This cleanup allows you to remove listeners, commands, intervals, and UI hooks associated with your plugin. In the class template this lives in the `destroy()` method, registered via `acode.setPluginUnmount`.
+## Related
 
-### Example Unmount Function
-
-```javascript
-acode.setPluginUnmount(plugin.id, () => {
-  const commands = acode.require("commands");
-  commands.removeCommand('example-plugin');
-});
-```
-
-In this example, the unmount function removes the 'example-plugin' command, ensuring that the plugin's impact on Acode is cleanly reverted upon unloading.
-
-::: tip
-For command registration APIs, see [Commands](../utilities/commands.md).
-:::
-
-:::tip
-You will not need to write these `init`/`destroy` registration functions for your plugin because the templates ship with them. You only need to write your plugin code inside the `AcodePlugin` class.
-:::
+- [Commands](../utilities/commands.md): register editor commands
+- [Understanding Plugins](../getting-started/understanding-plugin.md): lifecycle details

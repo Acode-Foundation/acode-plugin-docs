@@ -1,201 +1,182 @@
 ---
 lang: en-US
-title: Create Acode Plugin
+title: Create an Acode Plugin
+description: Set up a plugin project from a template, run it on your phone, and publish it.
 ---
 
-# Create Acode Plugin
+# Create an Acode Plugin
 
-## Overview
+Plugins are written in JavaScript (or TypeScript) and run inside Acode. This page takes you from an empty folder to a plugin installed on your device and, when you are ready, published.
 
-Acode opens up a world of possibilities with its extensibility through plugins. In this guide, you'll learn how to create plugins using JavaScript, with the added option of TypeScript. Whether you're customizing your coding experience or adding entirely new features, creating plugins for Acode is a straightforward and rewarding process.
-
-## Plugin Structure
-
-Acode plugins follow a specific structure within a zip file. The necessary components include:
-
-1. **plugin.json:**
-
-   - Contains crucial information about the plugin, such as its name, version, author, and more.
-
-2. **main.js:**
-
-   - The heart of the plugin, this file contains the actual plugin code.
-
-3. **readme.md:**
-   - Contains the description or about plugin
-
-3. **changelogs.md:**
-   - contains changelogs of your plugin updates.
-
-## Plugin Templates
-
-To make your journey smoother, we provide comprehensive plugin templates, which are preconfigured and catering to various use cases:
-
-1. **[JavaScript Template](https://github.com/Acode-Foundation/acode-plugin)** <Badge type="tip" text="official" /> : Javascript based template for plugin development and comes preconfigured
-
-2. **[TypeScript Template](https://github.com/Acode-Foundation/AcodeTSTemplate)** <Badge type="tip" text="official" /> : Typescript template for plugin development and comes with type checking and all typescript feature
-
-## Getting Started
-
-1.  **Clone the Plugin Template:**
-
-    - Choose the template that suits your needs and clone it.
-
-2.  **Customize plugin.json:**
-
-    - Open the `plugin.json` file and update it with your plugin's information.
-
-3.  **Install the dependency:**
-
-    - Install the required dependency by your package manager but first navigate to the plugin template folder by `cd acode-template`
-
-    ::: code-group
-    ```sh [npm]
-    $ npm install
-    ```
-
-    ```sh [pnpm]
-    $ pnpm install
-    ```
-
-    ```sh [yarn]
-    $ yarn install
-    ```
-
-    ```sh [bun]
-    $ bun install
-    ```
-    :::
-
-4.  **Develop Locally:**
-
-    - Use given commands to initiate a development server that watches for changes.
-    - The development server automatically creates a plugin zip file, ready for installation.
-    
-    ::: code-group
-    ```sh [npm]
-    $ npm run dev
-    ```
-
-    ```sh [pnpm]
-    $ pnpm dev
-    ```
-
-    ```sh [yarn]
-    $ yarn dev
-    ```
-
-    ```sh [bun]
-    $ bun run dev
-    ```
-    :::
-
-    - Or you can build every time manually on changes using(this will build production build):
-
-    ::: code-group
-    ```sh [npm]
-    $ npm run build
-    ```
-
-    ```sh [pnpm]
-    $ pnpm build
-    ```
-
-    ```sh [yarn]
-    $ yarn build
-    ```
-
-    ```sh [bun]
-    $ bun run build
-    ```
-    :::
-
-5.  **Install the Plugin:**
-
-    - Use the **REMOTE** option in Acode's plugin manager.
-    - This option is available on both sidebar extension tab or on Plugin page from settings.
-    - Provide the plugin URL (e.g., `http://\<ip\>:3000/dist.zip`) when prompted.
-    - Or if you are building manually then you can use the **Local** option in Acode's plugin manager and select the plugin zip
-
-:::info
-Development server will only build the zip on file changes
+::: tip New to plugins?
+Read [Understanding Plugins](./understanding-plugin.md) after this page. It explains how Acode loads and runs your code.
 :::
 
-:::tip 
-For local development, start a dev server using `npm run dev`. In Acode, use the **Remote** option, either from the **sidebar** or the **plugin page**. Enter the server URL, hit **Install**, and the plugin will be installed.  
+## Plugin structure
 
-It's more convenient to manage this from the sidebar. When you install a local plugin(either using url or selecting the zip), Acode will add a **reload** icon in the **Extensions** tab of the sidebar. This is useful because the server automatically builds the plugin ZIP when changes are made. Simply press the reload button to apply the latest changes instantly.  
+A plugin is a zip file with these files at its root:
 
-This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
+| File | Required | Purpose |
+| --- | --- | --- |
+| `plugin.json` | Yes | The [manifest](../plugin-essentials/manifest.md): id, name, version and more. |
+| `main.js` | Yes | The [core file](../plugin-essentials/core-file.md) with your plugin code. Its name and location are set by `main` in the manifest. |
+| `readme.md` | Recommended | Description shown in the plugin store. |
+| `icon.png` | Recommended | Icon shown in the plugin store (50 KB or smaller). |
+| `changelogs.md` | No | Release notes. Also list it in `files` in the manifest. |
+
+## Templates
+
+Start from one of the official templates. Both come preconfigured with a bundler and build script that creates the zip for you.
+
+| Template | Use it when |
+| --- | --- |
+| [JavaScript template](https://github.com/Acode-Foundation/acode-plugin) <Badge type="tip" text="official" /> | You want the simplest setup. |
+| [TypeScript template](https://github.com/Acode-Foundation/AcodeTSTemplate) <Badge type="tip" text="official" /> | You want type checking and editor autocomplete for the Acode API. |
+
+You can also start from scratch or use a different bundler. The only hard requirement is a zip with `plugin.json` at its root and the file named by `main` at the path it declares.
+
+## Set up the project
+
+### 1. Clone a template
+
+```sh
+git clone https://github.com/Acode-Foundation/acode-plugin.git my-plugin
+cd my-plugin
+```
+
+Replace the URL with the TypeScript template if you prefer it.
+
+### 2. Edit `plugin.json`
+
+Set at least a unique `id`, a `name` and a `version`. Every field is explained in the [manifest reference](../plugin-essentials/manifest.md).
+
+### 3. Install dependencies
+
+::: code-group
+```sh [npm]
+$ npm install
+```
+
+```sh [pnpm]
+$ pnpm install
+```
+
+```sh [yarn]
+$ yarn install
+```
+
+```sh [bun]
+$ bun install
+```
 :::
 
-## Creating Plugins with the CLI<Badge type="warning" text="community" />
+### 4. Start the development server
 
-You can also quickly scaffold new Acode plugins using the [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli). This tool provides an interactive wizard to generate a plugin project from the official JavaScript or TypeScript templates.
-
-### Installation
-
-If you have Rust installed, you can install the CLI with:
-
-```bash
-cargo install acode-plugin-cli
+::: code-group
+```sh [npm]
+$ npm run dev
 ```
 
-### Usage
-
-Run the CLI in your terminal:
-
-```bash
-acode-plugin-cli
+```sh [pnpm]
+$ pnpm dev
 ```
 
-The wizard will guide you to:
+```sh [yarn]
+$ yarn dev
+```
 
-- Choose plugin name, ID, version, and description
-- Enter author information
-- Pick license and keywords
-- Select JavaScript or TypeScript template
+```sh [bun]
+$ bun run dev
+```
+:::
 
-After completion, your plugin folder will be ready to use.
+The server watches your files and rebuilds the plugin zip whenever you save a change.
 
-## Building and Publishing
+::: info
+The server only rebuilds on file changes. If you start it and change nothing, no zip is created yet.
+:::
 
-To share your plugin with the Acode community, follow these steps:
+If you prefer to build by hand, run the production build instead. It creates a smaller zip:
 
-1. **Bundle for production:**
+::: code-group
+```sh [npm]
+$ npm run build
+```
 
-   - Use `build` command to create a production build. which will be lower in size
+```sh [pnpm]
+$ pnpm build
+```
+
+```sh [yarn]
+$ yarn build
+```
+
+```sh [bun]
+$ bun run build
+```
+:::
+
+### 5. Install the plugin in Acode
+
+Open Acode's plugin manager from either the **Extensions** tab in the sidebar or **Settings → Plugins**, then pick an install source:
+
+- **Remote**: enter the URL of the zip served by your dev server, for example `http://<your-ip>:3000/dist.zip`. Use this while developing.
+- **Local**: choose a zip file on your device. Use this if you built by hand.
+
+::: tip Reload without reinstalling
+Plugins installed from a URL or a local zip get a **reload** icon in the **Extensions** tab of the sidebar. After the dev server rebuilds the zip, tap reload to load the new version immediately.
+:::
+
+## Create a plugin with the CLI <Badge type="warning" text="community" />
+
+The community-maintained [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli) scaffolds a project from the official templates with an interactive wizard.
+
+Install it (requires [Rust](https://www.rust-lang.org/tools/install)):
+
+```sh
+$ cargo install acode-plugin-cli
+```
+
+Run it:
+
+```sh
+$ acode-plugin-cli
+```
+
+The wizard asks for the plugin name, id, version and description, author details, license and keywords, and whether to use the JavaScript or TypeScript template. When it finishes, the project is ready to use.
+
+## Build and publish
+
+1. **Create a production build.** It is smaller than the development build.
 
    ::: code-group
+   ```sh [npm]
+   $ npm run build
+   ```
 
-    ```sh [npm]
-    $ npm run build
-    ```
+   ```sh [pnpm]
+   $ pnpm build
+   ```
 
-    ```sh [pnpm]
-    $ pnpm build
-    ```
+   ```sh [yarn]
+   $ yarn build
+   ```
 
-    ```sh [yarn]
-    $ yarn build
-    ```
+   ```sh [bun]
+   $ bun run build
+   ```
+   :::
 
-    ```sh [bun]
-    $ bun run build
-    ```
+2. **Upload the zip** to [acode.app](https://acode.app) to publish it in the plugin store. Watch the [publishing walkthrough](https://youtube.com/shorts/cxF2pxyN1HM?si=kQ5_BRtIO2RU-zhb) if you have not done it before.
 
-2. **Publish:**
+To release an update, increase `version` in `plugin.json`, build again and upload the new zip. See [Publishing updates](../plugin-essentials/manifest.md#publishing-updates).
 
-   - Publish your release build on [Acode's](https://acode.app) official website, making your plugin accessible to the broader community.
+## Video tutorial
 
-   - Tutorial for publishing a plugin : [Youtube](https://youtube.com/shorts/cxF2pxyN1HM?si=kQ5_BRtIO2RU-zhb)
+[How to create Acode plugins](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
 
-## Tutorial
+## Next steps
 
-- Checkout a small tutorial of 👉 [How to create Acode Plugins?](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
-
-## Customization
-
-Certainly! You have the flexibility to either utilize your own template or start your plugin from scratch. Additionally, you're free to employ alternative bundlers and tools. We'll delve deeper into these customization possibilities in subsequent sections.
-
-Happy coding, and may your plugins bring new dimensions to your Acode experience! 🚀✨
+- [Understanding Plugins](./understanding-plugin.md): the lifecycle of a plugin
+- [Core File](../plugin-essentials/core-file.md): what `main.js` must contain
+- [Acode API](../global-apis/acode.md): the API your plugin talks to

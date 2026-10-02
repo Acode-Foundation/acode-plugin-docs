@@ -1,3 +1,8 @@
+---
+title: Plugin Context (ctx)
+description: Encrypted secret storage and permission checks for your plugin.
+---
+
 # Plugin Context (`ctx`)
 
 The plugin context (`ctx`) is the third argument of the options object passed to your plugin's `init` function. It is a native-backed handle for your plugin that provides **encrypted secret storage** and **permission checks**.
