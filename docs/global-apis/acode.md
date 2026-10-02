@@ -78,11 +78,11 @@ Set exactly one of the following to choose how the user edits the item:
 
 | Field | Type | Editing UI |
 | --- | --- | --- |
-| `checkbox` | `boolean` | A checkbox. The value passed to `cb` is `true` or `false`. |
+| `checkbox` | `boolean` | Selects a checkbox UI and also supplies its initial checked state when truthy. Set it to the current boolean value, or set it to `false` and use `value` for the initial state. The value passed to `cb` is `true` or `false`. |
 | `select` | `Array<string \| [value, text]>` | A [select](../ui-components/dialogs/select.md) dialog. |
 | `prompt` | `string` | A [prompt](../ui-components/dialogs/prompt.md) with this text as the message. |
 | `promptType` | `string` | Input type of that prompt (default `text`). Only with `prompt`. |
-| `promptOptions` | `object` | [Prompt options](../ui-components/dialogs/prompt.md#options) such as `match`, `required`, `placeholder` and `test`. Only with `prompt`. |
+| `promptOptions` | `object` | [Prompt options](../ui-components/dialogs/prompt.md#promptoptions) such as `match`, `required`, `placeholder` and `test`. Only with `prompt`. |
 | `color` | `boolean` | A [color picker](../ui-components/dialogs/color-picker.md). |
 | `file` / `folder` | `boolean` | The file browser, in file or folder mode. The value is the chosen URL. |
 | `link` | `string` | Opens this URL in the browser. `cb` is not called. |
@@ -106,7 +106,7 @@ acode.setPluginInit(
 
 Registers the function Acode calls when your plugin is disabled, uninstalled or reloaded. Use it to remove everything `init` added: commands, listeners, timers, UI elements and registered formatters.
 
-Errors thrown by `unmount` are caught and logged, so they will not stop the plugin from unloading. Acode also deletes your plugin's cache file after `unmount` runs.
+Synchronous errors thrown by `unmount` are caught and logged, so they will not stop the plugin from unloading. Acode does not await the handler: if an `async` handler rejects, that rejection is not caught and may become an unhandled rejection. Acode also deletes your plugin's cache file after calling `unmount`.
 
 **Example:**
 
@@ -161,7 +161,7 @@ Registers a code formatter. Users choose it per language in **Settings → Forma
 
 - `extensions`: file extensions the formatter supports, for example `["js", "ts"]`. An empty array or missing value means all files (`"*"`).
 - `format`: function that formats the active file. It receives no arguments and should modify the editor itself.
-- `displayName`: name shown in the formatter picker. Defaults to the plugin id if omitted.
+- `displayName`: name shown in the formatter picker. Always pass it; there is no fallback, so the picker shows no name without it.
 
 **Example:**
 
@@ -209,7 +209,7 @@ Returns formatter options for the given extensions.
 const options = acode.getFormatterFor(["js", "ts"]);
 ```
 
-### `addIcon(iconName, iconSrc, options?)` <Badge type="tip" text="monochrome: v967+" />
+### `addIcon(iconName, iconSrc, options?)`
 
 Registers a CSS class that shows an image as an icon.
 

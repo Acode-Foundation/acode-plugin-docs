@@ -33,7 +33,7 @@ Start from one of the official templates. Both come preconfigured with a bundler
 | [JavaScript template](https://github.com/Acode-Foundation/acode-plugin) <Badge type="tip" text="official" /> | You want the simplest setup. |
 | [TypeScript template](https://github.com/Acode-Foundation/AcodeTSTemplate) <Badge type="tip" text="official" /> | You want type checking and editor autocomplete for the Acode API. |
 
-You can also start from scratch or use a different bundler. The only hard requirement is a zip with `plugin.json` and the file named by `main` at its root.
+You can also start from scratch or use a different bundler. The only hard requirement is a zip with `plugin.json` at its root and the file named by `main` at the path it declares.
 
 ## Set up the project
 
@@ -155,7 +155,7 @@ The wizard asks for the plugin name, id, version and description, author details
    ```
 
    ```sh [pnpm]
-   $  pnpm build
+   $ pnpm build
    ```
 
    ```sh [yarn]

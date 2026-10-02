@@ -112,7 +112,7 @@ The icon must be **50 KB or smaller**.
 
 ### `files`
 
-Extra files your plugin needs at runtime besides `main`, `readme` and `icon`: for example a web worker, fonts or images. List every one so it ends up in the zip, then load it through `baseUrl`.
+Extra files your plugin needs at runtime besides `main`, `readme` and `icon`: for example a web worker, fonts or images. When building with the official templates, list each extra file here so the pack-zip script includes it in the zip; then load it through `baseUrl`. Acode itself does not use this field to package files.
 
 ```json
 "files": ["worker.js", "fonts/Mono.woff2", "images/logo.png"]
@@ -149,7 +149,7 @@ Search terms that help people find the plugin.
 Path of a Markdown changelog.
 
 ::: warning
-The file must be listed in [`files`](#files), or it will not be in the zip.
+When building with the official templates, list this file in [`files`](#files) or the pack-zip script will not include it in the zip.
 :::
 
 ### `contributors`
