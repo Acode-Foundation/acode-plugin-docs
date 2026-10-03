@@ -1,3 +1,8 @@
+---
+title: Executor
+description: Run shell commands without opening a terminal.
+---
+
 # Executor
 
 The `Executor` API lets you run shell commands on the device without opening a visual terminal session. It supports one-off commands, long-running processes with real-time streaming, stdin writes, and background execution via a foreground service.

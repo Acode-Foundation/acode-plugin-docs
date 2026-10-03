@@ -1,3 +1,8 @@
+---
+title: LSP
+description: Register language servers for CodeMirror LSP support.
+---
+
 # LSP API
 
 Use the LSP API to register language servers for Acode's CodeMirror LSP integration.

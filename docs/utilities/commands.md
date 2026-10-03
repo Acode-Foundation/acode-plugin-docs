@@ -1,3 +1,8 @@
+---
+title: Commands
+description: Register commands for the palette and key bindings, and run them from code.
+---
+
 # Commands API
 
 Use the Commands API to register commands for command palette/keybindings and execute them programmatically.

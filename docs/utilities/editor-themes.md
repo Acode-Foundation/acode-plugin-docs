@@ -1,3 +1,8 @@
+---
+title: Editor Themes
+description: Register CodeMirror themes that change how code is colored.
+---
+
 # Editor Themes API
 
 The Editor Themes API lets plugins register CodeMirror themes in Acode.

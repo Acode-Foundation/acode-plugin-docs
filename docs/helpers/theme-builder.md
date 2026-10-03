@@ -1,150 +1,186 @@
+---
+title: Theme Builder
+description: Create and customize app themes with the ThemeBuilder class.
+---
+
 # Theme Builder
 
+`ThemeBuilder` describes an **app theme**: a named set of colors that Acode turns into CSS variables on `:root`. Build one, then register it with the [`themes`](./themes.md) module.
 
-### Introduction
-
-The `ThemeBuilder` api from the `acode` core libraries  provides a solution for creating and customizing themes in Acode . It offers control over various UI elements, colors, and styles.
-
-### Basic Usage
-
-1. **Import the ThemeBuilder Class**
-
-```javascript
-const ThemeBuilder = acode.require('themeBuilder');
+```js
+const ThemeBuilder = acode.require("themeBuilder");
 ```
 
-2. **Create a Theme Instance**
+## Create a theme
 
-```javascript
-const myTheme = new ThemeBuilder("MyDarkTheme", "dark");
+```js
+new ThemeBuilder(name, type, version);
 ```
 
-- **Theme Name**: A descriptive name reflecting the theme's style (e.g., `"MyDarkTheme"`)
-- **Theme Mode**: Specifies the base mode (`"light"` or `"dark"`)
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | `""` | Theme name shown to the user. Its lowercase form is the theme [`id`](#id). |
+| `type` | `"dark" \| "light"` | `"dark"` | Base color scheme. Sets the `theme-type` attribute on `<body>`. |
+| `version` | `"free" \| "paid"` | `"free"` | Leave as `"free"`. Themes that are not `"free"` are treated as Pro themes, and Acode falls back to the default theme for users without Pro. |
 
-3. **Customize Theme Properties**
-
-```javascript
-myTheme.primaryColor = "#333";
-myTheme.secondaryColor = "#666";
-myTheme.textColor = "#ffffff";
-myTheme.backgroundColor = "#121212";
+```js
+const theme = new ThemeBuilder("Midnight", "dark");
+theme.primaryColor = "#0b1020";
+theme.primaryTextColor = "#e6e9f5";
 ```
 
-### Customizable Theme Properties
+Every color starts from a default (listed below), so you only set the values you want to change. Colors can be any CSS color string: hex, `rgb()`, `rgba()`, and so on.
 
-#### Color Palette
-- `primaryColor`: Main color for primary elements
-- `secondaryColor`: Accent color for secondary elements
-- `textColor`: Main text color
-- `backgroundColor`: Application background color
-- `activeColor`: Color for active elements
-- `dangerColor`: Color for error or destructive actions
-- `linkTextColor`: Color for clickable links
+## Color and style properties
 
-#### Typography
-- `fontFamily`: Font type and fallbacks
-- `fontSize`: Base font size
-- `fontWeight`: Text thickness
+### Surface & text
 
-#### Specific Element Styles
-- `buttonBackgroundColor`: Button background
-- `buttonTextColor`: Button text color
-- `borderColor`: Element border color
-- `popupBackgroundColor`: Popup/modal background
-- `scrollbarColor`: Scrollbar color
+| Property | CSS variable | Default |
+| --- | --- | --- |
+| `primaryColor` | `--primary-color` | `rgb(153, 153, 255)` |
+| `primaryTextColor` | `--primary-text-color` | `rgb(255, 255, 255)` |
+| `secondaryColor` | `--secondary-color` | `rgb(255, 255, 255)` |
+| `secondaryTextColor` | `--secondary-text-color` | `rgb(37, 37, 37)` |
+| `linkTextColor` | `--link-text-color` | `rgb(97, 94, 253)` |
+| `borderColor` | `--border-color` | `rgba(122, 122, 122, 0.2)` |
+| `boxShadowColor` | `--box-shadow-color` | `rgba(0, 0, 0, 0.2)` |
+| `scrollbarColor` | `--scrollbar-color` | `rgba(0, 0, 0, 0.3)` |
 
-### More Styling Options
+### Accent & state
 
-#### Color Manipulation
-```javascript
-// Generate a darker version of the primary color
-const darkenedPrimaryColor = myTheme.darkenPrimaryColor();
+| Property | CSS variable | Default |
+| --- | --- | --- |
+| `activeColor` | `--active-color` | `rgb(51, 153, 255)` |
+| `activeTextColor` | `--active-text-color` | `rgb(255, 215, 0)` |
+| `activeIconColor` | `--active-icon-color` | `rgba(0, 0, 0, 0.2)` |
+| `errorTextColor` | `--error-text-color` | `rgb(255, 185, 92)` |
+| `successTextColor` | `--success-text-color` | `rgb(22, 152, 44)` |
+| `dangerColor` | `--danger-color` | `rgb(160, 51, 0)` |
+
+### Buttons
+
+| Property | CSS variable | Default |
+| --- | --- | --- |
+| `buttonBackgroundColor` | `--button-background-color` | `rgb(51, 153, 255)` |
+| `buttonTextColor` | `--button-text-color` | `rgb(255, 255, 255)` |
+| `buttonActiveColor` | `--button-active-color` | `rgb(44, 142, 240)` |
+
+### Popups & dialogs
+
+| Property | CSS variable | Default |
+| --- | --- | --- |
+| `popupBackgroundColor` | `--popup-background-color` | `rgb(255, 255, 255)` |
+| `popupTextColor` | `--popup-text-color` | `rgb(37, 37, 37)` |
+| `popupIconColor` | `--popup-icon-color` | `rgb(153, 153, 255)` |
+| `popupActiveColor` | `--popup-active-color` | `rgb(169, 0, 0)` |
+| `popupBorderColor` | `--popup-border-color` | `rgba(0, 0, 0, 0)` |
+| `popupBorderRadius` | `--popup-border-radius` | `4px` |
+
+### Layout
+
+| Property | CSS variable | Default |
+| --- | --- | --- |
+| `fileTabWidth` | `--file-tab-width` | `120px` |
+
+::: tip Start with four
+Most themes look coherent after setting just `primaryColor`, `primaryTextColor`, `secondaryColor` and `secondaryTextColor`. Adjust the rest as needed.
+:::
+
+::: info
+The CSS variable `--danger-text-color` exists (default `rgb(255, 255, 255)`) but has no property on `ThemeBuilder`.
+:::
+
+## Other properties
+
+### `id`
+
+Read-only. The theme name in lowercase. The `themes` module uses it as the key, so two themes with names that differ only by case are the same theme.
+
+### `darkenedPrimaryColor`
+
+A darker variant of `primaryColor`. Acode uses it to darken the status and navigation bars while a dialog is open. While `autoDarkened` is `true` (the default), it is recalculated every time you assign `primaryColor`. Set `autoDarkened = false` first if you want to pick the value yourself:
+
+```js
+theme.autoDarkened = false;
+theme.primaryColor = "#000000";
+theme.darkenedPrimaryColor = "#000000";
 ```
 
-#### Theme Types
-- `"light"`: Light color scheme
-- `"dark"`: Dark color scheme
+### `preferredEditorTheme`, `preferredTerminalTheme`, `preferredFont`
 
-### Complete Theme Configuration Example
+Optional pairings that Acode applies together with the theme when the user selects it in **Settings → Themes**:
 
-```javascript
-const myCustomTheme = new ThemeBuilder("ModernDark", "dark");
+- `preferredEditorTheme`: id of an [editor theme](../utilities/editor-themes.md).
+- `preferredFont`: name of a registered [font](./fonts.md).
+- `preferredTerminalTheme`: id of a terminal theme (for example `"dark"`). Acode only applies this one the first time it applies a theme after starting, so don't rely on it to switch the terminal theme.
 
-// Color Configuration
-myCustomTheme.primaryColor = "#2196F3";
-myCustomTheme.secondaryColor = "#FF4081";
-myCustomTheme.textColor = "#FFFFFF";
-myCustomTheme.backgroundColor = "#121212";
+All three default to `null`, meaning "leave the user's choice alone".
 
-// Typography
-myCustomTheme.fontFamily = "Roboto, sans-serif";
-myCustomTheme.fontSize = "16px";
-myCustomTheme.fontWeight = "400";
+## Methods
 
-// Element-Specific Styles
-myCustomTheme.buttonBackgroundColor = "#2196F3";
-myCustomTheme.buttonTextColor = "#FFFFFF";
-myCustomTheme.borderColor = "#333333";
+### `toJSON(colorType?)`
+
+Returns a plain object with `name`, `type`, `version` and one camelCase key per color property (for example `primaryColor`).
+
+`colorType` controls how colors are written: `"none"` (default) keeps them as you set them, `"hex"` converts to hex and `"rgba"` converts to `rgba()`.
+
+### `toString()`
+
+`JSON.stringify(theme.toJSON())`.
+
+### `css`
+
+Read-only getter that returns the theme as a single `:root { ... }` rule with all CSS variables.
+
+### `matches(id)`
+
+Returns `true` if the theme's id equals `id` (case-insensitive).
+
+### `darkenPrimaryColor()`
+
+Recomputes `darkenedPrimaryColor` from the current `primaryColor`. It returns nothing; read `darkenedPrimaryColor` afterwards.
+
+### `ThemeBuilder.fromJSON(json)` <Badge type="tip" text="static" />
+
+Creates a theme from an object shaped like the output of `toJSON()`. `name`, `type` and `version` are required; unknown keys are ignored.
+
+```js
+const copy = ThemeBuilder.fromJSON(theme.toJSON());
 ```
 
-### Best Practices
-- Choose a consistent color palette
-- Ensure sufficient contrast between text and background
-- Test your theme across different components and states
-- Use the `darkenPrimaryColor()` method for dynamic color variations
+## Full example
 
-### Supported CSS Custom Properties
+```js
+const ThemeBuilder = acode.require("themeBuilder");
+const themes = acode.require("themes");
 
-The ThemeBuilder generates the following CSS custom properties:
-- `--primary-color`
-- `--secondary-color`
-- `--text-color`
-- `--background-color`
-- `--active-color`
-- `--button-background-color`
-- `--border-color`
-- And many more...
+const theme = new ThemeBuilder("Ocean Night", "dark");
 
-### Notes
-- Always import the ThemeBuilder from the `acode` library
-- Theme customization is flexible and supports both light and dark modes
-- You can override default styles for specific UI components
-- for theme management check the `themes`documentation
-=======
-**Theme Builder**
+// Surfaces and text
+theme.primaryColor = "#0d1b2a";
+theme.primaryTextColor = "#e0e1dd";
+theme.secondaryColor = "#1b263b";
+theme.secondaryTextColor = "#c8ccd4";
+theme.linkTextColor = "#7aa2f7";
+theme.borderColor = "rgba(255, 255, 255, 0.12)";
 
-**Introduction**
+// Accent and buttons
+theme.activeColor = "#4cc9f0";
+theme.buttonBackgroundColor = "#4cc9f0";
+theme.buttonTextColor = "#0d1b2a";
 
-To create a new theme for your application, you'll need to utilize the `ThemeBuilder` class provided by the `acode` library. This class offers a straightforward way to customize various aspects of your theme, from primary and secondary colors to font styles and more.
+// Popups
+theme.popupBackgroundColor = "#1b263b";
+theme.popupTextColor = "#e0e1dd";
 
-**Basic Usage**
+// Pair it with an editor theme (optional)
+theme.preferredEditorTheme = "tokyoNight";
 
-1. **Import the `ThemeBuilder` class:**
-   ```javascript
-   const ThemeBuilder = acode.require('themeBuilder');
-   ```
-2. **Create a new theme instance:**
-   ```javascript
-   const myTheme = new ThemeBuilder("MyDarkTheme", "dark");
-   ```
-   * **Theme Name:** The first argument, `"MyDarkTheme"`, is the name of your theme. It should be a descriptive name that reflects the theme's style.
-   * **Theme Mode:** The second argument, `"dark"`, specifies the base mode of the theme (either "light" or "dark").
+themes.add(theme);
+```
 
-3. **Customize theme properties:**
-   ```javascript
-   myTheme.primaryColor = "#333";
-   myTheme.secondaryColor = "#666";
-   // ... other theme property customizations
-   ```
-   You can customize various theme properties, such as:
-   * `primaryColor`
-   * `secondaryColor`
-   * `textColor`
-   * `backgroundColor`
-   * `fontFamily`
-   * `fontSize`
-   * `fontWeight`
-   * // ... and many more
+## Design tips
 
-
+- Keep enough contrast between `primaryColor`/`primaryTextColor` and `secondaryColor`/`secondaryTextColor`.
+- Set `type` to match your colors (`"dark"` for dark backgrounds). Acode exposes it as the `theme-type` attribute on `<body>`, which the built-in console and preview use to match light or dark.
+- Test the theme on dialogs, the file browser and the settings pages, not only the editor.

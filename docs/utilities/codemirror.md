@@ -1,3 +1,8 @@
+---
+title: CodeMirror Packages
+description: Share Acode's CodeMirror 6 and Lezer modules instead of bundling your own.
+---
+
 # CodeMirror packages
 
 Acode re-exports the CodeMirror 6 and Lezer packages used by the app so plugins can share the **same module instances** as the editor (important for extensions, facets, and state fields).
