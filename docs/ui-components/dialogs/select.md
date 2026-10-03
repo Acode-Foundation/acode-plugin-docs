@@ -78,7 +78,7 @@ Pass an object to change how the dialog behaves.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `hideOnSelect` | `boolean` | `true` | Close the dialog after an item is picked. Set to `false` for multi-step or checkbox lists. |
+| `hideOnSelect` | `boolean` | `true` | Close the dialog after an item is picked. Set to `false` to keep it open. The promise still resolves only once, with the first pick. |
 | `default` | `string` | none | `value` of the item to highlight and scroll into view. Also receives keyboard focus. |
 | `textTransform` | `boolean` | `false` | Apply the list's default text transformation to labels. By default labels are shown exactly as written. |
 | `className` | `string` | none | Extra CSS class for the dialog. |
@@ -121,23 +121,20 @@ const action = await select(
 );
 ```
 
-### Checkbox list
+### Checkbox items
 
-Set `hideOnSelect: false` so the dialog stays open while the user toggles items.
+The `checkbox` field only **shows** a checkbox. Tapping the row picks the item as usual: the checkbox does not toggle, and `select` does not return its state.
 
 ```js
-await select(
-  "Enable features",
-  [
-    { value: "sync", text: "Cloud sync", checkbox: true },
-    { value: "backup", text: "Auto backup", checkbox: false },
-  ],
-  { hideOnSelect: false },
-);
+const feature = await select("Toggle feature", [
+  { value: "sync", text: "Cloud sync", checkbox: true },
+  { value: "backup", text: "Auto backup", checkbox: false },
+]);
+// feature is "sync" or "backup"; flip it in your own state and reopen the list if needed
 ```
 
 ::: info
-`select` resolves only with the `value` of the tapped item. It does not return the state of the checkboxes.
+To let the user toggle several options in one dialog, use [Multi Prompt](./multi-prompt.md) with `checkbox` inputs. For a tappable control inside the row, pass your own `tailElement` with `ontailclick`.
 :::
 
 ### Letter avatars

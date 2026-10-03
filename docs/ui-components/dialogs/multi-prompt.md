@@ -39,7 +39,9 @@ const { name, age, subscribe } = await multiPrompt("Sign up", [
 ```
 
 ::: warning Cancel rejects the promise
-Pressing **Cancel** (or the back button) rejects the promise with no value. Wrap the call in `try`/`catch` if the user is allowed to cancel.
+Pressing **Cancel** rejects the promise with no value. Wrap the call in `try`/`catch` if the user is allowed to cancel.
+
+Closing the dialog with the back button does **not** reject or resolve: the promise stays pending.
 
 ```js
 try {
@@ -59,7 +61,7 @@ Numbers are returned as strings, like the browser's `input.value`. Convert with 
 | Option | Type | Description |
 | --- | --- | --- |
 | `id` | `string` | **Required.** Key of this value in the result. |
-| `type` | `string` | Any [HTML input type](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types) such as `text`, `number`, `email`, `password`, `checkbox` or `radio`; or `textarea`. Defaults to `text`. |
+| `type` | `string` | Any [HTML input type](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types) such as `text`, `number`, `email`, `password`, `checkbox` or `radio`. Defaults to `text`. `textarea` is drawn, but its value is not included in the result and `required` is not checked for it. |
 | `value` | `string \| boolean` | Initial value. For `checkbox` and `radio`, whether it starts checked. |
 | `placeholder` | `string` | Placeholder text. For `checkbox` and `radio`, this is the **label** next to the box. |
 | `required` | `boolean` | Block **OK** while the field is empty. |
@@ -71,12 +73,16 @@ Numbers are returned as strings, like the browser's `input.value`. Convert with 
 | `hidden` | `boolean` | Keep the field in the result but do not show it. |
 | `autofocus` | `boolean` | Focus this field when the dialog opens. |
 | `sensitive` | `boolean` | Clear the field's contents when the dialog closes. `password` fields are always cleared. |
-| `onclick` | `(event) => void` | Click handler. `this` is the input element. |
-| `onchange` | `(event) => void` | Change handler. `this` is the input element. |
+| `onclick` | `(event) => void` | Click handler. `this` is the input element (for `checkbox`/`radio`, its `<label>` wrapper). |
+| `onchange` | `(event) => void` | Change handler. `this` is the input element (for `checkbox`/`radio`, its `<label>` wrapper). |
+
+::: tip
+For `checkbox` and `radio`, `this.checked` and `this.value` are `undefined` because `this` is the label. In `onchange`, read the state from the event instead: `event.target.checked`.
+:::
 
 ### Custom validation
 
-Inside `onchange` (or `onclick`), `this` is the input element and has a `setError(message)` method. Call it with a message to show an error and disable **OK**, or with an empty value to clear it:
+Inside `onchange` (or `onclick`), `this` is the input element (the `<label>` wrapper for `checkbox`/`radio`) and has a `setError(message)` method. Call it with a message to show an error and disable **OK**, or with an empty value to clear it:
 
 ```js
 {

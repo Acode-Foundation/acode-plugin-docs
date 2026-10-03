@@ -52,6 +52,8 @@ Returns a summary of every registered theme (built-in and plugin-provided).
 
 **Returns:** `Array<{ id: string, name: string, type: string, version: string, primaryColor: string }>`
 
+`name` here is the id with its first letter capitalized (for example `"Ocean night"` for a theme named `"Ocean Night"`), not the original `name`. Compare by `id` instead.
+
 ```js
 themes.list().forEach(({ id, name, type }) => {
   console.log(id, name, type);
@@ -60,16 +62,21 @@ themes.list().forEach(({ id, name, type }) => {
 
 ### `update(theme)`
 
-Copies the values of `theme` onto the registered theme with the same id. If no such theme exists, it is added instead.
+Copies every value from `theme.toJSON()` (`name`, `type`, `version` and **all** colors) onto the registered theme with the same id. If no such theme exists, it is added instead.
+
+Colors you did not set on `theme` are copied too, as ThemeBuilder defaults. To change a few colors, edit the registered theme directly, or pass a theme with every color set:
 
 ```js
-const theme = new ThemeBuilder("Modern Dark", "dark");
+const theme = themes.get("Modern Dark");
 theme.primaryColor = "#11111b";
-themes.update(theme);
 ```
 
+::: info
+`toJSON()` does not include `preferredEditorTheme`, `preferredTerminalTheme`, `preferredFont`, `autoDarkened` or `darkenedPrimaryColor`, so `update` does not copy them. Set those on the registered theme directly.
+:::
+
 ::: warning
-`update` changes the stored theme, but it does **not** re-render the UI. If the theme is currently active, its new colors show up the next time the theme is applied (for example, when the user re-selects it or restarts Acode).
+`update` (or editing the registered theme) changes the stored theme, but it does **not** re-render the UI. If the theme is currently active, its new colors show up the next time the theme is applied (for example, when the user re-selects it or restarts Acode).
 :::
 
 ## Example: ship a theme with your plugin

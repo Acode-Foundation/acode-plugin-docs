@@ -29,7 +29,9 @@ prompt(message, defaultValue?, type?, options?): Promise<string | number | null>
 A `Promise` that resolves with:
 
 - the typed **string**, or a **number** when `type` is `"number"`
-- `null` if the user cancelled
+- `null` if the user pressed **Cancel**
+
+Closing the dialog with the back button does **not** resolve: the promise stays pending.
 
 Always check for `null` before using the result. An empty string is a valid answer unless you set `required`.
 

@@ -21,7 +21,7 @@ alert(title, message, onhide?): void
 | --- | --- | --- |
 | `title` | `string` | Heading of the dialog. |
 | `message` | `string` | Body text. Treated as HTML after sanitizing, and any `http(s)://` URL in it becomes a link. |
-| `onhide` | `() => void` | Optional. Called when the dialog is closed. |
+| `onhide` | `() => void` | Optional. Called when the user taps **OK** or outside the dialog. Not called when the dialog is closed with the back button. |
 
 If you pass only one argument, it is used as the **message** and the dialog has no title:
 
@@ -29,7 +29,7 @@ If you pass only one argument, it is used as the **message** and the dialog has 
 alert("Saved!");
 ```
 
-`alert` returns immediately; it does not wait for the user. Use `onhide` to run code after the dialog closes.
+`alert` returns immediately; it does not wait for the user. Use `onhide` to run code after the dialog closes, but don't rely on it running: closing the dialog with the back button skips it.
 
 ::: warning
 Because `message` is rendered as HTML, escape any text that comes from a file, a network response or the user before putting it in the message.

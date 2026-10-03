@@ -42,14 +42,17 @@ fonts.add(
   "Developer Mono",
   `@font-face {
     font-family: 'Developer Mono';
-    src: url('https://example.com/devmono.woff2') format('woff2');
+    src: url(https://example.com/devmono.woff2) format('woff2');
     font-weight: 400;
   }`,
 );
 ```
 
 ::: tip Remote fonts are cached
-When a font is applied, every `http(s)://` URL in its `src` (except `localhost`) is downloaded once and stored in Acode's data directory under `fonts/`. Later loads use the local copy, so the font works offline.
+When a font is applied, every **unquoted** `http(s)://` URL in its `src` (except `localhost`) is downloaded once and stored in Acode's data directory under `fonts/`. Later loads use the local copy, so the font works offline.
+
+- Write remote URLs without quotes: `url(https://...)`. A quoted URL such as `url('https://...')` is not cached and is always loaded from the network.
+- The cached file is named after the font, so use one remote URL per font. If a font lists several remote URLs (for example, one per weight), all of them load the first downloaded file.
 :::
 
 ### `addCustom(name, css)`

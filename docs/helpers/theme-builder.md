@@ -148,6 +148,8 @@ Creates a theme from an object shaped like the output of `toJSON()`. `name`, `ty
 const copy = ThemeBuilder.fromJSON(theme.toJSON());
 ```
 
+The copy holds the name, type, version and colors only. `toJSON()` leaves out `preferredEditorTheme`, `preferredTerminalTheme`, `preferredFont`, `autoDarkened` and `darkenedPrimaryColor`, so set them again on the copy if you need them.
+
 ## Full example
 
 ```js
