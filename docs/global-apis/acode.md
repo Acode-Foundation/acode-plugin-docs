@@ -82,7 +82,7 @@ Set exactly one of the following to choose how the user edits the item:
 | `select` | `Array<string \| [value, text]>` | A [select](../ui-components/dialogs/select.md) dialog. |
 | `prompt` | `string` | A [prompt](../ui-components/dialogs/prompt.md) with this text as the message. |
 | `promptType` | `string` | Input type of that prompt (default `text`). Only with `prompt`. |
-| `promptOptions` | `object` | [Prompt options](../ui-components/dialogs/prompt.md#promptoptions) such as `match`, `required`, `placeholder` and `test`. Only with `prompt`. |
+| `promptOptions` | `object` | [Prompt options](../ui-components/dialogs/prompt.md#options) such as `match`, `required`, `placeholder` and `test`. Only with `prompt`. |
 | `color` | `boolean` | A [color picker](../ui-components/dialogs/color-picker.md). |
 | `file` / `folder` | `boolean` | The file browser, in file or folder mode. The value is the chosen URL. |
 | `link` | `string` | Opens this URL in the browser. `cb` is not called. |

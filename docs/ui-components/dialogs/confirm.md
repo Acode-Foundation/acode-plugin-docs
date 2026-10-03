@@ -1,47 +1,93 @@
+---
+title: Confirm
+description: Ask the user a yes/no question in a modal dialog.
+---
+
 # Confirm
 
-The `confirm` ui component in Acode is a dialog box for displaying confirmation message modals to users. Whether you're seeking user approval for a critical action or confirming a decision, this component is best suited for this process.
+`confirm` shows a modal with **Cancel** and **OK** buttons and resolves with the user's answer.
 
-## Usage
-
-To use the `confirm` component in your Acode plugin, you can require it using the following code:
-
-```javascript
-const confirm = acode.require('confirm');
+```js
+const confirm = acode.require("confirm");
 ```
 
-Once you have the `confirm` component, you can create an instance with the following syntax:
+## Signature
 
-```javascript
-const confirmation = await confirm(
-  'Warning',                   // Title of the confirmation message modal
-  'Are you sure?'              // Body of the confirmation message modal
-);
+```ts
+confirm(title, message?, isHTML?, options?): Promise<boolean | { confirmed: boolean, checked: boolean }>
 ```
 
-## Parameters
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `title` | `string` | | Heading of the dialog. |
+| `message` | `string` | | Body text. |
+| `isHTML` | `boolean` | `false` | When `true`, `message` is rendered as sanitized HTML. Otherwise it is shown as plain text. |
+| `options` | `object` | `{}` | See [Options](#options). |
 
-- **titleText (string):**
-  - A string representing the title of the confirmation message modal. This title will be displayed at the top of the message modal.
-
-- **message (string):**
-  - A string representing the body of the confirmation message modal.
+If you pass only one argument, it is used as the **message** and the dialog has no title.
 
 ## Returns
 
-The `confirm` component returns a promise that resolves to a `boolean` value. The boolean value represents whether the user confirmed or denied the message. A value of `true` represents confirmation, while `false` represents denial.
+A `Promise` that resolves with:
 
-## Example
+- `true` if the user pressed **OK**
+- `false` if the user pressed **Cancel** or the back button, or the `signal` was aborted
 
-```javascript:line-numbers{1,3}
-const confirm = acode.require('confirm');
+With `options.returnState` set, it resolves with an object instead. See below.
 
-let confirmation = await confirm('Warning', 'Are you sure?');
-if (confirmation) {
-  window.toast('File deleted...', 4000);
-} else {
-  window.toast('File not deleted...', 4000);
+## Options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `checkboxText` | `string` | Adds a checkbox (unchecked) with this label under the message, such as "Don't ask again". |
+| `returnState` | `boolean` | Resolve with `{ confirmed, checked }` instead of a boolean, so you can read the checkbox. |
+| `signal` | `AbortSignal` | Aborting the signal closes the dialog and counts as **Cancel**. |
+| `direction` | `"ltr" \| "rtl"` | Text direction of the dialog. |
+| `aboveOverlay` | `boolean` | Draw the dialog above other overlays such as a full-screen page. |
+
+## Examples
+
+### Basic
+
+```js
+const confirm = acode.require("confirm");
+
+if (await confirm("Delete file", "This cannot be undone. Continue?")) {
+  // delete it
 }
 ```
 
-In this example, the `confirm` component is utilized to ask the user if they want to delete a file. If the user confirms, the message "File deleted." will be toasted. If the user denies, the message "File not deleted." will be toasted.
+### With a checkbox
+
+```js
+const { confirmed, checked } = await confirm(
+  "Reset settings",
+  "All settings return to their defaults.",
+  false,
+  { checkboxText: "Also clear saved layouts", returnState: true },
+);
+
+if (confirmed) {
+  resetSettings({ clearLayouts: checked });
+}
+```
+
+### Auto-close after a timeout
+
+```js
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 10_000);
+
+const ok = await confirm("Still there?", "Continue syncing?", false, {
+  signal: controller.signal,
+});
+```
+
+::: tip
+`acode.confirm(title, message)` is a shorter wrapper that accepts only the first two arguments.
+:::
+
+## See also
+
+- [Alert](./alert.md) for a message without a choice
+- [Select](./select.md) for more than two choices

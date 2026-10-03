@@ -1,3 +1,8 @@
+---
+title: Action Stack
+description: Control what the Android back button does.
+---
+
 # Action Stack
 
 The Action Stack is a crucial component for managing back button behavior in Acode. It allows you to handle navigation and state management by maintaining a stack of actions that can be executed when users press the back button.

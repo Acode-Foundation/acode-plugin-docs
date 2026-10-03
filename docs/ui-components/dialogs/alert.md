@@ -1,49 +1,53 @@
+---
+title: Alert
+description: Show a modal message with a single OK button.
+---
+
 # Alert
 
-The `alert` component in Acode is a dialog box for displaying messages, warnings, or errors to users within a modal window. Similar to the traditional JavaScript `alert()`.
-
-## Usage
-
-To use the `alert` component in your Acode plugin, you can require it using the following code:
-
-```javascript
-const alert = acode.require('alert');
-```
-
-Once you have the `alert` component, you can create an instance with the following syntax:
+`alert` shows a modal message and an **OK** button. It is the Acode equivalent of the browser's `alert()`.
 
 ```js
-alert(
-  'Title of Alert',          // Title of the alert modal
-  'The alert body message..', // Message to display in the body of the alert modal
-  () => {
-    // Optional function to call when the alert modal is closed
-    window.toast('Alert modal closed', 4000);
-  }
-);
+const alert = acode.require("alert");
 ```
 
-## Parameters
+## Signature
 
-- **titleText (string):**
-  - The text to display in the title of the alert modal.
+```ts
+alert(title, message, onhide?): void
+```
 
-- **message (string):**
-  - The message to display in the body of the alert modal.
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Heading of the dialog. |
+| `message` | `string` | Body text. Treated as HTML after sanitizing, and any `http(s)://` URL in it becomes a link. |
+| `onhide` | `() => void` | Optional. Called when the user taps **OK** or outside the dialog. Not called when the dialog is closed with the back button. |
 
-- **onhide (Function):**
-  - An optional function to call when the alert modal is closed.
+If you pass only one argument, it is used as the **message** and the dialog has no title:
+
+```js
+alert("Saved!");
+```
+
+`alert` returns immediately; it does not wait for the user. Use `onhide` to run code after the dialog closes, but don't rely on it running: closing the dialog with the back button skips it.
+
+::: warning
+Because `message` is rendered as HTML, escape any text that comes from a file, a network response or the user before putting it in the message.
+:::
 
 ## Example
 
-```javascript:line-numbers{1,7}
-const alert = acode.require('alert');
+```js
+const alert = acode.require("alert");
 
-const handleOnHide = () => {
-  window.toast('Alert modal closed', 4000);
-};
-
-alert('Title of Alert', 'The alert body message..', handleOnHide);
+alert(
+  "Update available",
+  "Version <b>2.0</b> is out. Details: https://example.com/changelog",
+  () => window.toast("Alert closed", 3000),
+);
 ```
 
-In this example, when the alert modal is closed, the `handleOnHide` function will be called, and a toast message **'Alert modal closed'** will be displayed for 4000 milliseconds. This allows you to perform additional actions or provide feedback when the user interacts with the alert dialog.
+## See also
+
+- [Confirm](./confirm.md) for a yes/no question
+- [Toast](../toast.md) for a message that disappears by itself

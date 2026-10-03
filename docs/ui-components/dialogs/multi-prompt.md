@@ -1,74 +1,140 @@
+---
+title: Multi Prompt
+description: Collect several values at once with a form-style dialog.
+---
+
 # Multi Prompt
 
-The `multiPrompt` ui component in Acode is a dialog box for prompting users with multiple inputs at once. Whether you need to collect various pieces of information or gather complex input data.
+`multiPrompt` shows one dialog containing several inputs (text fields, numbers, checkboxes and so on) and resolves with all the values together.
 
-## Usage
-
-To use the `multiPrompt` component in your Acode plugin, you can require it using the following code:
-
-```javascript
-const multiPrompt = acode.require('multiPrompt');
+```js
+const multiPrompt = acode.require("multiPrompt");
 ```
 
-Once you have the `multiPrompt` component, you can create an instance with the following syntax:
+## Signature
 
-```javascript
-const myPrompt = await multiPrompt(
-  'Enter your name & age', // Message for the prompt modal
-  [
-    { type: 'text', id: 'name' },   // Example: Text input for the name
-    { type: 'number', id: 'age' },  // Example: Number input for the age
-  ],
-  'https://example.com/help/' // Help text with the associated URL
-);
+```ts
+multiPrompt(message, inputs, help?): Promise<Record<string, string | boolean>>
 ```
 
-## Parameters
-
-- **`message (string):`**
-  - The title for the prompt modal.
-
-- **`inputs (Array<Input|Array<Input>>):`**
-  - The inputs to prompt the user for. It can be a single input or an array of inputs. Each input is defined by an object with various properties such as `id`, `type`, `placeholder`, etc.
-
-  :::tip
-  - Provide clear and concise messages to guide users through the input process.
-  - Utilize various input types, such as text, number, etc., based on the type of information you need. [Check this reference for more](http://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types).
-  :::
-
-- **`help (string):`**
-  - The help icon at the top of the `multiPrompt` will be enabled with the specified help URL.
-  - It must be valid url
-
-  :::warning
-  - Ensure that the help URL provided is accessible and relevant to assist users effectively.
-  :::
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `message` | `string` | Title of the dialog. |
+| `inputs` | `Array<Input \| Array<Input \| string>>` | The fields to show, in order. An inner array creates a [group](#groups). |
+| `help` | `string` | Optional. Adds a help icon to the title. See [Help](#help). |
 
 ## Returns
 
-The `multiPrompt` component returns a promise that resolves to an array of strings representing the user's input. You can access the values using the provided IDs in the input configuration.
+A `Promise` that resolves with an **object keyed by each input's `id`**:
+
+- text-like inputs give a `string`
+- `checkbox` and `radio` inputs give a `boolean`
+
+```js
+const { name, age, subscribe } = await multiPrompt("Sign up", [
+  { id: "name", type: "text", placeholder: "Name", required: true },
+  { id: "age", type: "number", placeholder: "Age" },
+  { id: "subscribe", type: "checkbox", placeholder: "Send me updates" },
+]);
+```
+
+::: warning Cancel rejects the promise
+Pressing **Cancel** rejects the promise with no value. Wrap the call in `try`/`catch` if the user is allowed to cancel.
+
+Closing the dialog with the back button does **not** reject or resolve: the promise stays pending.
+
+```js
+try {
+  const values = await multiPrompt("Settings", inputs);
+} catch {
+  return; // cancelled
+}
+```
+:::
+
+::: info
+Numbers are returned as strings, like the browser's `input.value`. Convert with `Number(age)` when you need a number.
+:::
+
+## Input options
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `id` | `string` | **Required.** Key of this value in the result. |
+| `type` | `string` | Any [HTML input type](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#input_types) such as `text`, `number`, `email`, `password`, `checkbox` or `radio`. Defaults to `text`. `textarea` is drawn, but its value is not included in the result and `required` is not checked for it. |
+| `value` | `string \| boolean` | Initial value. For `checkbox` and `radio`, whether it starts checked. |
+| `placeholder` | `string` | Placeholder text. For `checkbox` and `radio`, this is the **label** next to the box. |
+| `required` | `boolean` | Block **OK** while the field is empty. |
+| `match` | `RegExp` | The value must match, otherwise an "invalid value" message is shown and **OK** is disabled. |
+| `hints` | `string[] \| function` | Autocomplete suggestions shown while typing. See [Input Hints](../../helpers/input-hints.md). |
+| `name` | `string` | Group name for `radio` inputs; radios with the same `name` are mutually exclusive. |
+| `disabled` | `boolean` | Show the field but do not let the user edit it. |
+| `readOnly` | `boolean` | Show the value and allow selecting or copying it. |
+| `hidden` | `boolean` | Keep the field in the result but do not show it. |
+| `autofocus` | `boolean` | Focus this field when the dialog opens. |
+| `sensitive` | `boolean` | Clear the field's contents when the dialog closes. `password` fields are always cleared. |
+| `onclick` | `(event) => void` | Click handler. `this` is the input element (for `checkbox`/`radio`, its `<label>` wrapper). |
+| `onchange` | `(event) => void` | Change handler. `this` is the input element (for `checkbox`/`radio`, its `<label>` wrapper). |
+
+::: tip
+For `checkbox` and `radio`, `this.checked` and `this.value` are `undefined` because `this` is the label. In `onchange`, read the state from the event instead: `event.target.checked`.
+:::
+
+### Custom validation
+
+Inside `onchange` (or `onclick`), `this` is the input element (the `<label>` wrapper for `checkbox`/`radio`) and has a `setError(message)` method. Call it with a message to show an error and disable **OK**, or with an empty value to clear it:
+
+```js
+{
+  id: "port",
+  type: "number",
+  placeholder: "Port",
+  onchange() {
+    const port = Number(this.value);
+    this.setError(port > 0 && port < 65536 ? "" : "Port must be 1-65535");
+  },
+}
+```
+
+## Groups
+
+Put inputs in an inner array to lay them out together. A **string** inside the array becomes the group's label.
+
+```js
+const values = await multiPrompt("Server", [
+  ["Connection", { id: "host", placeholder: "Host" }, { id: "port", type: "number", placeholder: "Port" }],
+  { id: "password", type: "password", placeholder: "Password", sensitive: true },
+]);
+```
+
+## Help
+
+The `help` argument adds a help icon to the title bar:
+
+- If it starts with `http://` or `https://`, the icon opens that link.
+- Any other string is shown in an alert when the icon is tapped.
 
 ## Example
 
-```javascript:line-numbers
-const multiPrompt = acode.require('multiPrompt');
-const myPrompt = await multiPrompt(
-  'Enter your name & age',
-  [
-    { type: 'text', id: 'name' },
-    { type: 'number', id: 'age' },
-  ],
-  'https://example.com/help/'
-);
+```js
+const multiPrompt = acode.require("multiPrompt");
+
+try {
+  const { host, port, ssl } = await multiPrompt(
+    "Connect to server",
+    [
+      { id: "host", type: "text", placeholder: "Host", required: true },
+      { id: "port", type: "number", placeholder: "Port", value: "22" },
+      { id: "ssl", type: "checkbox", placeholder: "Use SSL", value: true },
+    ],
+    "https://example.com/help/connect",
+  );
+  connect(host, Number(port), ssl);
+} catch {
+  // cancelled
+}
 ```
 
-Now you can access the values of the inputs using:
+## See also
 
-```javascript:line-numbers
-const userName = myPrompt['name'];
-const userAge = myPrompt['age'];
-```
-
-:::info
-- The `multiPrompt` component supports a variety of input configurations. Refer to the html [`Input`](http://developer.mozilla.org/en-US/docs/Web/HTML/Element/input) element type for details.
-:::
+- [Prompt](./prompt.md) for a single value
