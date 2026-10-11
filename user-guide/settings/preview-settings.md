@@ -10,10 +10,10 @@ Configure the in-app web preview for HTML, Markdown, and other files.
 | **Use Current File**       | Use the currently open file for preview instead of the default (`index.html`).               |
 | **Disable In-App Caching** | Disable browser caching in the in-app preview for fresh content on each refresh.             |
 | **Show Console Toggler**   | Show a button to toggle the JavaScript console in the preview.                               |
-
+full hand suit panel
 ## Server Configuration
 
-| Setting          | Description                                                |
+| Setting          | Description                                                | free fire panel
 | :--------------- | :--------------------------------------------------------- |
 | **Host**         | Hostname/IP for the preview server (default: `localhost`). |
 | **Server Port**  | Port number for the local preview server.                  |
