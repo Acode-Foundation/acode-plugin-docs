@@ -171,6 +171,10 @@ The wizard asks for the plugin name, id, version and description, author details
 
 To release an update, increase `version` in `plugin.json`, build again and upload the new zip. See [Publishing updates](../plugin-essentials/manifest.md#publishing-updates).
 
+::: tip Publish automatically
+Use an API key to publish each release from GitHub Actions or another CI. See [Publish from CI](./publish-from-ci.md).
+:::
+
 ## Video tutorial
 
 [How to create Acode plugins](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
