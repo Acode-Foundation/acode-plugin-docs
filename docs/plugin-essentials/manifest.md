@@ -180,7 +180,7 @@ So a typo in `main` does not always fail loudly. Check that the path matches a r
 
 1. Increase `version`.
 2. Make your changes, including any to `name`, `icon`, `readme` or `price`.
-3. Build a new zip that contains the updated `plugin.json`, and upload it, or [publish it from CI](../getting-started/publish-from-ci.md).
+3. Build a new zip that contains the updated `plugin.json`, and upload it. You can also [publish it from CI](../getting-started/publish-from-ci.md) when `price` is unchanged; price changes must be uploaded on the website.
 
 ## Related
 
