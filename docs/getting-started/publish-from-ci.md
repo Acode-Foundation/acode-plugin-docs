@@ -54,7 +54,6 @@ jobs:
       - uses: Acode-Foundation/publish-plugin@v1
         with:
           api-key: ${{ secrets.ACODE_API_KEY }}
-          changelogs: ${{ github.event.release.body }}
 ```
 
 Before each release, increase `version` in [`plugin.json`](../plugin-essentials/manifest.md#version). acode.app rejects an upload whose version isn't greater than the current one.
@@ -63,8 +62,10 @@ Before each release, increase `version` in [`plugin.json`](../plugin-essentials/
 | --- | --- | --- |
 | `api-key` | required | Your API key, passed from a secret. |
 | `zip` | `plugin.zip` | Path to the built zip. The official templates write `plugin.zip` at the repo root. |
-| `changelogs` | | Release notes for this version. |
+| `changelogs` | | Optional. Leave it out to use the changelog file in the zip. Set it to publish different text, such as your GitHub release notes. |
 | `create-if-missing` | `false` | Submit the plugin as new if it doesn't exist yet. Needs the **Submit plugins** permission. |
+
+Changelogs come from the zip by default, just like a website upload: the file named by [`changelogs`](../plugin-essentials/manifest.md#changelogs) in `plugin.json`, or `changelogs.md`. The official templates already pack it, so keeping that file up to date is enough.
 
 The action sets a `result` output: `published` when the version is live, `review` when the security scan held it for an admin, or `submitted` for a new plugin waiting for approval. See the [action's README](https://github.com/Acode-Foundation/publish-plugin#readme) for all options.
 
