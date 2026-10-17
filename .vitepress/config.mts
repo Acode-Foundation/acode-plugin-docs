@@ -82,6 +82,10 @@ export default defineConfig({
 									text: "Understanding Plugins",
 									link: "/docs/getting-started/understanding-plugin",
 								},
+								{
+									text: "Publish from CI",
+									link: "/docs/getting-started/publish-from-ci",
+								},
 							],
 						},
 						{
