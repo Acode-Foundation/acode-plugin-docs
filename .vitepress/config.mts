@@ -5,7 +5,7 @@ export default defineConfig({
 	lastUpdated: true,
 	cleanUrls: true,
 	base: "/",
-	srcExclude: ["Acode/**"],
+	srcExclude: ["Readme.md"],
 	head: [["link", { rel: "icon", href: "/acode.png" }]],
 
 	locales: {
