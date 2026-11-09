@@ -476,6 +476,18 @@ export default defineConfig({
 							text: "How to run java",
 							link: "/tutorials/how-to-run-java",
 						},
+						{
+							text: "Use the AI Agent",
+							link: "/tutorials/ai-agent",
+						},
+						{
+							text: "Build and preview a website",
+							link: "/tutorials/preview-website",
+						},
+						{
+							text: "Python autocomplete",
+							link: "/tutorials/python-language-server",
+						},
 					],
 				},
 			},
