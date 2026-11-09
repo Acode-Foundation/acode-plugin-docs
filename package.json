@@ -16,6 +16,7 @@
 	"license": "ISC",
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
+		"sharp": "^0.35.5",
 		"vitepress": "^1.2.3",
 		"vue": "^3.4.27"
 	},

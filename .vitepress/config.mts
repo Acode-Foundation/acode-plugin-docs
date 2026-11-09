@@ -1,4 +1,33 @@
+import { join } from "node:path";
 import { defineConfig } from "vitepress";
+import { HEIGHT, type OgCard, WIDTH, writeOgImage } from "./og";
+
+const SITE_URL = "https://docs.acode.app";
+const DEFAULT_IMAGE = "og/default.jpg";
+const DEFAULT_CARD: OgCard = {
+	title: "Documentation",
+	subtitle: "Guides, plugin APIs and tutorials for the Acode editor",
+};
+// Pages in these folders get their own share image showing the page title.
+const SECTIONS: Record<string, string> = {
+	docs: "Plugin docs",
+	"user-guide": "User guide",
+	tutorials: "Tutorials",
+};
+// Filled while pages render, then drawn once the build is done.
+const ogCards = new Map<string, OgCard>();
+
+function plainText(html: string) {
+	return html
+		.replace(/<[^>]*>/g, "")
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, "&")
+		.replace(/\s+/g, " ")
+		.trim();
+}
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -7,6 +36,46 @@ export default defineConfig({
 	base: "/",
 	srcExclude: ["Readme.md"],
 	head: [["link", { rel: "icon", href: "/acode.png" }]],
+
+	transformHead({ pageData, title, description }) {
+		const page = pageData.relativePath.replace(/\.md$/, "");
+		const section = SECTIONS[page.split("/")[0]];
+		const heading = plainText(pageData.title);
+		const hasCard = Boolean(section && heading);
+		const image = hasCard ? `og/${page}.jpg` : DEFAULT_IMAGE;
+		if (hasCard) ogCards.set(image, { title: heading, subtitle: section });
+		const imageUrl = `${SITE_URL}/${image}`;
+		const alt = hasCard ? `${heading} · Acode Docs` : "Acode Docs";
+		return [
+			["meta", { property: "og:type", content: "website" }],
+			["meta", { property: "og:site_name", content: "Acode Docs" }],
+			["meta", { property: "og:title", content: title }],
+			["meta", { property: "og:description", content: description }],
+			[
+				"meta",
+				{
+					property: "og:url",
+					content: `${SITE_URL}/${page.replace(/(^|\/)index$/, "$1")}`,
+				},
+			],
+			["meta", { property: "og:image", content: imageUrl }],
+			["meta", { property: "og:image:type", content: "image/jpeg" }],
+			["meta", { property: "og:image:width", content: String(WIDTH) }],
+			["meta", { property: "og:image:height", content: String(HEIGHT) }],
+			["meta", { property: "og:image:alt", content: alt }],
+			["meta", { name: "twitter:card", content: "summary_large_image" }],
+			["meta", { name: "twitter:image", content: imageUrl }],
+			["meta", { name: "twitter:image:alt", content: alt }],
+		];
+	},
+
+	async buildEnd({ outDir }) {
+		await Promise.all(
+			[[DEFAULT_IMAGE, DEFAULT_CARD] as const, ...ogCards].map(([file, card]) =>
+				writeOgImage(join(outDir, file), card),
+			),
+		);
+	},
 
 	locales: {
 		root: {
