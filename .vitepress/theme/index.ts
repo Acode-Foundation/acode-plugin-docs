@@ -1,17 +1,13 @@
 // https://vitepress.dev/guide/custom-theme
 
-import Theme from "vitepress/theme";
-import { h } from "vue";
+import type { Theme } from "vitepress";
+import DefaultTheme from "vitepress/theme-without-fonts";
+import DocsHome from "./components/DocsHome.vue";
 import "./style.css";
 
 export default {
-	extends: Theme,
-	Layout: () => {
-		return h(Theme.Layout, null, {
-			// https://vitepress.dev/guide/extending-default-theme#layout-slots
-		});
+	extends: DefaultTheme,
+	enhanceApp({ app }) {
+		app.component("DocsHome", DocsHome);
 	},
-	enhanceApp({ _app, _router, _siteData }) {
-		// ...
-	},
-};
+} satisfies Theme;

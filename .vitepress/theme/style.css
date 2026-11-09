@@ -1,31 +1,80 @@
+/* Self-hosted Latin subsets shared with acode.app; licenses sit next to them in /fonts. */
+@font-face {
+	font-family: "Instrument Sans";
+	font-style: normal;
+	font-weight: 400 700;
+	font-display: swap;
+	src: url("/fonts/instrumentsans.woff2") format("woff2");
+}
+
+@font-face {
+	font-family: "JetBrains Mono";
+	font-style: normal;
+	font-weight: 400 500;
+	font-display: swap;
+	src: url("/fonts/jetbrainsmono.woff2") format("woff2");
+}
+
 :root {
-	--vp-c-brand-1: var(--vp-c-indigo-1);
-	--vp-c-brand-2: var(--vp-c-indigo-2);
-	--vp-c-brand-3: var(--vp-c-indigo-3);
-	--vp-c-brand-soft: var(--vp-c-indigo-soft);
-	--vp-home-hero-name-color: transparent;
-	--vp-home-hero-name-background: -webkit-linear-gradient(
-		120deg,
-		#3451b2,
-		#3a5ccc 25%,
-		#5672cd 50%,
-		rgba(100, 108, 255, 0.14)
-	);
-	--vp-home-hero-image-background-image: linear-gradient(
-		-45deg,
-		#3451b2,
-		#3a5ccc 25%,
-		#5672cd 50%,
-		rgba(100, 108, 255, 0.14)
-	);
-	--vp-home-hero-image-filter: blur(40px);
+	--vp-font-family-base:
+		"Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+	--vp-font-family-mono:
+		"JetBrains Mono", ui-monospace, "Menlo", "Monaco", "Consolas", monospace;
+
+	--vp-c-brand-1: #1f6fd6;
+	--vp-c-brand-2: #2a7fe8;
+	--vp-c-brand-3: #3499fe;
+	--vp-c-brand-soft: rgba(52, 153, 254, 0.14);
+
+	/* Home page tokens, matching acode.app. */
+	--acode-heading: #0d0f13;
+	--acode-text: #16181d;
+	--acode-muted: rgba(22, 24, 29, 0.64);
+	--acode-faint: rgba(22, 24, 29, 0.45);
+	--acode-line: rgba(0, 0, 0, 0.09);
+	--acode-line-strong: rgba(0, 0, 0, 0.18);
+	--acode-surface: rgba(0, 0, 0, 0.02);
+	--acode-surface-strong: rgba(0, 0, 0, 0.04);
+	--acode-accent: #1f6fd6;
+	--acode-grid: rgba(0, 0, 0, 0.06);
+	--acode-grid-fine: rgba(0, 0, 0, 0.03);
+	--acode-button: #111216;
+	--acode-button-hover: #000;
+	--acode-button-text: #f4f6f8;
+}
+
+.dark {
+	--vp-c-bg: #12141a;
+	--vp-c-bg-alt: #0e1015;
+	--vp-c-bg-elv: #171a21;
+	--vp-c-bg-soft: #181b22;
+
+	--vp-c-brand-1: #6ea8ff;
+	--vp-c-brand-2: #4f97ff;
+	--vp-c-brand-3: #3499fe;
+	--vp-c-brand-soft: rgba(52, 153, 254, 0.16);
+
+	--acode-heading: #fff;
+	--acode-text: #f1f2f4;
+	--acode-muted: rgba(241, 242, 244, 0.64);
+	--acode-faint: rgba(241, 242, 244, 0.4);
+	--acode-line: rgba(255, 255, 255, 0.08);
+	--acode-line-strong: rgba(255, 255, 255, 0.16);
+	--acode-surface: rgba(255, 255, 255, 0.035);
+	--acode-surface-strong: rgba(255, 255, 255, 0.06);
+	--acode-accent: #6ea8ff;
+	--acode-grid: rgba(255, 255, 255, 0.05);
+	--acode-grid-fine: rgba(255, 255, 255, 0.025);
+	--acode-button: #f4f6f8;
+	--acode-button-hover: #fff;
+	--acode-button-text: #111216;
 }
 
 .link {
-	color: var(--vp-c-indigo-1);
+	color: var(--vp-c-brand-1);
 }
 .link:hover {
-	color: var(--vp-c-indigo-2);
+	color: var(--vp-c-brand-2);
 	text-decoration: underline;
 }
 
@@ -35,39 +84,4 @@
 
 .DocSearch {
 	--docsearch-primary-color: var(--vp-c-brand-1) !important;
-}
-
-.VPFeature:hover {
-	border: 1px solid var(--vp-c-indigo-3);
-}
-
-.VPImage {
-	position: relative;
-	display: inline-block;
-}
-.VPImage::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: linear-gradient(
-		45deg,
-		#ff6b6b,
-		#f06595,
-		#cc5de8,
-		#845ef7,
-		#5c7cfa,
-		#339af0,
-		#22b8cf,
-		#20c997,
-		#51cf66,
-		#94d82d,
-		#fcc419,
-		#ff922b
-	);
-	border-radius: 50%;
-	filter: blur(10px);
-	z-index: -1; /* Ensure the gradient is behind the logo */
 }

@@ -35,7 +35,21 @@ export default defineConfig({
 	cleanUrls: true,
 	base: "/",
 	srcExclude: ["Readme.md"],
-	head: [["link", { rel: "icon", href: "/acode.png" }]],
+	// Dark by default to match acode.app; the theme toggle still offers light.
+	appearance: "dark",
+	head: [
+		["link", { rel: "icon", href: "/acode.png" }],
+		[
+			"link",
+			{
+				rel: "preload",
+				href: "/fonts/instrumentsans.woff2",
+				as: "font",
+				type: "font/woff2",
+				crossorigin: "",
+			},
+		],
+	],
 
 	transformHead({ pageData, title, description }) {
 		const page = pageData.relativePath.replace(/\.md$/, "");
