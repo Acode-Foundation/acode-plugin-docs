@@ -422,6 +422,10 @@ export default defineConfig({
 									text: "Context Menu",
 									link: "/docs/interface-apis/context-menu",
 								},
+								{
+									text: "QuickTools Adapter",
+									link: "/docs/interface-apis/quicktools-adapter",
+								},
 							],
 						},
 						{

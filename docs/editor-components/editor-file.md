@@ -363,6 +363,30 @@ try {
 }
 ```
 
+### Saving a Custom Tab <Badge type="tip" text="v1012+" />
+
+A custom tab gets Acode's normal save controls (the save button, `Ctrl` + `S` and the **Save** command) once it has a `save` listener. In the listener, call `event.respondWith()` synchronously with a promise that resolves to `true` after your data is written. `event.saveAs` is `true` for **Save as**.
+
+```js
+const fs = acode.require('fs');
+const tab = new EditorFile('data.json', { type: 'custom', content: element });
+
+tab.on('save', (event) => {
+    event.respondWith(
+        (async () => {
+            await fs(fileUrl).writeFile(JSON.stringify(myData));
+            tab.isUnsaved = false;
+            return true;
+        })()
+    );
+});
+
+// Mark the tab as changed so it shows the unsaved indicator.
+tab.isUnsaved = true;
+```
+
+`respondWith()` can be called only once per save. Resolving to anything other than `true` tells Acode the save didn't happen. For plugin editors that also need QuickTools input, see [QuickTools Adapter](../interface-apis/quicktools-adapter).
+
 ### Handling File Events
 
 ```js

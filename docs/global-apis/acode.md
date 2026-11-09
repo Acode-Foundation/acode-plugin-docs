@@ -336,6 +336,14 @@ Clears a plugin's broken mark so it can be retried on next load.
 acode.clearBrokenPluginMark("com.example.plugin");
 ```
 
+### `registerQuickToolsAdapter(tab: EditorFile, adapter: QuickToolsAdapter): () => void` <Badge type="tip" text="v1012+" />
+
+Routes QuickTools keys, text and commands to a custom editor tab. Returns a function that removes the adapter. See [QuickTools Adapter](../interface-apis/quicktools-adapter.md).
+
+```js
+const dispose = acode.registerQuickToolsAdapter(tab, adapter);
+```
+
 ## Related APIs
 
 - Commands API (preferred for adding/removing commands): [Commands](../utilities/commands.md)
@@ -343,5 +351,6 @@ acode.clearBrokenPluginMark("com.example.plugin");
 - Static CodeMirror highlighter (versionCode `1008+`): [Code Highlight](../utilities/code-highlight.md)
 - File and folder icon packs (versionCode `1012+`): [File Icons](../utilities/file-icons.md)
 - Language server API: [LSP](../advanced-apis/lsp.md)
+- QuickTools input for custom tabs (versionCode `1012+`): [QuickTools Adapter](../interface-apis/quicktools-adapter.md)
 - File handler API: [File Handlers](../advanced-apis/file-handlers.md)
 - Terminal API: [Terminal](../advanced-apis/terminal.md)
