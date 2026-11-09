@@ -7,7 +7,9 @@ import {
   Terminal, 
   Settings, 
   Keyboard,
-  Zap
+  Zap,
+  Search,
+  Braces
 } from 'lucide-vue-next';
 </script>
 
@@ -42,6 +44,15 @@ Manage files, workspaces, and projects
 </div>
 
 <div style="padding: 1rem; border: 1px solid var(--vp-c-divider); border-radius: 8px;">
+<Search :size="20" style="color: var(--vp-c-brand-1);"/>
+
+**[Search](./search)**
+
+Find and replace in a file or across folders
+
+</div>
+
+<div style="padding: 1rem; border: 1px solid var(--vp-c-divider); border-radius: 8px;">
 <Globe :size="20" style="color: var(--vp-c-brand-1);"/>
 
 **[Remote Access](./remote-access)**
@@ -65,6 +76,15 @@ Extend functionality with plugins
 **[Terminal](./terminal)**
 
 Full Alpine Linux terminal environment
+
+</div>
+
+<div style="padding: 1rem; border: 1px solid var(--vp-c-divider); border-radius: 8px;">
+<Braces :size="20" style="color: var(--vp-c-brand-1);"/>
+
+**[Language Servers](./language-servers)**
+
+Autocomplete, diagnostics and go to definition
 
 </div>
 

@@ -138,6 +138,12 @@ From **Terminal Settings**, you can:
 | **Restore**   | Restores a previous backup.                                |
 | **Uninstall** | Completely removes the terminal installation.              |
 
+## Running Processes
+
+Open the menu (⋮) and tap **Running processes** to see what Acode is running: the app itself, terminal sessions, [language servers](./language-servers) and other background commands. The top of the page shows the number of active processes and their total memory.
+
+Tap a process to see its command, PID and uptime. Tap the power button to stop it; anything it hasn't saved is lost. Use the refresh button to update the list, or search to filter it.
+
 ## Troubleshooting
 
 ::: details Terminal won't start

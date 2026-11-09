@@ -115,9 +115,14 @@ export default defineConfig({
 									link: "/user-guide/command-palette",
 								},
 								{ text: "File Browser", link: "/user-guide/file-browser" },
+								{ text: "Search", link: "/user-guide/search" },
 								{ text: "Remote Access", link: "/user-guide/remote-access" },
 								{ text: "Plugins", link: "/user-guide/plugins" },
 								{ text: "Terminal", link: "/user-guide/terminal" },
+								{
+									text: "Language Servers",
+									link: "/user-guide/language-servers",
+								},
 								{
 									text: "Settings",
 									link: "/user-guide/settings",
@@ -144,6 +149,10 @@ export default defineConfig({
 											link: "/user-guide/settings/formatter",
 										},
 										{ text: "Themes", link: "/user-guide/settings/themes" },
+										{
+											text: "Backup & Restore",
+											link: "/user-guide/settings/backup-restore",
+										},
 									],
 								},
 								{ text: "Keybindings", link: "/user-guide/keybindings" },
