@@ -166,4 +166,222 @@ await view.loadHTML(`
     window.webview.postMessage({ type: 'title', title: document.title || 'untitled' });
   </script>
 `);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clicker Simulator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(135deg,#090919,#19103b);
+    color: white;
+    font-family: Arial;
+    text-align: center;
+}
+
+header {
+    padding: 25px;
+    background: #111127;
+    color: #a78bfa;
+    font-size: 27px;
+    font-weight: bold;
+}
+
+main {
+    padding: 25px 15px;
+}
+
+.coins {
+    font-size: 38px;
+    font-weight: bold;
+    color: #facc15;
+    margin: 25px;
+}
+
+.click {
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    border: 6px solid #c4b5fd;
+    background: linear-gradient(135deg,#8b5cf6,#4c1d95);
+    color: white;
+    font-size: 65px;
+    cursor: pointer;
+    box-shadow: 0 0 35px #8b5cf6;
+    transition: .1s;
+}
+
+.click:active {
+    transform: scale(.9);
+}
+
+.shop {
+    margin: 35px auto;
+    max-width: 400px;
+    background: #17172e;
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.upgrade {
+    background: #29294c;
+    padding: 15px;
+    margin: 12px 0;
+    border-radius: 10px;
+}
+
+button.buy {
+    background: #8b5cf6;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.stats {
+    color: #c4b5fd;
+    margin-top: 15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>⚡ CLICKER SIMULATOR ⚡</header>
+
+<main>
+
+<h2>Toque para ganhar moedas!</h2>
+
+<div class="coins">
+    🪙 <span id="coins">0</span>
+</div>
+
+<button class="click" id="clickButton">💰</button>
+
+<div class="stats">
+    Por clique: +<span id="power">1</span>
+    <br><br>
+    Auto Click: <span id="auto">0</span>/segundo
+</div>
+
+<div class="shop">
+    <h2>🛒 LOJA</h2>
+
+    <div class="upgrade">
+        <h3>⚡ Clique Forte</h3>
+        <p>+1 moeda por clique</p>
+        <p>Preço: <span id="powerPrice">50</span> moedas</p>
+        <button class="buy" id="buyPower">Comprar</button>
+    </div>
+
+    <div class="upgrade">
+        <h3>🤖 Auto Click</h3>
+        <p>+1 moeda por segundo</p>
+        <p>Preço: <span id="autoPrice">100</span> moedas</p>
+        <button class="buy" id="buyAuto">Comprar</button>
+    </div>
+</div>
+
+<button class="buy" id="saveButton">💾 Salvar jogo</button>
+
+</main>
+
+<script>
+let coins = 0;
+let power = 1;
+let auto = 0;
+
+let powerPrice = 50;
+let autoPrice = 100;
+
+const $ = id => document.getElementById(id);
+
+function update() {
+    $("coins").textContent = Math.floor(coins);
+    $("power").textContent = power;
+    $("auto").textContent = auto;
+    $("powerPrice").textContent = powerPrice;
+    $("autoPrice").textContent = autoPrice;
+
+    $("buyPower").disabled = coins < powerPrice;
+    $("buyAuto").disabled = coins < autoPrice;
+}
+
+$("clickButton").onclick = () => {
+    coins += power;
+    update();
+};
+
+$("buyPower").onclick = () => {
+    if (coins >= powerPrice) {
+        coins -= powerPrice;
+        power++;
+        powerPrice = Math.floor(powerPrice * 1.7);
+        update();
+    }
+};
+
+$("buyAuto").onclick = () => {
+    if (coins >= autoPrice) {
+        coins -= autoPrice;
+        auto++;
+        autoPrice = Math.floor(autoPrice * 1.8);
+        update();
+    }
+};
+
+setInterval(() => {
+    coins += auto;
+    update();
+}, 1000);
+
+function save() {
+    localStorage.setItem("clickerSave", JSON.stringify({
+        coins, power, auto, powerPrice, autoPrice
+    }));
+}
+
+function load() {
+    const data = localStorage.getItem("clickerSave");
+    if (data) {
+        try {
+            const saveData = JSON.parse(data);
+            coins = Math.max(0, Number(saveData.coins) || 0);
+            power = Math.max(1, Number(saveData.power) || 1);
+            auto = Math.max(0, Number(saveData.auto) || 0);
+            powerPrice = Math.max(1, Number(saveData.powerPrice) || 50);
+            autoPrice = Math.max(1, Number(saveData.autoPrice) || 100);
+        } catch (e) {
+            console.log("Save inválido");
+        }
+    }
+    update();
+}
+
+$("saveButton").onclick = save;
+
+load();
+setInterval(save, 5000);
+window.addEventListener("beforeunload", save);
+</script>
+
+</body>
+</html>
+
 ```
