@@ -184,3 +184,4 @@ Use an API key to publish each release from GitHub Actions or another CI. See [P
 - [Understanding Plugins](./understanding-plugin.md): the lifecycle of a plugin
 - [Core File](../plugin-essentials/core-file.md): what `main.js` must contain
 - [Acode API](../global-apis/acode.md): the API your plugin talks to
+- [Badges and public stats](./plugin-badges.md): show downloads, ratings and release info in your README

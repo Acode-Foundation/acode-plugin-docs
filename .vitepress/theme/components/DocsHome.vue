@@ -57,6 +57,11 @@ const references = [
 		<div class="docs-home__grid" aria-hidden="true" />
 
 		<section class="docs-home__hero">
+			<a class="docs-home__notice" href="/docs/getting-started/plugin-badges">
+				<span class="docs-home__eyebrow">NEW</span>
+				<span>Live plugin badges &amp; public stats</span>
+				<span aria-hidden="true">→</span>
+			</a>
 			<h1>
 				<span class="docs-home__brand" role="img" aria-label="Acode">
 					<span class="docs-home__logo-a" aria-hidden="true">
@@ -187,6 +192,27 @@ const references = [
 	flex-direction: column;
 	align-items: center;
 	text-align: center;
+}
+
+.docs-home__notice {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	max-width: 100%;
+	margin-bottom: 28px;
+	padding: 10px 14px;
+	border: 1px solid var(--acode-line);
+	border-radius: 12px;
+	background: var(--acode-surface);
+	color: var(--acode-text);
+	font-size: 0.88rem;
+	line-height: 1.5;
+	text-decoration: none;
+}
+
+.docs-home__notice:hover {
+	border-color: var(--acode-line-strong);
+	background: var(--acode-surface-strong);
 }
 
 .docs-home__hero h1 {

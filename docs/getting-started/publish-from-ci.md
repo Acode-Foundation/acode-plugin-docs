@@ -69,6 +69,8 @@ Changelogs come from the zip by default, just like a website upload: the file na
 
 The action sets a `result` output: `published` when the version is live, `review` when the security scan held it for an admin, or `submitted` for a new plugin waiting for approval. See the [action's README](https://github.com/Acode-Foundation/publish-plugin#readme) for all options.
 
+After publishing, add [live badges](./plugin-badges.md) to your README for downloads, rating, version and last update. Badge URLs stay the same across releases, and the public JSON stats endpoint needs no API key.
+
 ## Other CI and scripts
 
 Any tool that can send an HTTP request works. Send the key in the `Authorization` header and the zip as a multipart field named `plugin`:

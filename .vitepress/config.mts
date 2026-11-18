@@ -178,6 +178,10 @@ export default defineConfig({
 									text: "Publish from CI",
 									link: "/docs/getting-started/publish-from-ci",
 								},
+								{
+									text: "Badges and public stats",
+									link: "/docs/getting-started/plugin-badges",
+								},
 							],
 						},
 						{
